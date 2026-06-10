@@ -32,6 +32,34 @@ export interface OrganizationMember {
 
 export type WorkspaceStatus = "prospect" | "active" | "archived";
 
+export type DocumentStatus =
+  | "draft"
+  | "sent"
+  | "viewed"
+  | "downloaded"
+  | "approved"
+  | "rejected"
+  | "archived";
+
+export interface Document {
+  id: string;
+  organization_id: string;
+  workspace_id: string;
+  title: string;
+  description: string | null;
+  category: string | null;
+  file_url: string | null;
+  file_path: string;
+  file_type: string | null;
+  file_size: number | null;
+  status: DocumentStatus;
+  allow_download: boolean;
+  is_visible_to_client: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Workspace {
   id: string;
   organization_id: string;

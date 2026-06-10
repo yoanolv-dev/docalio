@@ -126,7 +126,11 @@ export async function archiveWorkspaceAction(formData: FormData): Promise<void> 
   revalidatePath("/dashboard");
 }
 
-/** Suppression définitive — appelée depuis un <form action>. */
+/**
+ * Suppression définitive — appelée depuis un <form action>.
+ * Les documents sont supprimés en cascade (FK) ; on nettoie aussi les
+ * fichiers Storage du workspace pour ne pas laisser d'orphelins.
+ */
 export async function deleteWorkspaceAction(formData: FormData): Promise<void> {
   const supabase = await createClient();
   const {
@@ -136,6 +140,22 @@ export async function deleteWorkspaceAction(formData: FormData): Promise<void> {
 
   const id = text(formData, "workspace_id");
   if (!id) return;
+
+  // Lecture via RLS : hors organisation → introuvable, rien n'est supprimé.
+  const { data: workspace } = await supabase
+    .from("workspaces")
+    .select("id, organization_id")
+    .eq("id", id)
+    .maybeSingle<{ id: string; organization_id: string }>();
+  if (!workspace) return;
+
+  const prefix = `organizations/${workspace.organization_id}/workspaces/${workspace.id}`;
+  const { data: files } = await supabase.storage.from("documents").list(prefix);
+  if (files && files.length > 0) {
+    await supabase.storage
+      .from("documents")
+      .remove(files.map((f) => `${prefix}/${f.name}`));
+  }
 
   await supabase.from("workspaces").delete().eq("id", id);
 

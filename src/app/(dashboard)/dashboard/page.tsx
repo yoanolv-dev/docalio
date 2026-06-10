@@ -4,13 +4,24 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
 import { getWorkspaceStats } from "@/lib/workspaces";
+import { getDocumentStats } from "@/lib/documents";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, FileText, CheckCircle, Archive, Plus, Building2 } from "lucide-react";
+import {
+  Users,
+  FileText,
+  CheckCircle,
+  Archive,
+  Plus,
+  Building2,
+  FileStack,
+  Eye,
+  PenLine,
+} from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -31,7 +42,10 @@ export default async function DashboardPage() {
   const membership = await getCurrentMembership();
   if (!membership) redirect("/onboarding");
 
-  const stats = await getWorkspaceStats();
+  const [stats, docStats] = await Promise.all([
+    getWorkspaceStats(),
+    getDocumentStats(),
+  ]);
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] ?? "là";
   const { organization, role } = membership;
 
@@ -72,7 +86,7 @@ export default async function DashboardPage() {
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary">{ROLE_LABELS[role] ?? role}</Badge>
-            <Badge variant="success">Sprint 4 prêt</Badge>
+            <Badge variant="success">Sprint 5 prêt</Badge>
           </div>
         </CardContent>
       </Card>
@@ -83,6 +97,17 @@ export default async function DashboardPage() {
         <StatCard label="Prospects" value={stats.prospect} icon={FileText} />
         <StatCard label="Actifs" value={stats.active} icon={CheckCircle} />
         <StatCard label="Archivés" value={stats.archived} icon={Archive} />
+      </div>
+
+      {/* Stats documents */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard label="Documents" value={docStats.total} icon={FileStack} />
+        <StatCard label="Brouillons" value={docStats.draft} icon={PenLine} />
+        <StatCard
+          label="Visibles client"
+          value={docStats.visibleToClient}
+          icon={Eye}
+        />
       </div>
 
       {/* Activité récente — placeholder */}
