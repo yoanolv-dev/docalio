@@ -21,7 +21,7 @@ const navItems = [
   },
   {
     label: "Espaces clients",
-    href: "/dashboard/clients",
+    href: "/dashboard/workspaces",
     icon: Users,
   },
   {

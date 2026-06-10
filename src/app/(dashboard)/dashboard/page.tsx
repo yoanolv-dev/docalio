@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
+import { getWorkspaceStats } from "@/lib/workspaces";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, FileText, CheckCircle, Clock, Plus, Building2 } from "lucide-react";
+import { Users, FileText, CheckCircle, Archive, Plus, Building2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -29,6 +31,7 @@ export default async function DashboardPage() {
   const membership = await getCurrentMembership();
   if (!membership) redirect("/onboarding");
 
+  const stats = await getWorkspaceStats();
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] ?? "là";
   const { organization, role } = membership;
 
@@ -38,9 +41,11 @@ export default async function DashboardPage() {
         title={`Bonjour, ${firstName} 👋`}
         description="Voici un aperçu de votre activité documentaire."
         action={
-          <Button size="sm">
-            <Plus className="h-4 w-4" />
-            Nouvel espace client
+          <Button size="sm" asChild>
+            <Link href="/dashboard/workspaces/new">
+              <Plus className="h-4 w-4" />
+              Nouvel espace client
+            </Link>
           </Button>
         }
       />
@@ -67,36 +72,20 @@ export default async function DashboardPage() {
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary">{ROLE_LABELS[role] ?? role}</Badge>
-            <Badge variant="success">Sprint 2 prêt</Badge>
+            <Badge variant="success">Sprint 4 prêt</Badge>
           </div>
         </CardContent>
       </Card>
 
-      {/* Stats */}
+      {/* Stats workspaces */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Espaces clients"
-          value={0}
-          icon={Users}
-        />
-        <StatCard
-          label="Documents partagés"
-          value={0}
-          icon={FileText}
-        />
-        <StatCard
-          label="Validations reçues"
-          value={0}
-          icon={CheckCircle}
-        />
-        <StatCard
-          label="En attente"
-          value={0}
-          icon={Clock}
-        />
+        <StatCard label="Espaces clients" value={stats.total} icon={Users} />
+        <StatCard label="Prospects" value={stats.prospect} icon={FileText} />
+        <StatCard label="Actifs" value={stats.active} icon={CheckCircle} />
+        <StatCard label="Archivés" value={stats.archived} icon={Archive} />
       </div>
 
-      {/* Empty state — activité récente */}
+      {/* Activité récente — placeholder */}
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-[--color-muted-foreground] uppercase tracking-wide">
           Activité récente
@@ -104,11 +93,13 @@ export default async function DashboardPage() {
         <EmptyState
           icon={FileText}
           title="Aucune activité pour le moment"
-          description="Créez votre premier espace client pour commencer à partager des documents."
+          description="Créez votre premier espace client pour commencer à centraliser vos informations."
           action={
-            <Button size="sm">
-              <Plus className="h-4 w-4" />
-              Créer un espace client
+            <Button size="sm" asChild>
+              <Link href="/dashboard/workspaces/new">
+                <Plus className="h-4 w-4" />
+                Créer un espace client
+              </Link>
             </Button>
           }
         />
