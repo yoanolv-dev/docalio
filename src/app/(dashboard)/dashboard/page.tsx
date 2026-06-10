@@ -1,13 +1,23 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentMembership } from "@/lib/organizations";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
-import { Users, FileText, CheckCircle, Clock, Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, FileText, CheckCircle, Clock, Plus, Building2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Dashboard",
+};
+
+const ROLE_LABELS: Record<string, string> = {
+  owner: "Propriétaire",
+  admin: "Administrateur",
+  member: "Membre",
 };
 
 export default async function DashboardPage() {
@@ -16,7 +26,11 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const membership = await getCurrentMembership();
+  if (!membership) redirect("/onboarding");
+
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] ?? "là";
+  const { organization, role } = membership;
 
   return (
     <div className="space-y-6">
@@ -30,6 +44,33 @@ export default async function DashboardPage() {
           </Button>
         }
       />
+
+      {/* Contexte organisation */}
+      <Card>
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-5">
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-lg"
+              style={{
+                backgroundColor:
+                  organization.primary_color ?? "var(--color-primary)",
+              }}
+            >
+              <Building2 className="h-5 w-5 text-[--color-primary-foreground]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">{organization.name}</p>
+              <p className="text-xs text-[--color-muted-foreground]">
+                /{organization.slug}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">{ROLE_LABELS[role] ?? role}</Badge>
+            <Badge variant="success">Sprint 2 prêt</Badge>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

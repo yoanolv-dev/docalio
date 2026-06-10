@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentMembership } from "@/lib/organizations";
 import { Sidebar } from "@/components/layout/sidebar";
 
 export default async function DashboardLayout({
@@ -14,6 +15,12 @@ export default async function DashboardLayout({
 
   if (!user) {
     redirect("/login");
+  }
+
+  // Pas encore d'organisation → onboarding obligatoire.
+  const membership = await getCurrentMembership();
+  if (!membership) {
+    redirect("/onboarding");
   }
 
   return (

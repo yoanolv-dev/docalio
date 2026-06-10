@@ -31,8 +31,10 @@ export async function proxy(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // Routes protégées
-  if (pathname.startsWith("/dashboard") && !user) {
+  // Routes protégées (nécessitent une session)
+  const isProtected =
+    pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding");
+  if (isProtected && !user) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
