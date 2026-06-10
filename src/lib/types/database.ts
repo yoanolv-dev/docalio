@@ -29,3 +29,21 @@ export interface OrganizationMember {
   role: OrganizationRole;
   created_at: string;
 }
+
+export type WorkspaceStatus = "prospect" | "active" | "archived";
+
+export interface Workspace {
+  id: string;
+  organization_id: string;
+  name: string;
+  client_company: string | null;
+  client_email: string | null;
+  client_phone: string | null;
+  status: WorkspaceStatus;
+  internal_note: string | null;
+  logo_url: string | null;
+  primary_color: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}

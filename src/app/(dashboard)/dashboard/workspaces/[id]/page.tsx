@@ -1,0 +1,150 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, Archive, Trash2, FileText, Activity, CheckCircle } from "lucide-react";
+import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { WorkspaceForm } from "@/components/workspaces/workspace-form";
+import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
+import {
+  updateWorkspaceAction,
+  archiveWorkspaceAction,
+  deleteWorkspaceAction,
+} from "@/lib/actions/workspaces";
+import { getWorkspace } from "@/lib/workspaces";
+import { formatDate } from "@/lib/utils";
+
+export const metadata: Metadata = {
+  title: "Espace client",
+};
+
+function InfoRow({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-2 text-sm">
+      <span className="text-[--color-muted-foreground]">{label}</span>
+      <span className="font-medium">{value || "—"}</span>
+    </div>
+  );
+}
+
+const PLACEHOLDER_SECTIONS = [
+  { icon: FileText, title: "Documents", description: "Bientôt : partage et collecte de documents." },
+  { icon: Activity, title: "Activité", description: "Bientôt : historique des actions de l'espace." },
+  { icon: CheckCircle, title: "Validation", description: "Bientôt : demandes et suivi de validation." },
+];
+
+export default async function WorkspaceDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const workspace = await getWorkspace(id);
+  if (!workspace) notFound();
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <Link
+          href="/dashboard/workspaces"
+          className="inline-flex items-center gap-1.5 text-sm text-[--color-muted-foreground] hover:text-[--color-foreground]"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Espaces clients
+        </Link>
+        <DashboardHeader
+          title={workspace.name}
+          description={workspace.client_company ?? undefined}
+          action={
+            <div className="flex items-center gap-2">
+              <WorkspaceStatusBadge status={workspace.status} />
+              {workspace.status !== "archived" && (
+                <form action={archiveWorkspaceAction}>
+                  <input type="hidden" name="workspace_id" value={workspace.id} />
+                  <Button type="submit" variant="outline" size="sm">
+                    <Archive className="h-4 w-4" />
+                    Archiver
+                  </Button>
+                </form>
+              )}
+            </div>
+          }
+        />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Colonne infos + édition */}
+        <div className="space-y-6 lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Informations</CardTitle>
+            </CardHeader>
+            <CardContent className="divide-y divide-[--color-border] pt-0">
+              <InfoRow label="Société cliente" value={workspace.client_company} />
+              <InfoRow label="Email" value={workspace.client_email} />
+              <InfoRow label="Téléphone" value={workspace.client_phone} />
+              <InfoRow label="Note interne" value={workspace.internal_note} />
+              <InfoRow label="Créé le" value={formatDate(workspace.created_at)} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Modifier l&apos;espace</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <WorkspaceForm
+                action={updateWorkspaceAction}
+                workspace={workspace}
+                submitLabel="Enregistrer les modifications"
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Colonne modules à venir + zone danger */}
+        <div className="space-y-6">
+          {PLACEHOLDER_SECTIONS.map((section) => {
+            const Icon = section.icon;
+            return (
+              <Card key={section.title} className="opacity-70">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Icon className="h-4 w-4 text-[--color-muted-foreground]" />
+                    <CardTitle>{section.title}</CardTitle>
+                  </div>
+                  <CardDescription>{section.description}</CardDescription>
+                </CardHeader>
+              </Card>
+            );
+          })}
+
+          <Card className="border-red-200">
+            <CardHeader>
+              <CardTitle>Zone de danger</CardTitle>
+              <CardDescription>
+                La suppression est définitive et irréversible.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form action={deleteWorkspaceAction}>
+                <input type="hidden" name="workspace_id" value={workspace.id} />
+                <Button type="submit" variant="destructive" size="sm">
+                  <Trash2 className="h-4 w-4" />
+                  Supprimer l&apos;espace
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -127,6 +127,34 @@ Prérequis : `.env.local` rempli, migrations Supabase appliquées, `npm run dev`
   onboarding et paramètres d'organisation. Migrations dans `supabase/migrations/`.
 - **Sprint 3** — Parcours d'authentification : flux register/login robustes,
   déconnexion, mot de passe oublié / réinitialisation, redirections d'auth.
+- **Sprint 4** — Module Workspaces (espaces clients) : table `workspaces`,
+  RLS multi-tenant, CRUD (créer / modifier / archiver / supprimer), pages
+  liste / création / détail, statistiques sur le dashboard.
 
-Les fonctionnalités produit (workspaces, documents, portail client, IA,
+Les fonctionnalités produit (documents, portail client, validations, IA,
 facturation Stripe) sont hors périmètre actuel et seront traitées plus tard.
+
+## Module Workspaces (Sprint 4)
+
+Un **workspace** est un espace documentaire privé lié à un client, un prospect
+ou un projet. Table `workspaces` (migration
+`supabase/migrations/20260610130000_workspaces.sql`) :
+`name`, `client_company`, `client_email`, `client_phone`,
+`status` (`prospect` | `active` | `archived`), `internal_note`, `logo_url`,
+`primary_color`, `created_by`, rattachée à `organization_id`.
+RLS : un membre n'accède qu'aux workspaces de son organisation (aucun accès
+inter-organisation).
+
+Routes : `/dashboard/workspaces` (liste + recherche + filtre statut),
+`/dashboard/workspaces/new` (création), `/dashboard/workspaces/[id]` (détail,
+édition, archivage, suppression).
+
+### Test manuel — Workspaces
+
+1. `/dashboard/workspaces` → **Créer un espace** → remplir le formulaire → succès → page détail.
+2. Vérifier le statut (badge) et les informations affichées.
+3. Modifier l'espace → message de succès.
+4. **Archiver** → le statut passe à « Archivé ».
+5. Rechercher / filtrer par statut dans la liste.
+6. Vérifier les statistiques mises à jour sur `/dashboard`.
+7. **Supprimer** (zone de danger) → retour à la liste.

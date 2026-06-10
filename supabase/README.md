@@ -8,6 +8,7 @@ Migrations SQL du socle organisationnel (Sprint 2).
 | --- | --- |
 | `migrations/20260610120000_init_organizations.sql` | Tables `profiles`, `organizations`, `organization_members`, contraintes, index, triggers `updated_at` et création auto du profil à l'inscription. |
 | `migrations/20260610120100_rls_and_functions.sql` | Activation RLS, fonctions `SECURITY DEFINER`, policies d'isolation multi-tenant, RPC `create_organization`. |
+| `migrations/20260610130000_workspaces.sql` | Table `workspaces` (espaces clients), contraintes, index, trigger `updated_at`, RLS multi-tenant (select/insert/update/delete réservés aux membres de l'organisation). |
 
 ## Application des migrations
 
