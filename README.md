@@ -71,17 +71,62 @@ src/
     └── utils.ts             # Utilitaires
 ```
 
-## État du Sprint 1
+## Routes d'authentification
 
-Le Sprint 1 met en place le socle technique :
+| Route | Rôle |
+| --- | --- |
+| `/login` | Connexion email/password |
+| `/register` | Inscription |
+| `/forgot-password` | Demande de lien de réinitialisation |
+| `/reset-password` | Définition d'un nouveau mot de passe (après lien email) |
+| `/auth/callback` | Route handler : échange le code email contre une session |
+| `/onboarding` | Création de l'organisation (post-inscription) |
 
-- ✅ Initialisation Next.js 16 + TypeScript + Tailwind v4
-- ✅ Intégration Supabase (clients navigateur et serveur)
-- ✅ Protection des routes via `proxy.ts`
-- ✅ Pages et formulaires d'authentification (login / register)
-- ✅ Layouts public et dashboard, composants UI de base
-- ✅ Documentation (`README.md`, `.env.example`)
+## Configuration Supabase (auth)
 
-Les fonctionnalités produit (organizations, profiles, workspaces, documents,
-IA, facturation Stripe) sont hors périmètre du Sprint 1 et seront traitées dans
-les sprints suivants.
+1. **Provider Email** : activer Email/Password dans **Authentication → Sign In / Providers**.
+2. **Confirm email** (**Authentication → Settings**) :
+   - **Activé** (par défaut) : après inscription, l'utilisateur reçoit un email
+     et n'a pas de session tant qu'il n'a pas cliqué le lien. `/register`
+     affiche alors un message « Vérifiez votre boîte mail ».
+   - **Désactivé** : session immédiate, redirection directe vers `/onboarding`
+     (pratique pour le développement local).
+3. **URL Configuration** (**Authentication → URL Configuration**) :
+   - **Site URL** : `http://localhost:3000` en local.
+   - **Redirect URLs** : ajouter `http://localhost:3000/auth/callback`
+     (indispensable pour la réinitialisation de mot de passe et la confirmation
+     d'email). En production, ajouter l'équivalent avec le domaine réel.
+
+## Checklist de test manuel
+
+Prérequis : `.env.local` rempli, migrations Supabase appliquées, `npm run dev`.
+
+1. **Register** : `/register` → créer un compte.
+   - Confirm email *désactivé* → redirection vers `/onboarding`.
+   - Confirm email *activé* → message de confirmation ; cliquer le lien reçu.
+2. **Onboarding** : créer une organisation (nom → slug auto, couleur).
+   Tester un slug déjà pris → message d'erreur clair. Succès → `/dashboard`.
+3. **Dashboard** : vérifier nom d'organisation, rôle « Propriétaire »,
+   badge « Sprint 2 prêt ».
+4. **Settings** : `/dashboard/settings` → modifier nom/slug/logo/couleur →
+   message de succès. Vérifier le rechargement des valeurs.
+5. **Logout** : bouton « Déconnexion » (sidebar) → redirection `/login`.
+6. **Login** : se reconnecter → retour direct au `/dashboard`.
+7. **Forgot password** : `/forgot-password` → saisir l'email → message d'envoi.
+   Ouvrir le lien reçu → `/reset-password` → définir un nouveau mot de passe →
+   redirection `/dashboard`.
+8. **Redirections** : visiter `/login` en étant connecté → renvoi automatique
+   vers `/dashboard` (ou `/onboarding` si pas encore d'organisation).
+
+## Historique des sprints
+
+- **Sprint 1** — Socle technique : Next.js 16, TypeScript, Tailwind v4, clients
+  Supabase, protection des routes (`proxy.ts`), layouts et UI de base.
+- **Sprint 2** — Socle organisationnel : tables `profiles`, `organizations`,
+  `organization_members`, RLS multi-tenant, RPC `create_organization`,
+  onboarding et paramètres d'organisation. Migrations dans `supabase/migrations/`.
+- **Sprint 3** — Parcours d'authentification : flux register/login robustes,
+  déconnexion, mot de passe oublié / réinitialisation, redirections d'auth.
+
+Les fonctionnalités produit (workspaces, documents, portail client, IA,
+facturation Stripe) sont hors périmètre actuel et seront traitées plus tard.

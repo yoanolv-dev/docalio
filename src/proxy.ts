@@ -38,8 +38,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Rediriger les utilisateurs connectés hors des pages auth
-  if ((pathname === "/login" || pathname === "/register") && user) {
+  // Rediriger les utilisateurs déjà connectés hors des pages d'authentification.
+  // /reset-password est volontairement exclu : il s'utilise avec une session
+  // de récupération active.
+  const isAuthPage =
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/forgot-password";
+  if (isAuthPage && user) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

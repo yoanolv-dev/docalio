@@ -7,12 +7,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
+function translateError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("already registered") || m.includes("already exists")) {
+    return "Un compte existe déjà avec cet email.";
+  }
+  if (m.includes("password")) {
+    return "Le mot de passe doit contenir au moins 8 caractères.";
+  }
+  if (m.includes("valid email") || m.includes("invalid")) {
+    return "Adresse email invalide.";
+  }
+  return "Une erreur est survenue. Veuillez réessayer.";
+}
+
 export function RegisterForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -21,22 +36,43 @@ export function RegisterForm() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
       },
     });
 
     if (error) {
-      setError(error.message);
+      setError(translateError(error.message));
       setLoading(false);
       return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    // Confirm email désactivé → session immédiate → on enchaîne vers l'app.
+    if (data.session) {
+      router.push("/dashboard");
+      router.refresh();
+      return;
+    }
+
+    // Confirm email activé → pas de session, l'utilisateur doit confirmer.
+    setSuccess(true);
+    setLoading(false);
+  }
+
+  if (success) {
+    return (
+      <div className="rounded-md border border-[--color-border] bg-[--color-muted] px-4 py-5 text-center">
+        <p className="text-sm font-medium">Compte créé 🎉</p>
+        <p className="mt-1 text-sm text-[--color-muted-foreground]">
+          Vérifiez votre boîte mail ({email}) pour confirmer votre adresse, puis
+          connectez-vous.
+        </p>
+      </div>
+    );
   }
 
   return (
