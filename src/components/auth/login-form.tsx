@@ -7,6 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
+function translateError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("invalid login") || m.includes("invalid credentials")) {
+    return "Email ou mot de passe incorrect.";
+  }
+  if (m.includes("email not confirmed")) {
+    return "Veuillez confirmer votre email avant de vous connecter.";
+  }
+  return "Connexion impossible. Veuillez réessayer.";
+}
+
 export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -26,11 +37,12 @@ export function LoginForm() {
     });
 
     if (error) {
-      setError("Email ou mot de passe incorrect.");
+      setError(translateError(error.message));
       setLoading(false);
       return;
     }
 
+    // Le layout du dashboard redirige vers /onboarding si aucune organisation.
     router.push("/dashboard");
     router.refresh();
   }
@@ -51,7 +63,15 @@ export function LoginForm() {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="password">Mot de passe</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Mot de passe</Label>
+          <a
+            href="/forgot-password"
+            className="text-xs text-[--color-muted-foreground] underline-offset-4 hover:underline"
+          >
+            Mot de passe oublié ?
+          </a>
+        </div>
         <Input
           id="password"
           type="password"
