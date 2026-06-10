@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Archive, Trash2, FileText, Activity, CheckCircle } from "lucide-react";
-import { DashboardHeader } from "@/components/layout/dashboard-header";
+import {
+  ArrowLeft,
+  Archive,
+  Trash2,
+  FileText,
+  Activity,
+  CheckCircle,
+  Building2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,14 +18,18 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { EmptyState } from "@/components/shared/empty-state";
 import { WorkspaceForm } from "@/components/workspaces/workspace-form";
 import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
+import { DocumentList } from "@/components/documents/document-list";
+import { DocumentUploadForm } from "@/components/documents/document-upload-form";
 import {
   updateWorkspaceAction,
   archiveWorkspaceAction,
   deleteWorkspaceAction,
 } from "@/lib/actions/workspaces";
 import { getWorkspace } from "@/lib/workspaces";
+import { listWorkspaceDocuments } from "@/lib/documents";
 import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -29,15 +40,22 @@ function InfoRow({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="flex items-center justify-between gap-4 py-2 text-sm">
       <span className="text-[--color-muted-foreground]">{label}</span>
-      <span className="font-medium">{value || "—"}</span>
+      <span className="text-right font-medium">{value || "—"}</span>
     </div>
   );
 }
 
 const PLACEHOLDER_SECTIONS = [
-  { icon: FileText, title: "Documents", description: "Bientôt : partage et collecte de documents." },
-  { icon: Activity, title: "Activité", description: "Bientôt : historique des actions de l'espace." },
-  { icon: CheckCircle, title: "Validation", description: "Bientôt : demandes et suivi de validation." },
+  {
+    icon: Activity,
+    title: "Activité",
+    description: "Bientôt : historique des actions de l'espace.",
+  },
+  {
+    icon: CheckCircle,
+    title: "Validation",
+    description: "Bientôt : demandes et suivi de validation client.",
+  },
 ];
 
 export default async function WorkspaceDetailPage({
@@ -49,39 +67,97 @@ export default async function WorkspaceDetailPage({
   const workspace = await getWorkspace(id);
   if (!workspace) notFound();
 
+  const documents = await listWorkspaceDocuments(workspace.id);
+
   return (
     <div className="space-y-6">
-      <div className="space-y-3">
+      {/* En-tête */}
+      <div className="space-y-4">
         <Link
           href="/dashboard/workspaces"
-          className="inline-flex items-center gap-1.5 text-sm text-[--color-muted-foreground] hover:text-[--color-foreground]"
+          className="inline-flex items-center gap-1.5 text-sm text-[--color-muted-foreground] transition-colors hover:text-[--color-foreground]"
         >
           <ArrowLeft className="h-4 w-4" />
           Espaces clients
         </Link>
-        <DashboardHeader
-          title={workspace.name}
-          description={workspace.client_company ?? undefined}
-          action={
-            <div className="flex items-center gap-2">
-              <WorkspaceStatusBadge status={workspace.status} />
-              {workspace.status !== "archived" && (
-                <form action={archiveWorkspaceAction}>
-                  <input type="hidden" name="workspace_id" value={workspace.id} />
-                  <Button type="submit" variant="outline" size="sm">
-                    <Archive className="h-4 w-4" />
-                    Archiver
-                  </Button>
-                </form>
-              )}
+
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-12 w-12 items-center justify-center rounded-xl"
+              style={{
+                backgroundColor:
+                  workspace.primary_color ?? "var(--color-primary)",
+              }}
+            >
+              <Building2 className="h-6 w-6 text-[--color-primary-foreground]" />
             </div>
-          }
-        />
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl font-semibold tracking-tight">
+                  {workspace.name}
+                </h1>
+                <WorkspaceStatusBadge status={workspace.status} />
+              </div>
+              <p className="text-sm text-[--color-muted-foreground]">
+                {workspace.client_company ?? "Espace client"} · Créé le{" "}
+                {formatDate(workspace.created_at)}
+              </p>
+            </div>
+          </div>
+
+          {workspace.status !== "archived" && (
+            <form action={archiveWorkspaceAction}>
+              <input type="hidden" name="workspace_id" value={workspace.id} />
+              <Button type="submit" variant="outline" size="sm">
+                <Archive className="h-4 w-4" />
+                Archiver
+              </Button>
+            </form>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Colonne infos + édition */}
+        {/* Colonne principale */}
         <div className="space-y-6 lg:col-span-2">
+          {/* Documents */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <CardTitle>
+                    Documents
+                    {documents.length > 0 && (
+                      <span className="ml-2 text-sm font-normal text-[--color-muted-foreground]">
+                        {documents.length}
+                      </span>
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    Fichiers partagés dans cet espace client.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <DocumentUploadForm workspaceId={workspace.id} />
+              {documents.length === 0 ? (
+                <EmptyState
+                  icon={FileText}
+                  title="Aucun document"
+                  description="Ajoutez votre premier document : devis, rapport, contrat ou tout fichier utile à ce client."
+                />
+              ) : (
+                <DocumentList
+                  documents={documents}
+                  workspaceId={workspace.id}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Informations */}
           <Card>
             <CardHeader>
               <CardTitle>Informations</CardTitle>
@@ -91,10 +167,10 @@ export default async function WorkspaceDetailPage({
               <InfoRow label="Email" value={workspace.client_email} />
               <InfoRow label="Téléphone" value={workspace.client_phone} />
               <InfoRow label="Note interne" value={workspace.internal_note} />
-              <InfoRow label="Créé le" value={formatDate(workspace.created_at)} />
             </CardContent>
           </Card>
 
+          {/* Modification */}
           <Card>
             <CardHeader>
               <CardTitle>Modifier l&apos;espace</CardTitle>
@@ -109,7 +185,7 @@ export default async function WorkspaceDetailPage({
           </Card>
         </div>
 
-        {/* Colonne modules à venir + zone danger */}
+        {/* Colonne latérale */}
         <div className="space-y-6">
           {PLACEHOLDER_SECTIONS.map((section) => {
             const Icon = section.icon;
@@ -126,11 +202,12 @@ export default async function WorkspaceDetailPage({
             );
           })}
 
-          <Card className="border-red-200">
+          <Card className="border-red-200 dark:border-red-900/50">
             <CardHeader>
               <CardTitle>Zone de danger</CardTitle>
               <CardDescription>
-                La suppression est définitive et irréversible.
+                La suppression est définitive : l&apos;espace et ses documents
+                seront perdus.
               </CardDescription>
             </CardHeader>
             <CardContent>

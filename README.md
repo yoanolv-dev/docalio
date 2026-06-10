@@ -130,9 +130,59 @@ Prérequis : `.env.local` rempli, migrations Supabase appliquées, `npm run dev`
 - **Sprint 4** — Module Workspaces (espaces clients) : table `workspaces`,
   RLS multi-tenant, CRUD (créer / modifier / archiver / supprimer), pages
   liste / création / détail, statistiques sur le dashboard.
+- **Sprint 5** — Module Documents : table `documents`, bucket Storage privé,
+  upload sécurisé via Server Actions, téléchargement par URLs signées,
+  gestion (statut, visibilité client, catégorie), statistiques dashboard.
 
-Les fonctionnalités produit (documents, portail client, validations, IA,
-facturation Stripe) sont hors périmètre actuel et seront traitées plus tard.
+Les fonctionnalités produit (portail client, liens de partage, tracking,
+validations client, IA, facturation Stripe) sont hors périmètre actuel et
+seront traitées plus tard.
+
+## Module Documents (Sprint 5)
+
+Chaque workspace dispose d'une section **Documents** permettant d'uploader,
+gérer et télécharger des fichiers. Table `documents` (migration
+`supabase/migrations/20260610140000_documents.sql`) rattachée à
+`organization_id` **et** `workspace_id` (FK composite : un document ne peut
+jamais référencer un workspace d'une autre organisation).
+
+**Stockage** : bucket Supabase Storage **privé** `documents` — jamais public.
+Chemins : `organizations/{org_id}/workspaces/{ws_id}/{doc_id}-{nom-assaini}`.
+Les téléchargements passent exclusivement par des **URLs signées temporaires**
+(60 s) générées côté serveur. Les policies Storage restreignent chaque
+opération aux membres de l'organisation du chemin.
+
+**Formats acceptés (V1)** : PDF, DOCX, XLSX, PPTX, PNG, JPG, JPEG, ZIP —
+**20 Mo maximum** par fichier (validé côté client, serveur et Storage).
+
+**Statuts** : brouillon, envoyé, consulté, téléchargé, approuvé, refusé,
+archivé. Les statuts « consulté / téléchargé » seront automatisés par le futur
+portail client ; en V1 ils sont modifiables manuellement. Les options
+« visible client » et « téléchargement autorisé » sont stockées dès maintenant
+et seront appliquées par le portail client.
+
+### Configuration Supabase (Sprint 5)
+
+1. Appliquer la migration `20260610140000_documents.sql` (SQL Editor ou CLI).
+   Elle crée la table, la RLS, le bucket privé `documents` et les policies
+   Storage. Si la création des policies Storage échoue en SQL
+   (« must be owner of table objects »), créez les 3 policies équivalentes via
+   **Dashboard → Storage → documents → Policies** (select / insert / delete
+   pour `authenticated`, scopées sur l'organisation du chemin).
+2. Vérifier dans **Storage** que le bucket `documents` est bien **privé**.
+
+### Test manuel — Documents
+
+1. Ouvrir un workspace → section **Documents** → **Ajouter un document**.
+2. Sélectionner un fichier accepté (< 20 Mo) → titre pré-rempli → **Envoyer**.
+3. Vérifier la ligne créée : icône selon le type, taille formatée, statut
+   « Brouillon », badges visibilité/téléchargement, date.
+4. Tester un fichier refusé (mauvais format ou > 20 Mo) → message d'erreur clair.
+5. **Télécharger** → le fichier arrive avec son nom d'origine.
+6. **Modifier** → changer titre/catégorie/statut/visibilité → enregistrer.
+7. **Supprimer** (confirmation) → la ligne et le fichier Storage disparaissent.
+8. Vérifier les stats documents sur `/dashboard`.
+9. Supprimer un workspace avec documents → fichiers Storage nettoyés.
 
 ## Module Workspaces (Sprint 4)
 
