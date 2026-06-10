@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Docalio
 
-## Getting Started
+Plateforme de gestion documentaire collaborative. Ce dépôt contient le socle
+technique de l'application web (Next.js + Supabase), construit lors du Sprint 1.
 
-First, run the development server:
+## Stack technique
+
+- **Next.js 16** (App Router, React 19)
+- **TypeScript**
+- **Supabase** (`@supabase/ssr` + `@supabase/supabase-js`) — authentification
+- **Tailwind CSS v4**
+- **shadcn/ui** + **Radix UI** + **lucide-react** (composants d'interface)
+- **ESLint** (`eslint-config-next`)
+
+## Prérequis
+
+- Node.js 20+
+- npm
+- Un projet Supabase (URL + clé `anon`)
+
+## Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <url-du-repo>
+cd docalio
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copiez le fichier d'exemple et renseignez vos identifiants Supabase :
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.example .env.local
+```
 
-## Learn More
+`.env.local` doit contenir :
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=votre-cle-anon-publique
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> `.env.local` est ignoré par Git : aucune clé réelle n'est versionnée.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Commandes disponibles
 
-## Deploy on Vercel
+| Commande        | Description                              |
+| --------------- | ---------------------------------------- |
+| `npm run dev`   | Démarre le serveur de développement      |
+| `npm run build` | Génère le build de production            |
+| `npm run start` | Lance l'application en mode production    |
+| `npm run lint`  | Analyse le code avec ESLint              |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Structure du projet
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── proxy.ts                 # Protection des routes (auth Supabase)
+├── app/
+│   ├── (auth)/              # /login, /register
+│   ├── (dashboard)/         # /dashboard (espace protégé)
+│   └── (public)/            # Pages publiques
+├── components/
+│   ├── auth/                # Formulaires de connexion / inscription
+│   ├── layout/              # Navbar, sidebar, header dashboard
+│   ├── shared/              # Composants transverses (empty-state, stat-card)
+│   └── ui/                  # Primitives shadcn/ui
+└── lib/
+    ├── supabase/            # Clients Supabase (navigateur / serveur)
+    └── utils.ts             # Utilitaires
+```
+
+## État du Sprint 1
+
+Le Sprint 1 met en place le socle technique :
+
+- ✅ Initialisation Next.js 16 + TypeScript + Tailwind v4
+- ✅ Intégration Supabase (clients navigateur et serveur)
+- ✅ Protection des routes via `proxy.ts`
+- ✅ Pages et formulaires d'authentification (login / register)
+- ✅ Layouts public et dashboard, composants UI de base
+- ✅ Documentation (`README.md`, `.env.example`)
+
+Les fonctionnalités produit (organizations, profiles, workspaces, documents,
+IA, facturation Stripe) sont hors périmètre du Sprint 1 et seront traitées dans
+les sprints suivants.
