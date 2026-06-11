@@ -3,7 +3,7 @@ import { FileText, FolderOpen, ShieldCheck, Link2 } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PortalDocumentList } from "@/components/portal/portal-document-list";
 import { PortalTracker } from "@/components/portal/portal-tracker";
-import { getPortalData } from "@/lib/share-links";
+import { getPortalData, getPortalDecisions } from "@/lib/share-links";
 import { getInitials } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -38,6 +38,7 @@ export default async function PortalPage({
 
   if (!portal) return <PortalInvalid />;
 
+  const decisions = await getPortalDecisions(token);
   const { organization, workspace, documents } = portal;
   const accent = organization.primary_color ?? "var(--color-primary)";
 
@@ -94,7 +95,11 @@ export default async function PortalPage({
             <h2 className="text-sm font-semibold text-muted-foreground">
               Documents ({documents.length})
             </h2>
-            <PortalDocumentList token={token} documents={documents} />
+            <PortalDocumentList
+              token={token}
+              documents={documents}
+              decisions={decisions}
+            />
           </section>
         )}
 

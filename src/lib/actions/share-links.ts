@@ -176,6 +176,45 @@ export async function getPortalDownloadUrl(
 }
 
 /**
+ * Génère une URL signée (60 s) pour PRÉVISUALISER un document dans le portail
+ * (rendu inline, sans forcer le téléchargement). Réutilise le chemin sécurisé
+ * (document visible + téléchargeable). Enregistre l'évènement document_opened.
+ */
+export async function getPortalPreviewUrl(
+  token: string,
+  documentId: string,
+  visitorId?: string
+): Promise<PortalDownloadResult> {
+  const supabase = await createClient();
+
+  const { data: path } = await supabase.rpc("get_portal_document_path", {
+    p_token: token,
+    p_document_id: documentId,
+  });
+
+  if (!path || typeof path !== "string") {
+    return { ok: false, message: "Aperçu indisponible." };
+  }
+
+  const { data, error } = await supabase.storage
+    .from("documents")
+    .createSignedUrl(path, 60);
+
+  if (error || !data?.signedUrl) {
+    return { ok: false, message: "Aperçu indisponible. Réessayez." };
+  }
+
+  await supabase.rpc("record_portal_event", {
+    p_token: token,
+    p_event_type: "document_opened",
+    p_document_id: documentId,
+    p_visitor_id: visitorId ?? null,
+  });
+
+  return { ok: true, url: data.signedUrl };
+}
+
+/**
  * Enregistre un évènement de portail (ex. portal_opened) depuis la page
  * publique. La RPC SECURITY DEFINER valide le token ; rien n'est inséré si
  * le lien est invalide/expiré.

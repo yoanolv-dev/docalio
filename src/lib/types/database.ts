@@ -113,6 +113,15 @@ export interface PortalData {
   documents: PortalDocument[];
 }
 
+export type DecisionType = "approved" | "rejected" | "changes_requested";
+
+export interface DocumentDecision {
+  document_id: string;
+  decision: DecisionType;
+  comment: string | null;
+  updated_at?: string;
+}
+
 export type ActivityEventType =
   | "portal_opened"
   | "document_downloaded"

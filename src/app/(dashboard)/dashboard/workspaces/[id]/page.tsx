@@ -30,6 +30,7 @@ import {
 } from "@/components/workspaces/workspace-activity";
 import { DocumentList } from "@/components/documents/document-list";
 import { DocumentUploadForm } from "@/components/documents/document-upload-form";
+import { DecisionSummary } from "@/components/decisions/decision-summary";
 import { PortalShareCard } from "@/components/workspaces/portal-share-card";
 import {
   archiveWorkspaceAction,
@@ -39,6 +40,7 @@ import { getWorkspace } from "@/lib/workspaces";
 import { listWorkspaceDocuments } from "@/lib/documents";
 import { getActiveShareLink } from "@/lib/share-links";
 import { getWorkspaceActivity } from "@/lib/activity";
+import { getWorkspaceDecisions } from "@/lib/decisions";
 import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -63,16 +65,33 @@ export default async function WorkspaceDetailPage({
   const workspace = await getWorkspace(id);
   if (!workspace) notFound();
 
-  const [documents, shareLink, activity, headerList] = await Promise.all([
-    listWorkspaceDocuments(workspace.id),
-    getActiveShareLink(workspace.id),
-    getWorkspaceActivity(workspace.id),
-    headers(),
-  ]);
+  const [documents, shareLink, activity, decisions, headerList] =
+    await Promise.all([
+      listWorkspaceDocuments(workspace.id),
+      getActiveShareLink(workspace.id),
+      getWorkspaceActivity(workspace.id),
+      getWorkspaceDecisions(workspace.id),
+      headers(),
+    ]);
 
   const host = headerList.get("host") ?? "localhost:3000";
   const proto = headerList.get("x-forwarded-proto") ?? "http";
   const baseUrl = `${proto}://${host}`;
+
+  // Synthèse des décisions sur les documents visibles client
+  const visibleDocs = documents.filter((d) => d.is_visible_to_client);
+  const decided = visibleDocs.filter((d) => decisions[d.id]);
+  const decisionCounts = {
+    approved: decided.filter((d) => decisions[d.id].decision === "approved")
+      .length,
+    changesRequested: decided.filter(
+      (d) => decisions[d.id].decision === "changes_requested"
+    ).length,
+    rejected: decided.filter((d) => decisions[d.id].decision === "rejected")
+      .length,
+    pending: visibleDocs.length - decided.length,
+  };
+  const hasDecisionContext = visibleDocs.length > 0;
 
   return (
     <div className="space-y-6">
@@ -150,6 +169,14 @@ export default async function WorkspaceDetailPage({
             </CardHeader>
             <CardContent className="space-y-4">
               <DocumentUploadForm workspaceId={workspace.id} />
+              {hasDecisionContext && (
+                <DecisionSummary
+                  approved={decisionCounts.approved}
+                  changesRequested={decisionCounts.changesRequested}
+                  rejected={decisionCounts.rejected}
+                  pending={decisionCounts.pending}
+                />
+              )}
               {documents.length === 0 ? (
                 <EmptyState
                   icon={FileText}
@@ -157,7 +184,11 @@ export default async function WorkspaceDetailPage({
                   description="Ajoutez votre premier document : devis, rapport, contrat ou tout fichier utile à ce client."
                 />
               ) : (
-                <DocumentList documents={documents} workspaceId={workspace.id} />
+                <DocumentList
+                  documents={documents}
+                  workspaceId={workspace.id}
+                  decisions={decisions}
+                />
               )}
             </CardContent>
           </Card>

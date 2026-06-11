@@ -143,9 +143,46 @@ Prérequis : `.env.local` rempli, migrations Supabase appliquées, `npm run dev`
   ouvertures de portail et des téléchargements, section « Activité client »
   (stats d'engagement + timeline) dans le workspace, refonte UX (édition en
   modale, recherche/tri des documents, portail enrichi).
+- **Sprint 8** — Décisions client : table `document_decisions`, le client
+  approuve / demande une modification / refuse chaque document avec commentaire
+  depuis le portail ; aperçu inline des documents ; synthèse et badges de
+  décision côté dashboard.
 
-Les fonctionnalités produit (validation client, signature, IA, facturation
-Stripe) sont hors périmètre actuel et seront traitées plus tard.
+Les fonctionnalités produit (signature électronique, IA, facturation Stripe)
+sont hors périmètre actuel et seront traitées plus tard.
+
+## Décisions client (Sprint 8)
+
+Le portail devient un **outil de décision** : pour chaque document visible, le
+client peut **Approuver**, **Demander une modification** ou **Refuser**, avec un
+**commentaire** optionnel. Il peut aussi **prévisualiser** les documents
+téléchargeables (ouverture inline via URL signée 60 s ; émet l'évènement
+`document_opened`).
+
+**Architecture (table `document_decisions`, migration
+`supabase/migrations/20260611300000_document_decisions.sql`)** :
+- Une décision **courante par document** (modifiable), rattachée à l'org + au
+  workspace (FK composite).
+- Écriture publique **uniquement** via la RPC `SECURITY DEFINER`
+  `submit_document_decision(token, document_id, decision, comment, visitor_id)`
+  (`search_path` fixé) qui revalide le token + la visibilité du document.
+- Lecture portail via `get_portal_decisions(token)` (l'état se reflète dans le
+  portail) ; lecture dashboard via RLS (membres de l'org uniquement).
+- Bucket toujours **privé**, aucun service_role, aucun secret. La prévisualisation
+  réutilise le chemin sécurisé existant (documents téléchargeables uniquement).
+
+Côté dashboard : badges de décision + commentaire par document, et **synthèse**
+(approuvés / modifs demandées / refusés / en attente) en tête de la liste.
+
+### Test manuel — Décisions (Sprint 8)
+
+1. Workspace avec ≥ 1 document visible client → générer un lien de portail.
+2. Ouvrir `/p/{token}` (fenêtre privée) → **Aperçu** d'un document téléchargeable.
+3. Choisir **Approuver / Demander une modification / Refuser**, ajouter un
+   commentaire → **Envoyer ma décision** → l'état « Vous avez … » s'affiche.
+4. Côté dashboard, rouvrir le workspace → badge de décision + commentaire sur le
+   document, et synthèse mise à jour.
+5. Modifier la décision depuis le portail → le dashboard reflète le changement.
 
 ## Tracking & activité client (Sprint 7)
 
