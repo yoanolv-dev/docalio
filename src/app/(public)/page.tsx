@@ -48,11 +48,11 @@ export default function HomePage() {
           </Badge>
           <h1 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
             Partagez vos documents.{" "}
-            <span className="text-[--color-muted-foreground]">
+            <span className="text-muted-foreground">
               Collectez les validations.
             </span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-[--color-muted-foreground]">
+          <p className="mt-6 max-w-xl text-lg text-muted-foreground">
             Docalio centralise la gestion documentaire client — espaces dédiés,
             partage sécurisé, suivi des consultations et validations en temps
             réel.
@@ -68,7 +68,7 @@ export default function HomePage() {
               <Link href="#features">Voir les fonctionnalités</Link>
             </Button>
           </div>
-          <p className="mt-4 text-xs text-[--color-muted-foreground]">
+          <p className="mt-4 text-xs text-muted-foreground">
             Aucune carte bancaire requise · Gratuit pendant 14 jours
           </p>
         </div>
@@ -77,14 +77,14 @@ export default function HomePage() {
       {/* Features */}
       <section
         id="features"
-        className="border-t border-[--color-border] bg-[--color-muted]/30"
+        className="border-t border-border bg-muted/30"
       >
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="text-center">
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
               Tout ce dont vous avez besoin
             </h2>
-            <p className="mt-3 text-[--color-muted-foreground]">
+            <p className="mt-3 text-muted-foreground">
               Une plateforme simple et puissante pour gérer vos documents
               clients.
             </p>
@@ -95,13 +95,13 @@ export default function HomePage() {
               return (
                 <div
                   key={feature.title}
-                  className="rounded-xl border border-[--color-border] bg-[--color-card] p-6"
+                  className="rounded-xl border border-border bg-card p-6"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[--color-muted]">
-                    <Icon className="h-5 w-5 text-[--color-foreground]" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                    <Icon className="h-5 w-5 text-foreground" />
                   </div>
                   <h3 className="mt-4 text-sm font-semibold">{feature.title}</h3>
-                  <p className="mt-2 text-sm text-[--color-muted-foreground]">
+                  <p className="mt-2 text-sm text-muted-foreground">
                     {feature.description}
                   </p>
                 </div>
@@ -113,12 +113,12 @@ export default function HomePage() {
 
       {/* CTA */}
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <div className="rounded-2xl border border-[--color-border] bg-[--color-primary] px-8 py-12 text-center">
-          <FileText className="mx-auto h-10 w-10 text-[--color-primary-foreground]/60" />
-          <h2 className="mt-4 text-2xl font-bold text-[--color-primary-foreground]">
+        <div className="rounded-2xl border border-border bg-primary px-8 py-12 text-center">
+          <FileText className="mx-auto h-10 w-10 text-primary-foreground/60" />
+          <h2 className="mt-4 text-2xl font-bold text-primary-foreground">
             Prêt à simplifier vos échanges documentaires ?
           </h2>
-          <p className="mt-3 text-[--color-primary-foreground]/70">
+          <p className="mt-3 text-primary-foreground/70">
             Rejoignez les équipes qui font confiance à Docalio.
           </p>
           <Button
@@ -133,21 +133,21 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[--color-border]">
+      <footer className="border-t border-border">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <p className="text-xs text-[--color-muted-foreground]">
+          <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Docalio. Tous droits réservés.
           </p>
           <nav className="flex items-center gap-4">
             <Link
               href="/legal"
-              className="text-xs text-[--color-muted-foreground] hover:text-[--color-foreground]"
+              className="text-xs text-muted-foreground hover:text-foreground"
             >
               Mentions légales
             </Link>
             <Link
               href="/privacy"
-              className="text-xs text-[--color-muted-foreground] hover:text-[--color-foreground]"
+              className="text-xs text-muted-foreground hover:text-foreground"
             >
               Confidentialité
             </Link>

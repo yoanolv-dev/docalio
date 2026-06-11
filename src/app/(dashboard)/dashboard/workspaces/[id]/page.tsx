@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 function InfoRow({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="flex items-center justify-between gap-4 py-2 text-sm">
-      <span className="text-[--color-muted-foreground]">{label}</span>
+      <span className="text-muted-foreground">{label}</span>
       <span className="text-right font-medium">{value || "—"}</span>
     </div>
   );
@@ -75,7 +75,7 @@ export default async function WorkspaceDetailPage({
       <div className="space-y-4">
         <Link
           href="/dashboard/workspaces"
-          className="inline-flex items-center gap-1.5 text-sm text-[--color-muted-foreground] transition-colors hover:text-[--color-foreground]"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Espaces clients
@@ -90,7 +90,7 @@ export default async function WorkspaceDetailPage({
                   workspace.primary_color ?? "var(--color-primary)",
               }}
             >
-              <Building2 className="h-6 w-6 text-[--color-primary-foreground]" />
+              <Building2 className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -99,7 +99,7 @@ export default async function WorkspaceDetailPage({
                 </h1>
                 <WorkspaceStatusBadge status={workspace.status} />
               </div>
-              <p className="text-sm text-[--color-muted-foreground]">
+              <p className="text-sm text-muted-foreground">
                 {workspace.client_company ?? "Espace client"} · Créé le{" "}
                 {formatDate(workspace.created_at)}
               </p>
@@ -129,7 +129,7 @@ export default async function WorkspaceDetailPage({
                   <CardTitle>
                     Documents
                     {documents.length > 0 && (
-                      <span className="ml-2 text-sm font-normal text-[--color-muted-foreground]">
+                      <span className="ml-2 text-sm font-normal text-muted-foreground">
                         {documents.length}
                       </span>
                     )}
@@ -162,7 +162,7 @@ export default async function WorkspaceDetailPage({
             <CardHeader>
               <CardTitle>Informations</CardTitle>
             </CardHeader>
-            <CardContent className="divide-y divide-[--color-border] pt-0">
+            <CardContent className="divide-y divide-border pt-0">
               <InfoRow label="Société cliente" value={workspace.client_company} />
               <InfoRow label="Email" value={workspace.client_email} />
               <InfoRow label="Téléphone" value={workspace.client_phone} />
@@ -193,7 +193,7 @@ export default async function WorkspaceDetailPage({
               <Card key={section.title} className="opacity-70">
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    <Icon className="h-4 w-4 text-[--color-muted-foreground]" />
+                    <Icon className="h-4 w-4 text-muted-foreground" />
                     <CardTitle>{section.title}</CardTitle>
                   </div>
                   <CardDescription>{section.description}</CardDescription>

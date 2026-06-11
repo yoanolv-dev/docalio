@@ -27,7 +27,7 @@ export function FileIcon({ filePath }: { filePath: string }) {
   const ext = getFileExtension(filePath);
   const config = EXTENSION_ICONS[ext] ?? {
     icon: File,
-    className: "bg-[--color-muted] text-[--color-muted-foreground]",
+    className: "bg-muted text-muted-foreground",
   };
   const Icon = config.icon;
 

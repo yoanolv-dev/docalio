@@ -71,7 +71,7 @@ export function DocumentUploadForm({ workspaceId }: { workspaceId: string }) {
     <form
       ref={formRef}
       action={formAction}
-      className="space-y-4 rounded-lg border border-[--color-border] bg-[--color-muted]/30 p-4"
+      className="space-y-4 rounded-lg border border-border bg-muted/30 p-4"
     >
       <input type="hidden" name="workspace_id" value={workspaceId} />
 
@@ -91,13 +91,13 @@ export function DocumentUploadForm({ workspaceId }: { workspaceId: string }) {
       {/* Zone de sélection de fichier */}
       <label
         htmlFor="file"
-        className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[--color-border] bg-[--color-background] px-4 py-8 text-center transition-colors hover:border-[--color-ring]"
+        className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-background px-4 py-8 text-center transition-colors hover:border-ring"
       >
-        <CloudUpload className="h-6 w-6 text-[--color-muted-foreground]" />
+        <CloudUpload className="h-6 w-6 text-muted-foreground" />
         {selectedFile ? (
           <div>
             <p className="text-sm font-medium">{selectedFile.name}</p>
-            <p className="text-xs text-[--color-muted-foreground]">
+            <p className="text-xs text-muted-foreground">
               {formatBytes(selectedFile.size)}
             </p>
           </div>
@@ -106,7 +106,7 @@ export function DocumentUploadForm({ workspaceId }: { workspaceId: string }) {
             <p className="text-sm font-medium">
               Cliquez pour sélectionner un fichier
             </p>
-            <p className="text-xs text-[--color-muted-foreground]">
+            <p className="text-xs text-muted-foreground">
               PDF, Word, Excel, PowerPoint, image ou ZIP — {MAX_FILE_SIZE_MB} Mo
               max
             </p>

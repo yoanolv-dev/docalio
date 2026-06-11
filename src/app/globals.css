@@ -1,78 +1,221 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* =============================================================================
+   Docalio — Design tokens (« Calm Precision »)
+   Palette : neutres slate + indigo de marque. Light par défaut, dark via OS.
+   Les variables sont mappées en utilitaires Tailwind via @theme inline
+   (bg-primary, text-muted-foreground, border-border, ...).
+   ============================================================================= */
 
-  /* Design tokens — neutral palette inspiré Linear/Vercel */
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(240 10% 3.9%);
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(240 10% 3.9%);
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(240 10% 3.9%);
-  --color-primary: hsl(240 5.9% 10%);
-  --color-primary-foreground: hsl(0 0% 98%);
-  --color-secondary: hsl(240 4.8% 95.9%);
-  --color-secondary-foreground: hsl(240 5.9% 10%);
-  --color-muted: hsl(240 4.8% 95.9%);
-  --color-muted-foreground: hsl(240 3.8% 46.1%);
-  --color-accent: hsl(240 4.8% 95.9%);
-  --color-accent-foreground: hsl(240 5.9% 10%);
-  --color-destructive: hsl(0 84.2% 60.2%);
-  --color-destructive-foreground: hsl(0 0% 98%);
-  --color-border: hsl(240 5.9% 90%);
-  --color-input: hsl(240 5.9% 90%);
-  --color-ring: hsl(240 5.9% 10%);
+:root {
+  /* Surfaces */
+  --background: #f8fafc;            /* fond applicatif (slate-50) */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
 
-  --color-sidebar: hsl(240 4.8% 97%);
-  --color-sidebar-foreground: hsl(240 10% 3.9%);
-  --color-sidebar-border: hsl(240 5.9% 90%);
-  --color-sidebar-accent: hsl(240 4.8% 93%);
+  /* Texte */
+  --foreground: #0f172a;            /* slate-900 */
+  --muted: #f1f5f9;                 /* slate-100 */
+  --muted-foreground: #64748b;      /* slate-500 */
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  /* Marque */
+  --primary: #4f46e5;               /* indigo-600 */
+  --primary-hover: #4338ca;         /* indigo-700 */
+  --primary-foreground: #ffffff;
+  --primary-subtle: #eef2ff;        /* indigo-50 */
+
+  /* Neutres interactifs */
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+
+  /* Sémantique */
+  --destructive: #dc2626;           /* red-600 */
+  --destructive-foreground: #ffffff;
+  --success: #059669;               /* emerald-600 */
+  --warning: #d97706;               /* amber-600 */
+  --info: #0284c7;                  /* sky-600 */
+
+  /* Bordures & focus */
+  --border: #e2e8f0;                /* slate-200 */
+  --input: #cbd5e1;                 /* slate-300 — inputs légèrement plus marqués */
+  --ring: #4f46e5;
+
+  /* Navigation latérale */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #334155;    /* slate-700 */
+  --sidebar-border: #e2e8f0;
+  --sidebar-accent: #f1f5f9;
+
+  --radius: 0.5rem;
 }
 
 @media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: hsl(240 10% 3.9%);
-    --color-foreground: hsl(0 0% 98%);
-    --color-card: hsl(240 10% 3.9%);
-    --color-card-foreground: hsl(0 0% 98%);
-    --color-popover: hsl(240 10% 3.9%);
-    --color-popover-foreground: hsl(0 0% 98%);
-    --color-primary: hsl(0 0% 98%);
-    --color-primary-foreground: hsl(240 5.9% 10%);
-    --color-secondary: hsl(240 3.7% 15.9%);
-    --color-secondary-foreground: hsl(0 0% 98%);
-    --color-muted: hsl(240 3.7% 15.9%);
-    --color-muted-foreground: hsl(240 5% 64.9%);
-    --color-accent: hsl(240 3.7% 15.9%);
-    --color-accent-foreground: hsl(0 0% 98%);
-    --color-destructive: hsl(0 62.8% 30.6%);
-    --color-destructive-foreground: hsl(0 0% 98%);
-    --color-border: hsl(240 3.7% 15.9%);
-    --color-input: hsl(240 3.7% 15.9%);
-    --color-ring: hsl(240 4.9% 83.9%);
+  :root {
+    --background: #0b101b;
+    --card: #111827;
+    --card-foreground: #f1f5f9;
+    --popover: #111827;
+    --popover-foreground: #f1f5f9;
 
-    --color-sidebar: hsl(240 10% 5%);
-    --color-sidebar-foreground: hsl(0 0% 98%);
-    --color-sidebar-border: hsl(240 3.7% 15.9%);
-    --color-sidebar-accent: hsl(240 3.7% 10%);
+    --foreground: #f1f5f9;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+
+    --primary: #6366f1;             /* indigo-500 — plus lumineux sur fond sombre */
+    --primary-hover: #818cf8;
+    --primary-foreground: #ffffff;
+    --primary-subtle: rgba(99, 102, 241, 0.14);
+
+    --secondary: #1e293b;
+    --secondary-foreground: #f1f5f9;
+    --accent: #1e293b;
+    --accent-foreground: #f1f5f9;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --info: #38bdf8;
+
+    --border: #1e293b;
+    --input: #334155;
+    --ring: #6366f1;
+
+    --sidebar: #0f1623;
+    --sidebar-foreground: #cbd5e1;
+    --sidebar-border: #1e293b;
+    --sidebar-accent: #1e293b;
   }
 }
 
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent: var(--sidebar-accent);
+
+  --radius-sm: calc(var(--radius) - 0.125rem);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 0.25rem);
+  --radius-xl: calc(var(--radius) + 0.5rem);
+}
+
+/* ============================================================================
+   Base
+   ============================================================================ */
+
 * {
-  border-color: var(--color-border);
+  border-color: var(--border);
 }
 
 body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: var(--primary-subtle);
+  color: var(--primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  ::selection {
+    background-color: rgba(99, 102, 241, 0.35);
+    color: #f1f5f9;
+  }
+}
+
+/* Scrollbars fines et discrètes */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ============================================================================
+   Micro-animations (dialogs, apparitions)
+   ============================================================================ */
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-overlay-in {
+  animation: overlay-in 150ms ease-out;
+}
+
+@utility animate-dialog-in {
+  animation: dialog-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@utility animate-fade-up {
+  animation: fade-up 250ms ease-out both;
 }

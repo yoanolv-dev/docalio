@@ -50,14 +50,14 @@ export function WorkspacesList({ workspaces }: { workspaces: Workspace[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-[--color-border] px-4 py-10 text-center text-sm text-[--color-muted-foreground]">
+        <p className="rounded-lg border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
           Aucun espace ne correspond à votre recherche.
         </p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((w) => (
             <Link key={w.id} href={`/dashboard/workspaces/${w.id}`}>
-              <Card className="h-full transition-colors hover:border-[--color-ring]">
+              <Card className="h-full transition-colors hover:border-ring">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div
@@ -67,12 +67,12 @@ export function WorkspacesList({ workspaces }: { workspaces: Workspace[] }) {
                           w.primary_color ?? "var(--color-primary)",
                       }}
                     >
-                      <Building2 className="h-4 w-4 text-[--color-primary-foreground]" />
+                      <Building2 className="h-4 w-4 text-primary-foreground" />
                     </div>
                     <WorkspaceStatusBadge status={w.status} />
                   </div>
                   <p className="mt-3 truncate text-sm font-semibold">{w.name}</p>
-                  <p className="truncate text-xs text-[--color-muted-foreground]">
+                  <p className="truncate text-xs text-muted-foreground">
                     {w.client_company ?? "—"}
                   </p>
                 </CardContent>

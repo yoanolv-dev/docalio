@@ -74,7 +74,7 @@ export function OrganizationSettingsForm({
             className="h-9 w-14 cursor-pointer p-1"
             disabled={!canEdit}
           />
-          <span className="text-xs text-[--color-muted-foreground]">
+          <span className="text-xs text-muted-foreground">
             {organization.primary_color ?? "Non définie"}
           </span>
         </div>
@@ -97,7 +97,7 @@ export function OrganizationSettingsForm({
           {pending ? "Enregistrement..." : "Enregistrer les modifications"}
         </Button>
       ) : (
-        <p className="text-sm text-[--color-muted-foreground]">
+        <p className="text-sm text-muted-foreground">
           Seuls les administrateurs peuvent modifier ces paramètres.
         </p>
       )}

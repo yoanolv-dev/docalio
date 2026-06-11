@@ -75,11 +75,11 @@ export default async function DashboardPage() {
                   organization.primary_color ?? "var(--color-primary)",
               }}
             >
-              <Building2 className="h-5 w-5 text-[--color-primary-foreground]" />
+              <Building2 className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
               <p className="text-sm font-semibold">{organization.name}</p>
-              <p className="text-xs text-[--color-muted-foreground]">
+              <p className="text-xs text-muted-foreground">
                 /{organization.slug}
               </p>
             </div>
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
 
       {/* Activité récente — placeholder */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-[--color-muted-foreground] uppercase tracking-wide">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
           Activité récente
         </h2>
         <EmptyState

@@ -67,7 +67,7 @@ export function LoginForm() {
           <Label htmlFor="password">Mot de passe</Label>
           <a
             href="/forgot-password"
-            className="text-xs text-[--color-muted-foreground] underline-offset-4 hover:underline"
+            className="text-xs text-muted-foreground underline-offset-4 hover:underline"
           >
             Mot de passe oublié ?
           </a>

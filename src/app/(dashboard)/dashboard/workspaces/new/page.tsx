@@ -16,7 +16,7 @@ export default function NewWorkspacePage() {
       <div className="space-y-3">
         <Link
           href="/dashboard/workspaces"
-          className="inline-flex items-center gap-1.5 text-sm text-[--color-muted-foreground] hover:text-[--color-foreground]"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Espaces clients

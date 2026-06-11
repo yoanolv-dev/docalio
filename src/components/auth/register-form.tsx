@@ -65,9 +65,9 @@ export function RegisterForm() {
 
   if (success) {
     return (
-      <div className="rounded-md border border-[--color-border] bg-[--color-muted] px-4 py-5 text-center">
+      <div className="rounded-md border border-border bg-muted px-4 py-5 text-center">
         <p className="text-sm font-medium">Compte créé 🎉</p>
-        <p className="mt-1 text-sm text-[--color-muted-foreground]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Vérifiez votre boîte mail ({email}) pour confirmer votre adresse, puis
           connectez-vous.
         </p>
@@ -115,7 +115,7 @@ export function RegisterForm() {
           minLength={8}
           autoComplete="new-password"
         />
-        <p className="text-xs text-[--color-muted-foreground]">
+        <p className="text-xs text-muted-foreground">
           Minimum 8 caractères
         </p>
       </div>

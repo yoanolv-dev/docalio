@@ -3,21 +3,20 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-colors",
   {
     variants: {
       variant: {
-        default:
-          "border-transparent bg-[--color-primary] text-[--color-primary-foreground]",
-        secondary:
-          "border-transparent bg-[--color-secondary] text-[--color-secondary-foreground]",
+        default: "border-transparent bg-primary-subtle text-primary",
+        secondary: "border-transparent bg-secondary text-secondary-foreground",
         destructive:
-          "border-transparent bg-[--color-destructive] text-[--color-destructive-foreground]",
-        outline: "text-[--color-foreground]",
+          "border-transparent bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400",
+        outline: "text-muted-foreground",
         success:
-          "border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
+          "border-transparent bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
         warning:
-          "border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+          "border-transparent bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
+        info: "border-transparent bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400",
       },
     },
     defaultVariants: {
@@ -28,11 +27,28 @@ const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+    VariantProps<typeof badgeVariants> {
+  /** Affiche un point coloré devant le texte (statuts). */
+  dot?: boolean;
+}
 
-function Badge({ className, variant, ...props }: BadgeProps) {
+function Badge({
+  className,
+  variant,
+  dot = false,
+  children,
+  ...props
+}: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div className={cn(badgeVariants({ variant }), className)} {...props}>
+      {dot && (
+        <span
+          aria-hidden
+          className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-80"
+        />
+      )}
+      {children}
+    </div>
   );
 }
 

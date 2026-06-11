@@ -104,7 +104,7 @@ export function WorkspaceForm({
             defaultValue={workspace?.primary_color ?? "#4f46e5"}
             className="h-9 w-14 cursor-pointer p-1"
           />
-          <span className="text-xs text-[--color-muted-foreground]">
+          <span className="text-xs text-muted-foreground">
             Personnalise l&apos;espace client.
           </span>
         </div>

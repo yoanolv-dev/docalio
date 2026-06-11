@@ -13,22 +13,22 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[--color-primary]">
-            <FileText className="h-5 w-5 text-[--color-primary-foreground]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
+            <FileText className="h-5 w-5 text-primary-foreground" />
           </div>
           <h1 className="text-xl font-semibold">Connexion à Docalio</h1>
-          <p className="text-sm text-[--color-muted-foreground]">
+          <p className="text-sm text-muted-foreground">
             Accédez à votre espace de travail
           </p>
         </div>
 
         <LoginForm />
 
-        <p className="mt-4 text-center text-sm text-[--color-muted-foreground]">
+        <p className="mt-4 text-center text-sm text-muted-foreground">
           Pas encore de compte ?{" "}
           <Link
             href="/register"
-            className="font-medium text-[--color-foreground] underline-offset-4 hover:underline"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
           >
             Créer un compte
           </Link>
