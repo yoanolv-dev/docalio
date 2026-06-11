@@ -4,8 +4,8 @@ import { FileText } from "lucide-react";
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
             <FileText className="h-4 w-4 text-primary-foreground" />
@@ -13,7 +13,7 @@ export function Navbar() {
           <span className="text-sm font-semibold tracking-tight">Docalio</span>
         </Link>
 
-        <nav className="hidden items-center gap-6 sm:flex">
+        <nav className="hidden items-center gap-8 sm:flex">
           <Link
             href="#features"
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -33,7 +33,7 @@ export function Navbar() {
             <Link href="/login">Connexion</Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href="/register">Démarrer gratuitement</Link>
+            <Link href="/register">Démarrer</Link>
           </Button>
         </div>
       </div>

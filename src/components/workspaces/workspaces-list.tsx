@@ -57,7 +57,7 @@ export function WorkspacesList({ workspaces }: { workspaces: Workspace[] }) {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((w) => (
             <Link key={w.id} href={`/dashboard/workspaces/${w.id}`}>
-              <Card className="h-full transition-colors hover:border-ring">
+              <Card className="h-full transition-all hover:border-ring hover:shadow-md">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div

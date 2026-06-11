@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
 import { getWorkspaceStats } from "@/lib/workspaces";
 import { getDocumentStats } from "@/lib/documents";
-import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
@@ -17,14 +17,15 @@ import {
   CheckCircle,
   Archive,
   Plus,
-  Building2,
   FileStack,
   Eye,
   PenLine,
+  ArrowRight,
 } from "lucide-react";
+import { getInitials } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Dashboard",
+  title: "Vue d'ensemble",
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -50,11 +51,11 @@ export default async function DashboardPage() {
   const { organization, role } = membership;
 
   return (
-    <div className="space-y-6">
-      <DashboardHeader
-        title={`Bonjour, ${firstName} 👋`}
+    <div className="space-y-8">
+      <PageHeader
+        title={`Bonjour, ${firstName}`}
         description="Voici un aperçu de votre activité documentaire."
-        action={
+        actions={
           <Button size="sm" asChild>
             <Link href="/dashboard/workspaces/new">
               <Plus className="h-4 w-4" />
@@ -66,59 +67,68 @@ export default async function DashboardPage() {
 
       {/* Contexte organisation */}
       <Card>
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-5">
+        <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5 sm:pt-5">
           <div className="flex items-center gap-3">
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-lg"
+              className="flex h-11 w-11 items-center justify-center rounded-xl text-sm font-semibold text-primary-foreground"
               style={{
                 backgroundColor:
                   organization.primary_color ?? "var(--color-primary)",
               }}
             >
-              <Building2 className="h-5 w-5 text-primary-foreground" />
+              {getInitials(organization.name)}
             </div>
             <div>
               <p className="text-sm font-semibold">{organization.name}</p>
               <p className="text-xs text-muted-foreground">
-                /{organization.slug}
+                docalio.app/{organization.slug}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Badge variant="secondary">{ROLE_LABELS[role] ?? role}</Badge>
-            <Badge variant="success">Sprint 5 prêt</Badge>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/dashboard/settings">
+                Paramètres
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Stats workspaces */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Espaces clients" value={stats.total} icon={Users} />
-        <StatCard label="Prospects" value={stats.prospect} icon={FileText} />
-        <StatCard label="Actifs" value={stats.active} icon={CheckCircle} />
-        <StatCard label="Archivés" value={stats.archived} icon={Archive} />
-      </div>
+      {/* Espaces clients */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-muted-foreground">
+          Espaces clients
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard label="Total" value={stats.total} icon={Users} tone="primary" />
+          <StatCard label="Prospects" value={stats.prospect} icon={FileText} tone="warning" />
+          <StatCard label="Actifs" value={stats.active} icon={CheckCircle} tone="success" />
+          <StatCard label="Archivés" value={stats.archived} icon={Archive} />
+        </div>
+      </section>
 
-      {/* Stats documents */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard label="Documents" value={docStats.total} icon={FileStack} />
-        <StatCard label="Brouillons" value={docStats.draft} icon={PenLine} />
-        <StatCard
-          label="Visibles client"
-          value={docStats.visibleToClient}
-          icon={Eye}
-        />
-      </div>
+      {/* Documents */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-muted-foreground">Documents</h2>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard label="Total" value={docStats.total} icon={FileStack} tone="primary" />
+          <StatCard label="Brouillons" value={docStats.draft} icon={PenLine} />
+          <StatCard label="Visibles client" value={docStats.visibleToClient} icon={Eye} tone="success" />
+        </div>
+      </section>
 
       {/* Activité récente — placeholder */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-muted-foreground">
           Activité récente
         </h2>
         <EmptyState
           icon={FileText}
           title="Aucune activité pour le moment"
-          description="Créez votre premier espace client pour commencer à centraliser vos informations."
+          description="Créez votre premier espace client pour commencer à centraliser vos informations et partager des documents."
           action={
             <Button size="sm" asChild>
               <Link href="/dashboard/workspaces/new">
@@ -128,7 +138,7 @@ export default async function DashboardPage() {
             </Button>
           }
         />
-      </div>
+      </section>
     </div>
   );
 }

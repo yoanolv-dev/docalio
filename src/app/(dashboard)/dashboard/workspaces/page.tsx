@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus, Users } from "lucide-react";
-import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { WorkspacesList } from "@/components/workspaces/workspaces-list";
@@ -16,10 +16,10 @@ export default async function WorkspacesPage() {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader
+      <PageHeader
         title="Espaces clients"
         description="Gérez vos espaces clients, prospects et projets."
-        action={
+        actions={
           <Button size="sm" asChild>
             <Link href="/dashboard/workspaces/new">
               <Plus className="h-4 w-4" />

@@ -19,6 +19,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ConfirmDeleteDialog } from "@/components/shared/confirm-delete-dialog";
 import { WorkspaceForm } from "@/components/workspaces/workspace-form";
 import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
 import { DocumentList } from "@/components/documents/document-list";
@@ -211,13 +212,19 @@ export default async function WorkspaceDetailPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form action={deleteWorkspaceAction}>
-                <input type="hidden" name="workspace_id" value={workspace.id} />
-                <Button type="submit" variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4" />
-                  Supprimer l&apos;espace
-                </Button>
-              </form>
+              <ConfirmDeleteDialog
+                action={deleteWorkspaceAction}
+                fields={{ workspace_id: workspace.id }}
+                title="Supprimer cet espace client ?"
+                description={`« ${workspace.name} » et tous ses documents seront définitivement supprimés. Cette action est irréversible.`}
+                confirmLabel="Supprimer l'espace"
+                trigger={
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="h-4 w-4" />
+                    Supprimer l&apos;espace
+                  </Button>
+                }
+              />
             </CardContent>
           </Card>
         </div>

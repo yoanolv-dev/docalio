@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ConfirmDeleteDialog } from "@/components/shared/confirm-delete-dialog";
 import { FileIcon } from "@/components/documents/file-icon";
 import {
   DocumentStatusBadge,
@@ -261,30 +262,24 @@ export function DocumentList({
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <form
+                  <ConfirmDeleteDialog
                     action={deleteDocumentAction}
-                    onSubmit={(e) => {
-                      if (
-                        !window.confirm(
-                          `Supprimer définitivement « ${doc.title} » ? Le fichier sera également supprimé.`
-                        )
-                      ) {
-                        e.preventDefault();
-                      }
-                    }}
-                  >
-                    <input type="hidden" name="document_id" value={doc.id} />
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Supprimer"
-                      title="Supprimer"
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </form>
+                    fields={{ document_id: doc.id }}
+                    title="Supprimer ce document ?"
+                    description={`« ${doc.title} » et son fichier seront définitivement supprimés. Cette action est irréversible.`}
+                    confirmLabel="Supprimer le document"
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Supprimer"
+                        title="Supprimer"
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    }
+                  />
                 </div>
               </div>
 

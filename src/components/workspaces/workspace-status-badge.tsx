@@ -19,5 +19,9 @@ export const WORKSPACE_STATUS_OPTIONS: { value: WorkspaceStatus; label: string }
 
 export function WorkspaceStatusBadge({ status }: { status: WorkspaceStatus }) {
   const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.prospect;
-  return <Badge variant={config.variant}>{config.label}</Badge>;
+  return (
+    <Badge variant={config.variant} dot>
+      {config.label}
+    </Badge>
+  );
 }
