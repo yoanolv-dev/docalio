@@ -8,7 +8,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getFileExtension } from "@/lib/files";
+import { extensionFromMime, getFileExtension } from "@/lib/files";
 
 const EXTENSION_ICONS: Record<string, { icon: LucideIcon; className: string }> =
   {
@@ -22,9 +22,18 @@ const EXTENSION_ICONS: Record<string, { icon: LucideIcon; className: string }> =
     zip: { icon: FileArchive, className: "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400" },
   };
 
-/** Icône colorée selon l'extension du fichier (déduite du chemin Storage). */
-export function FileIcon({ filePath }: { filePath: string }) {
-  const ext = getFileExtension(filePath);
+/**
+ * Icône colorée selon le type de fichier.
+ * Déduit l'extension du chemin Storage (dashboard) ou du type MIME (portail).
+ */
+export function FileIcon({
+  filePath,
+  fileType,
+}: {
+  filePath?: string;
+  fileType?: string | null;
+}) {
+  const ext = filePath ? getFileExtension(filePath) : extensionFromMime(fileType);
   const config = EXTENSION_ICONS[ext] ?? {
     icon: File,
     className: "bg-muted text-muted-foreground",
