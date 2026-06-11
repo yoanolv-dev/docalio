@@ -133,10 +133,50 @@ Prérequis : `.env.local` rempli, migrations Supabase appliquées, `npm run dev`
 - **Sprint 5** — Module Documents : table `documents`, bucket Storage privé,
   upload sécurisé via Server Actions, téléchargement par URLs signées,
   gestion (statut, visibilité client, catégorie), statistiques dashboard.
+- **Sprint 5.5** — Design System & refonte UI : direction artistique
+  « Calm Precision » (neutres slate + indigo), tokens Tailwind v4, dark mode
+  auto, primitives homogènes, shell SaaS, confirmations par dialog.
+- **Sprint 6** — Portail client : table `share_links`, liens de partage
+  sécurisés, page publique `/p/[token]` sans compte, accès aux documents
+  visibles, téléchargement contrôlé par URLs signées.
 
-Les fonctionnalités produit (portail client, liens de partage, tracking,
-validations client, IA, facturation Stripe) sont hors périmètre actuel et
-seront traitées plus tard.
+Les fonctionnalités produit (tracking, validations client, IA, facturation
+Stripe) sont hors périmètre actuel et seront traitées plus tard.
+
+## Portail client (Sprint 6)
+
+Depuis un workspace, l'utilisateur génère un **lien de partage unique**
+(`/p/{token}`) qu'il envoie à son client. Le client accède à un portail
+**sans créer de compte** et consulte uniquement les documents marqués
+« visibles ».
+
+**Architecture sécurité (sans nouveau secret, bucket jamais public)** :
+- Table `share_links` (migration `supabase/migrations/20260611100000_share_links.sql`),
+  rattachée à l'org + au workspace par **FK composite** ; au plus **un lien
+  actif par workspace** (index unique partiel).
+- L'accès public passe par des fonctions **`SECURITY DEFINER`** :
+  `get_portal(token)` (renvoie org + workspace + documents visibles, ou `null`
+  si lien inactif/expiré) et `get_portal_document_path(token, doc_id)` (résout
+  le chemin **seulement** si visible + téléchargeable + lien actif).
+- Les téléchargements utilisent des **URLs signées (60 s)** ; une policy
+  Storage `anon` autorise la signature **uniquement** pour les fichiers
+  visibles + téléchargeables d'un lien actif. Aucun accès inter-organisation.
+- Un document « visible mais non téléchargeable » (`allow_download = false`)
+  est listé en **lecture seule** : son fichier n'est jamais signable.
+
+Côté dashboard : section **Portail client** sur `/dashboard/workspaces/[id]`
+(créer / copier / régénérer / désactiver le lien, expiration optionnelle).
+
+### Test manuel — Portail (Sprint 6)
+
+1. Ouvrir un workspace avec au moins un document **visible client**.
+2. Section **Portail client** → **Générer le lien** (expiration au choix).
+3. **Copier** le lien → l'ouvrir dans une **fenêtre privée** (non connectée).
+4. Vérifier : branding org, nom du workspace, liste des documents visibles.
+5. Document téléchargeable → bouton **Télécharger** (URL signée, nom d'origine).
+6. Document `allow_download = false` → affiché en **lecture seule**, pas de téléchargement.
+7. Un document **non visible** ne doit **jamais** apparaître.
+8. **Désactiver** le lien → recharger le portail → écran « Lien indisponible ».
 
 ## Module Documents (Sprint 5)
 

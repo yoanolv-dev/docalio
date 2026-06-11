@@ -48,6 +48,28 @@ export function fileTypeLabel(ext: string): string {
   return isAcceptedExtension(ext) ? EXTENSION_LABELS[ext] : ext.toUpperCase();
 }
 
+const MIME_TO_EXTENSION: Record<string, AcceptedExtension> = {
+  "application/pdf": "pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    "docx",
+  "application/msword": "docx",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+  "application/vnd.ms-excel": "xlsx",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+    "pptx",
+  "application/vnd.ms-powerpoint": "pptx",
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "application/zip": "zip",
+  "application/x-zip-compressed": "zip",
+};
+
+/** Déduit une extension connue à partir d'un type MIME (pour l'affichage). */
+export function extensionFromMime(mime: string | null | undefined): string {
+  if (!mime) return "";
+  return MIME_TO_EXTENSION[mime] ?? "";
+}
+
 /** Taille lisible : 1.2 Mo, 540 Ko... */
 export function formatBytes(bytes: number | null): string {
   if (bytes === null || Number.isNaN(bytes)) return "—";

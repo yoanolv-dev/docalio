@@ -75,3 +75,40 @@ export interface Workspace {
   created_at: string;
   updated_at: string;
 }
+
+export interface ShareLink {
+  id: string;
+  organization_id: string;
+  workspace_id: string;
+  token: string;
+  expires_at: string | null;
+  is_active: boolean;
+  created_by: string | null;
+  created_at: string;
+}
+
+/** Données publiques renvoyées par la RPC get_portal (aucune info sensible). */
+export interface PortalDocument {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string | null;
+  file_type: string | null;
+  file_size: number | null;
+  status: DocumentStatus;
+  allow_download: boolean;
+  created_at: string;
+}
+
+export interface PortalData {
+  organization: {
+    name: string;
+    logo_url: string | null;
+    primary_color: string | null;
+  };
+  workspace: {
+    name: string;
+    client_company: string | null;
+  };
+  documents: PortalDocument[];
+}

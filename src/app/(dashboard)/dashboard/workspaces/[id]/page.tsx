@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -9,6 +10,7 @@ import {
   Activity,
   CheckCircle,
   Building2,
+  Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +26,7 @@ import { WorkspaceForm } from "@/components/workspaces/workspace-form";
 import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
 import { DocumentList } from "@/components/documents/document-list";
 import { DocumentUploadForm } from "@/components/documents/document-upload-form";
+import { PortalShareCard } from "@/components/workspaces/portal-share-card";
 import {
   updateWorkspaceAction,
   archiveWorkspaceAction,
@@ -31,6 +34,7 @@ import {
 } from "@/lib/actions/workspaces";
 import { getWorkspace } from "@/lib/workspaces";
 import { listWorkspaceDocuments } from "@/lib/documents";
+import { getActiveShareLink } from "@/lib/share-links";
 import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -68,7 +72,15 @@ export default async function WorkspaceDetailPage({
   const workspace = await getWorkspace(id);
   if (!workspace) notFound();
 
-  const documents = await listWorkspaceDocuments(workspace.id);
+  const [documents, shareLink, headerList] = await Promise.all([
+    listWorkspaceDocuments(workspace.id),
+    getActiveShareLink(workspace.id),
+    headers(),
+  ]);
+
+  const host = headerList.get("host") ?? "localhost:3000";
+  const proto = headerList.get("x-forwarded-proto") ?? "http";
+  const baseUrl = `${proto}://${host}`;
 
   return (
     <div className="space-y-6">
@@ -188,6 +200,27 @@ export default async function WorkspaceDetailPage({
 
         {/* Colonne latérale */}
         <div className="space-y-6">
+          {/* Portail client */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Share2 className="h-4 w-4 text-primary" />
+                <CardTitle>Portail client</CardTitle>
+              </div>
+              <CardDescription>
+                Partagez les documents visibles avec votre client via un lien
+                sécurisé, sans compte.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PortalShareCard
+                workspaceId={workspace.id}
+                link={shareLink}
+                baseUrl={baseUrl}
+              />
+            </CardContent>
+          </Card>
+
           {PLACEHOLDER_SECTIONS.map((section) => {
             const Icon = section.icon;
             return (
