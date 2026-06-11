@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OrganizationSettingsForm } from "@/components/settings/organization-settings-form";
 import { getCurrentMembership } from "@/lib/organizations";
@@ -17,7 +17,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader
+      <PageHeader
         title="Paramètres de l'organisation"
         description="Gérez l'identité et les informations de votre organisation."
       />

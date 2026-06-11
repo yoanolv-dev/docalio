@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ConfirmDeleteDialog } from "@/components/shared/confirm-delete-dialog";
 import { FileIcon } from "@/components/documents/file-icon";
 import {
   DocumentStatusBadge,
@@ -51,7 +52,7 @@ function DocumentEditForm({
   return (
     <form
       action={formAction}
-      className="mt-3 space-y-4 rounded-lg border border-[--color-border] bg-[--color-muted]/30 p-4"
+      className="mt-3 space-y-4 rounded-lg border border-border bg-muted/30 p-4"
     >
       <input type="hidden" name="document_id" value={document.id} />
       <input type="hidden" name="workspace_id" value={workspaceId} />
@@ -98,7 +99,7 @@ function DocumentEditForm({
               type="checkbox"
               name="is_visible_to_client"
               defaultChecked={document.is_visible_to_client}
-              className="h-4 w-4 rounded border-[--color-input]"
+              className="h-4 w-4 rounded border-input"
             />
             Visible par le client
           </label>
@@ -107,7 +108,7 @@ function DocumentEditForm({
               type="checkbox"
               name="allow_download"
               defaultChecked={document.allow_download}
-              className="h-4 w-4 rounded border-[--color-input]"
+              className="h-4 w-4 rounded border-input"
             />
             Téléchargement autorisé
           </label>
@@ -179,7 +180,7 @@ export function DocumentList({
         </p>
       )}
 
-      <ul className="divide-y divide-[--color-border]">
+      <ul className="divide-y divide-border">
         {documents.map((doc) => {
           const ext = getFileExtension(doc.file_path);
           return (
@@ -192,7 +193,7 @@ export function DocumentList({
                     <p className="truncate text-sm font-medium">{doc.title}</p>
                     <DocumentStatusBadge status={doc.status} />
                   </div>
-                  <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-[--color-muted-foreground]">
+                  <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
                     <span>{fileTypeLabel(ext)}</span>
                     <span>·</span>
                     <span>{formatBytes(doc.file_size)}</span>
@@ -205,7 +206,7 @@ export function DocumentList({
                       </>
                     )}
                   </p>
-                  <p className="mt-1 flex items-center gap-3 text-xs text-[--color-muted-foreground]">
+                  <p className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                     <span
                       className="inline-flex items-center gap-1"
                       title={
@@ -261,30 +262,24 @@ export function DocumentList({
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <form
+                  <ConfirmDeleteDialog
                     action={deleteDocumentAction}
-                    onSubmit={(e) => {
-                      if (
-                        !window.confirm(
-                          `Supprimer définitivement « ${doc.title} » ? Le fichier sera également supprimé.`
-                        )
-                      ) {
-                        e.preventDefault();
-                      }
-                    }}
-                  >
-                    <input type="hidden" name="document_id" value={doc.id} />
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Supprimer"
-                      title="Supprimer"
-                      className="text-[--color-muted-foreground] hover:text-[--color-destructive]"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </form>
+                    fields={{ document_id: doc.id }}
+                    title="Supprimer ce document ?"
+                    description={`« ${doc.title} » et son fichier seront définitivement supprimés. Cette action est irréversible.`}
+                    confirmLabel="Supprimer le document"
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Supprimer"
+                        title="Supprimer"
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    }
+                  />
                 </div>
               </div>
 

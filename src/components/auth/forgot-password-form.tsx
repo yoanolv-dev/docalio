@@ -35,9 +35,9 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="rounded-md border border-[--color-border] bg-[--color-muted] px-4 py-5 text-center">
+      <div className="rounded-md border border-border bg-muted px-4 py-5 text-center">
         <p className="text-sm font-medium">Email envoyé</p>
-        <p className="mt-1 text-sm text-[--color-muted-foreground]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Si un compte est associé à {email}, vous recevrez un lien pour
           réinitialiser votre mot de passe.
         </p>

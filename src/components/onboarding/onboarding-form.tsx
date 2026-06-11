@@ -52,7 +52,7 @@ export function OnboardingForm() {
             setSlug(slugify(e.target.value));
           }}
         />
-        <p className="text-xs text-[--color-muted-foreground]">
+        <p className="text-xs text-muted-foreground">
           Généré à partir du nom. Utilisé dans les URLs, modifiable.
         </p>
       </div>
@@ -67,7 +67,7 @@ export function OnboardingForm() {
             defaultValue="#4f46e5"
             className="h-9 w-14 cursor-pointer p-1"
           />
-          <span className="text-xs text-[--color-muted-foreground]">
+          <span className="text-xs text-muted-foreground">
             Sert à personnaliser votre espace.
           </span>
         </div>

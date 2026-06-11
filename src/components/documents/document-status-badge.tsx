@@ -27,5 +27,9 @@ export const DOCUMENT_STATUS_OPTIONS: {
 
 export function DocumentStatusBadge({ status }: { status: DocumentStatus }) {
   const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.draft;
-  return <Badge variant={config.variant}>{config.label}</Badge>;
+  return (
+    <Badge variant={config.variant} dot>
+      {config.label}
+    </Badge>
+  );
 }
