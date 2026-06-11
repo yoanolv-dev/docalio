@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import {
   Download,
   Eye,
   EyeOff,
   LoaderCircle,
   Pencil,
+  Search,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -149,6 +150,8 @@ function DocumentEditForm({
   );
 }
 
+type SortKey = "recent" | "name" | "size";
+
 export function DocumentList({
   documents,
   workspaceId,
@@ -159,6 +162,8 @@ export function DocumentList({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>("recent");
 
   async function handleDownload(id: string) {
     setError(null);
@@ -172,16 +177,67 @@ export function DocumentList({
     }
   }
 
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const filtered = documents.filter((d) => {
+      if (!q) return true;
+      return (
+        d.title.toLowerCase().includes(q) ||
+        (d.category ?? "").toLowerCase().includes(q)
+      );
+    });
+    const sorted = [...filtered];
+    if (sort === "name") {
+      sorted.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sort === "size") {
+      sorted.sort((a, b) => (b.file_size ?? 0) - (a.file_size ?? 0));
+    } else {
+      sorted.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    }
+    return sorted;
+  }, [documents, query, sort]);
+
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       {error && (
         <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400">
           {error}
         </p>
       )}
 
-      <ul className="divide-y divide-border">
-        {documents.map((doc) => {
+      {documents.length > 1 && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher un document..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          <Select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="sm:w-40"
+          >
+            <option value="recent">Plus récents</option>
+            <option value="name">Nom (A→Z)</option>
+            <option value="size">Taille</option>
+          </Select>
+        </div>
+      )}
+
+      {visible.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+          Aucun document ne correspond à votre recherche.
+        </p>
+      ) : (
+        <ul className="divide-y divide-border">
+          {visible.map((doc) => {
           const ext = getFileExtension(doc.file_path);
           return (
             <li key={doc.id} className="py-3">
@@ -293,7 +349,8 @@ export function DocumentList({
             </li>
           );
         })}
-      </ul>
+        </ul>
+      )}
     </div>
   );
 }

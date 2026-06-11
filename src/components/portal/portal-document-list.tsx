@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { FileIcon } from "@/components/documents/file-icon";
 import { getPortalDownloadUrl } from "@/lib/actions/share-links";
 import { fileTypeLabel, extensionFromMime, formatBytes } from "@/lib/files";
+import { getVisitorId } from "@/lib/visitor";
 import { formatDate } from "@/lib/utils";
 import type { PortalDocument } from "@/lib/types/database";
 
@@ -22,7 +23,7 @@ export function PortalDocumentList({
   async function handleDownload(id: string) {
     setError(null);
     setDownloadingId(id);
-    const result = await getPortalDownloadUrl(token, id);
+    const result = await getPortalDownloadUrl(token, id, getVisitorId());
     setDownloadingId(null);
     if (result.ok) {
       window.location.assign(result.url);

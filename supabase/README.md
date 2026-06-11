@@ -11,6 +11,7 @@ Migrations SQL du socle organisationnel (Sprint 2).
 | `migrations/20260610130000_workspaces.sql` | Table `workspaces` (espaces clients), contraintes, index, trigger `updated_at`, RLS multi-tenant (select/insert/update/delete réservés aux membres de l'organisation). |
 | `migrations/20260610140000_documents.sql` | Table `documents` (FK composite vers `workspaces`), index, trigger `updated_at`, RLS multi-tenant, bucket Storage privé `documents` (20 Mo max) et policies Storage scopées sur l'organisation du chemin. |
 | `migrations/20260611100000_share_links.sql` | Table `share_links` (portail client), RLS multi-tenant, RPC publiques `SECURITY DEFINER` `get_portal` / `get_portal_document_path`, et policy Storage `anon` autorisant la signature des seuls fichiers visibles + téléchargeables d'un lien actif. |
+| `migrations/20260611200000_activity_events.sql` | Table `activity_events` (tracking portail), RLS lecture par les membres de l'org, RPC publique `SECURITY DEFINER` `record_portal_event` (insertion validée par token, `search_path` fixé). Aucune IP ni donnée personnelle. |
 
 ## Storage (Sprint 5)
 

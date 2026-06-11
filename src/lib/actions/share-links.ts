@@ -134,10 +134,12 @@ export type PortalDownloadResult =
  * Génère une URL signée (60 s) pour télécharger un document depuis le portail
  * public. Le chemin n'est résolu (RPC) que si le document est visible,
  * téléchargeable et rattaché à un lien actif. Aucune authentification requise.
+ * Enregistre l'évènement document_downloaded uniquement après signature réussie.
  */
 export async function getPortalDownloadUrl(
   token: string,
-  documentId: string
+  documentId: string,
+  visitorId?: string
 ): Promise<PortalDownloadResult> {
   const supabase = await createClient();
 
@@ -161,5 +163,34 @@ export async function getPortalDownloadUrl(
   if (error || !data?.signedUrl) {
     return { ok: false, message: "Téléchargement indisponible. Réessayez." };
   }
+
+  // Tracking : téléchargement effectif (la RPC revalide le token côté base).
+  await supabase.rpc("record_portal_event", {
+    p_token: token,
+    p_event_type: "document_downloaded",
+    p_document_id: documentId,
+    p_visitor_id: visitorId ?? null,
+  });
+
   return { ok: true, url: data.signedUrl };
+}
+
+/**
+ * Enregistre un évènement de portail (ex. portal_opened) depuis la page
+ * publique. La RPC SECURITY DEFINER valide le token ; rien n'est inséré si
+ * le lien est invalide/expiré.
+ */
+export async function recordPortalEventAction(
+  token: string,
+  eventType: "portal_opened" | "document_opened",
+  documentId?: string,
+  visitorId?: string
+): Promise<void> {
+  const supabase = await createClient();
+  await supabase.rpc("record_portal_event", {
+    p_token: token,
+    p_event_type: eventType,
+    p_document_id: documentId ?? null,
+    p_visitor_id: visitorId ?? null,
+  });
 }
