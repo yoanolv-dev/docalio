@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDeleteDialog } from "@/components/shared/confirm-delete-dialog";
+import { DecisionBadge } from "@/components/decisions/decision-badge";
 import { FileIcon } from "@/components/documents/file-icon";
 import {
   DocumentStatusBadge,
@@ -29,7 +30,7 @@ import {
 } from "@/lib/actions/documents";
 import { fileTypeLabel, formatBytes, getFileExtension } from "@/lib/files";
 import { formatDate } from "@/lib/utils";
-import type { Document } from "@/lib/types/database";
+import type { Document, DocumentDecision } from "@/lib/types/database";
 
 function DocumentEditForm({
   document,
@@ -155,9 +156,11 @@ type SortKey = "recent" | "name" | "size";
 export function DocumentList({
   documents,
   workspaceId,
+  decisions = {},
 }: {
   documents: Document[];
   workspaceId: string;
+  decisions?: Record<string, DocumentDecision>;
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -239,6 +242,7 @@ export function DocumentList({
         <ul className="divide-y divide-border">
           {visible.map((doc) => {
           const ext = getFileExtension(doc.file_path);
+          const decision = decisions[doc.id];
           return (
             <li key={doc.id} className="py-3">
               <div className="flex items-start gap-3">
@@ -248,7 +252,13 @@ export function DocumentList({
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <p className="truncate text-sm font-medium">{doc.title}</p>
                     <DocumentStatusBadge status={doc.status} />
+                    {decision && <DecisionBadge decision={decision.decision} />}
                   </div>
+                  {decision?.comment && (
+                    <p className="mt-1 rounded-md bg-muted/60 px-2 py-1 text-xs text-muted-foreground">
+                      💬 {decision.comment}
+                    </p>
+                  )}
                   <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
                     <span>{fileTypeLabel(ext)}</span>
                     <span>·</span>
