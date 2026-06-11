@@ -7,10 +7,10 @@ import {
   Archive,
   Trash2,
   FileText,
-  Activity,
   CheckCircle,
   Building2,
   Share2,
+  Activity as ActivityIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,19 +22,23 @@ import {
 } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDeleteDialog } from "@/components/shared/confirm-delete-dialog";
-import { WorkspaceForm } from "@/components/workspaces/workspace-form";
 import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
+import { EditWorkspaceDialog } from "@/components/workspaces/edit-workspace-dialog";
+import {
+  WorkspaceEngagementStats,
+  WorkspaceActivityTimeline,
+} from "@/components/workspaces/workspace-activity";
 import { DocumentList } from "@/components/documents/document-list";
 import { DocumentUploadForm } from "@/components/documents/document-upload-form";
 import { PortalShareCard } from "@/components/workspaces/portal-share-card";
 import {
-  updateWorkspaceAction,
   archiveWorkspaceAction,
   deleteWorkspaceAction,
 } from "@/lib/actions/workspaces";
 import { getWorkspace } from "@/lib/workspaces";
 import { listWorkspaceDocuments } from "@/lib/documents";
 import { getActiveShareLink } from "@/lib/share-links";
+import { getWorkspaceActivity } from "@/lib/activity";
 import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -50,19 +54,6 @@ function InfoRow({ label, value }: { label: string; value: string | null }) {
   );
 }
 
-const PLACEHOLDER_SECTIONS = [
-  {
-    icon: Activity,
-    title: "Activité",
-    description: "Bientôt : historique des actions de l'espace.",
-  },
-  {
-    icon: CheckCircle,
-    title: "Validation",
-    description: "Bientôt : demandes et suivi de validation client.",
-  },
-];
-
 export default async function WorkspaceDetailPage({
   params,
 }: {
@@ -72,9 +63,10 @@ export default async function WorkspaceDetailPage({
   const workspace = await getWorkspace(id);
   if (!workspace) notFound();
 
-  const [documents, shareLink, headerList] = await Promise.all([
+  const [documents, shareLink, activity, headerList] = await Promise.all([
     listWorkspaceDocuments(workspace.id),
     getActiveShareLink(workspace.id),
+    getWorkspaceActivity(workspace.id),
     headers(),
   ]);
 
@@ -107,7 +99,7 @@ export default async function WorkspaceDetailPage({
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl font-semibold tracking-tight">
+                <h1 className="text-2xl font-semibold tracking-tight">
                   {workspace.name}
                 </h1>
                 <WorkspaceStatusBadge status={workspace.status} />
@@ -119,39 +111,42 @@ export default async function WorkspaceDetailPage({
             </div>
           </div>
 
-          {workspace.status !== "archived" && (
-            <form action={archiveWorkspaceAction}>
-              <input type="hidden" name="workspace_id" value={workspace.id} />
-              <Button type="submit" variant="outline" size="sm">
-                <Archive className="h-4 w-4" />
-                Archiver
-              </Button>
-            </form>
-          )}
+          <div className="flex items-center gap-2">
+            <EditWorkspaceDialog workspace={workspace} />
+            {workspace.status !== "archived" && (
+              <form action={archiveWorkspaceAction}>
+                <input type="hidden" name="workspace_id" value={workspace.id} />
+                <Button type="submit" variant="ghost" size="sm">
+                  <Archive className="h-4 w-4" />
+                  Archiver
+                </Button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Colonne principale */}
         <div className="space-y-6 lg:col-span-2">
-          {/* Documents */}
+          {/* Documents — espace partagé */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between gap-3">
-                <div className="space-y-1">
-                  <CardTitle>
-                    Documents
-                    {documents.length > 0 && (
-                      <span className="ml-2 text-sm font-normal text-muted-foreground">
-                        {documents.length}
-                      </span>
-                    )}
-                  </CardTitle>
-                  <CardDescription>
-                    Fichiers partagés dans cet espace client.
-                  </CardDescription>
-                </div>
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
+                <CardTitle>
+                  Documents
+                  {documents.length > 0 && (
+                    <span className="ml-2 text-sm font-normal text-muted-foreground">
+                      {documents.length}
+                    </span>
+                  )}
+                </CardTitle>
               </div>
+              <CardDescription>
+                Fichiers de cet espace. Marquez-les « visibles » pour les
+                partager dans le portail client.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <DocumentUploadForm workspaceId={workspace.id} />
@@ -162,15 +157,12 @@ export default async function WorkspaceDetailPage({
                   description="Ajoutez votre premier document : devis, rapport, contrat ou tout fichier utile à ce client."
                 />
               ) : (
-                <DocumentList
-                  documents={documents}
-                  workspaceId={workspace.id}
-                />
+                <DocumentList documents={documents} workspaceId={workspace.id} />
               )}
             </CardContent>
           </Card>
 
-          {/* Informations */}
+          {/* Informations client */}
           <Card>
             <CardHeader>
               <CardTitle>Informations</CardTitle>
@@ -180,20 +172,6 @@ export default async function WorkspaceDetailPage({
               <InfoRow label="Email" value={workspace.client_email} />
               <InfoRow label="Téléphone" value={workspace.client_phone} />
               <InfoRow label="Note interne" value={workspace.internal_note} />
-            </CardContent>
-          </Card>
-
-          {/* Modification */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Modifier l&apos;espace</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <WorkspaceForm
-                action={updateWorkspaceAction}
-                workspace={workspace}
-                submitLabel="Enregistrer les modifications"
-              />
             </CardContent>
           </Card>
         </div>
@@ -208,8 +186,8 @@ export default async function WorkspaceDetailPage({
                 <CardTitle>Portail client</CardTitle>
               </div>
               <CardDescription>
-                Partagez les documents visibles avec votre client via un lien
-                sécurisé, sans compte.
+                Partagez les documents visibles via un lien sécurisé, sans
+                compte.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -221,21 +199,37 @@ export default async function WorkspaceDetailPage({
             </CardContent>
           </Card>
 
-          {PLACEHOLDER_SECTIONS.map((section) => {
-            const Icon = section.icon;
-            return (
-              <Card key={section.title} className="opacity-70">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Icon className="h-4 w-4 text-muted-foreground" />
-                    <CardTitle>{section.title}</CardTitle>
-                  </div>
-                  <CardDescription>{section.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            );
-          })}
+          {/* Activité client */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <ActivityIcon className="h-4 w-4 text-primary" />
+                <CardTitle>Activité client</CardTitle>
+              </div>
+              <CardDescription>
+                Suivez les consultations et téléchargements de votre client.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <WorkspaceEngagementStats activity={activity} />
+              <WorkspaceActivityTimeline timeline={activity.timeline} />
+            </CardContent>
+          </Card>
 
+          {/* Validation — à venir */}
+          <Card className="opacity-70">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                <CardTitle>Validation</CardTitle>
+              </div>
+              <CardDescription>
+                Bientôt : demandes et suivi de validation client.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          {/* Zone de danger */}
           <Card className="border-red-200 dark:border-red-900/50">
             <CardHeader>
               <CardTitle>Zone de danger</CardTitle>

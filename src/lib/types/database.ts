@@ -112,3 +112,17 @@ export interface PortalData {
   };
   documents: PortalDocument[];
 }
+
+export type ActivityEventType =
+  | "portal_opened"
+  | "document_downloaded"
+  | "document_opened";
+
+export interface ActivityEvent {
+  id: string;
+  event_type: ActivityEventType;
+  document_id: string | null;
+  document_title: string | null;
+  visitor_id: string | null;
+  created_at: string;
+}

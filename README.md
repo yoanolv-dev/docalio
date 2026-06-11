@@ -139,9 +139,51 @@ Prérequis : `.env.local` rempli, migrations Supabase appliquées, `npm run dev`
 - **Sprint 6** — Portail client : table `share_links`, liens de partage
   sécurisés, page publique `/p/[token]` sans compte, accès aux documents
   visibles, téléchargement contrôlé par URLs signées.
+- **Sprint 7** — Tracking client v1 & UX : table `activity_events`, suivi des
+  ouvertures de portail et des téléchargements, section « Activité client »
+  (stats d'engagement + timeline) dans le workspace, refonte UX (édition en
+  modale, recherche/tri des documents, portail enrichi).
 
-Les fonctionnalités produit (tracking, validations client, IA, facturation
+Les fonctionnalités produit (validation client, signature, IA, facturation
 Stripe) sont hors périmètre actuel et seront traitées plus tard.
+
+## Tracking & activité client (Sprint 7)
+
+Docalio enregistre une **activité minimale et anonyme** pour permettre au
+commercial de savoir si son client a consulté le dossier.
+
+**Événements suivis** (table `activity_events`, migration
+`supabase/migrations/20260611200000_activity_events.sql`) :
+- `portal_opened` — le portail a été ouvert (une fois par chargement) ;
+- `document_downloaded` — un document a été téléchargé (après signature réussie).
+- `document_opened` — réservé pour un usage futur (non émis en v1).
+
+> Nommage volontairement **honnête** : on ne marque jamais un document comme
+> « lu/vu » alors qu'on sait seulement qu'il a été *ouvert* ou *téléchargé*.
+
+**Architecture** : les évènements publics sont créés **uniquement** par la RPC
+`record_portal_event(token, event_type, document_id, visitor_id)`
+(`SECURITY DEFINER`, `search_path` fixé) qui revalide le token (actif + non
+expiré) et que le document appartient au workspace + est visible. Aucune
+insertion directe possible. Côté dashboard, RLS : un membre ne lit que les
+évènements de son organisation. Aucun accès inter-organisation.
+
+**Confidentialité / RGPD** :
+- ❌ aucune adresse IP stockée ; ❌ aucun fingerprint ; ❌ aucune donnée personnelle ;
+- ✅ `visitor_id` = identifiant **aléatoire** (localStorage), non sensible, pour
+  distinguer des sessions ;
+- ✅ aucune metadata libre venant du client n'est persistée (anti-injection) ;
+- ✅ les analytics restent **internes** : jamais affichées au client dans le portail.
+
+### Test manuel — Tracking (Sprint 7)
+
+1. Générer un lien de portail, ouvrir `/p/{token}` (fenêtre privée).
+2. Côté dashboard, ouvrir le workspace → section **Activité client** :
+   « Ouvertures » doit s'incrémenter, « Portail ouvert — il y a … » dans la timeline.
+3. Depuis le portail, télécharger un document autorisé → l'activité affiche
+   « Document téléchargé : … » et « Téléchargements » s'incrémente.
+4. Vérifier qu'un document **non visible** ne génère jamais d'évènement.
+5. Le portail public ne montre **aucune** statistique au client.
 
 ## Portail client (Sprint 6)
 
