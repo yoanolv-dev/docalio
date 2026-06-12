@@ -41,6 +41,8 @@ import { listWorkspaceDocuments } from "@/lib/documents";
 import { getActiveShareLink } from "@/lib/share-links";
 import { getWorkspaceActivity } from "@/lib/activity";
 import { getWorkspaceDecisions } from "@/lib/decisions";
+import { getCurrentMembership } from "@/lib/organizations";
+import { effectiveMaxFileBytes, resolvePlan } from "@/lib/plans";
 import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -65,14 +67,19 @@ export default async function WorkspaceDetailPage({
   const workspace = await getWorkspace(id);
   if (!workspace) notFound();
 
-  const [documents, shareLink, activity, decisions, headerList] =
+  const [documents, shareLink, activity, decisions, headerList, membership] =
     await Promise.all([
       listWorkspaceDocuments(workspace.id),
       getActiveShareLink(workspace.id),
       getWorkspaceActivity(workspace.id),
       getWorkspaceDecisions(workspace.id),
       headers(),
+      getCurrentMembership(),
     ]);
+
+  const maxFileBytes = effectiveMaxFileBytes(
+    resolvePlan(membership?.organization)
+  );
 
   const host = headerList.get("host") ?? "localhost:3000";
   const proto = headerList.get("x-forwarded-proto") ?? "http";
@@ -168,7 +175,10 @@ export default async function WorkspaceDetailPage({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <DocumentUploadForm workspaceId={workspace.id} />
+              <DocumentUploadForm
+                workspaceId={workspace.id}
+                maxFileBytes={maxFileBytes}
+              />
               {hasDecisionContext && (
                 <DecisionSummary
                   approved={decisionCounts.approved}

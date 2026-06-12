@@ -147,9 +147,83 @@ Prérequis : `.env.local` rempli, migrations Supabase appliquées, `npm run dev`
   approuve / demande une modification / refuse chaque document avec commentaire
   depuis le portail ; aperçu inline des documents ; synthèse et badges de
   décision côté dashboard.
+- **Sprint 9** — Plans, quotas & limites SaaS : définitions de plans côté code
+  (`src/lib/plans.ts`), calcul de l'usage par organisation, affichage plan +
+  utilisation dans les paramètres, et application des limites importantes
+  (espaces clients actifs, taille de fichier, stockage). Sans Stripe, mais avec
+  une architecture prête pour la facturation.
 
-Les fonctionnalités produit (signature électronique, IA, facturation Stripe)
-sont hors périmètre actuel et seront traitées plus tard.
+La signature électronique et l'IA restent hors périmètre actuel. La
+**facturation Stripe** n'est pas intégrée : les plans et leurs limites existent
+côté produit (Sprint 9) et le branchement paiement viendra plus tard.
+
+## Plans, quotas & limites (Sprint 9)
+
+Docalio est préparé pour la vente par abonnement. **Sans Stripe pour l'instant**,
+mais avec une architecture compatible facturation plus tard.
+
+**Plans (source de vérité : `src/lib/plans.ts`)** :
+
+| Plan | Prix | Stockage | Espaces actifs | Utilisateurs | Fichier max | Historique |
+| --- | --- | --- | --- | --- | --- | --- |
+| Starter | 19 €/mois | 10 Go | 10 | 1 | 250 Mo | 30 jours |
+| Pro | 39 €/mois | 50 Go | 50 | 3 | 500 Mo | 6 mois |
+| Business | 79 €/mois | 200 Go | 150 | 10 | 1 Go | 12 mois |
+| Enterprise | Sur devis | Sur mesure | Illimité | Illimité | Sur mesure | Sur mesure |
+
+**Architecture** :
+- Le plan d'une organisation vit sur `organizations` (`plan`, `plan_status`,
+  `trial_ends_at` — migration `20260611400000_org_plans.sql`). Les limites et
+  prix vivent **dans le code** (`src/lib/plans.ts`), jamais codés en dur ailleurs.
+- L'usage est calculé côté base par la RPC `get_organization_usage(org_id)`
+  (`SECURITY DEFINER`, `search_path` fixé — migration `20260611500000_org_usage.sql`) :
+  elle **agrège** stockage / espaces actifs / membres sans remonter de lignes et
+  ne renvoie un résultat **que** si l'appelant est membre de l'organisation
+  (garde `current_user_org_ids()`). Aucun accès inter-organisation.
+- Le changement de plan se fera **côté serveur** (futur webhook de facturation),
+  pas via l'UI cliente. La RLS de `organizations` reste inchangée.
+
+**Limites appliquées (côté serveur, autorité)** :
+- **Création / activation d'un espace client actif** bloquée au-delà du quota du
+  plan (`createWorkspaceAction` / `updateWorkspaceAction`). Les statuts
+  « Prospect » et « Archivé » ne sont pas comptés.
+- **Upload d'un fichier trop lourd** : la taille max dépend du plan (250 Mo →
+  1 Go), validée côté client (feedback immédiat) **et** serveur. Le bucket privé
+  `documents` borne à 1 Go en défense en profondeur (**toujours privé**).
+- **Upload dépassant le stockage** de l'organisation : bloqué avec le reste
+  disponible affiché.
+
+**UX** : page `/dashboard/settings` → carte **Plan & utilisation** (barres de
+consommation qui virent à l'ambre à 80 % et au rouge à 100 %) + grille des plans
+avec le plan courant mis en avant. Messages clairs quand une limite est atteinte
+(à la soumission, et bannière proactive sur la création d'espace).
+
+> **Note branding** : la personnalisation du portail (logo/couleur) introduite
+> aux Sprints 5.5/6 reste disponible pour tous les plans afin de **ne pas casser
+> l'existant** ; « branding » est présenté comme un atout des offres Pro+ mais
+> n'est pas restreint en V1.
+
+### Configuration Supabase (Sprint 9)
+
+Appliquer les deux migrations (SQL Editor ou CLI), dans l'ordre :
+1. `20260611400000_org_plans.sql` — colonnes `plan` / `plan_status` /
+   `trial_ends_at` sur `organizations`.
+2. `20260611500000_org_usage.sql` — RPC `get_organization_usage` + relèvement du
+   plafond du bucket `documents` à 1 Go (le bucket **reste privé**).
+
+### Test manuel — Plans & limites (Sprint 9)
+
+1. `/dashboard/settings` → carte **Plan & utilisation** : plan, statut, barres
+   stockage / espaces actifs / utilisateurs, grille des 4 plans (plan courant
+   surligné).
+2. Forcer un plan plus restrictif (ex. `update organizations set plan='starter'`)
+   et créer/activer des espaces : au-delà de la limite, l'activation est
+   **refusée** avec un message clair ; « Prospect » reste possible.
+3. Uploader un fichier plus lourd que la limite du plan → message « Fichier trop
+   volumineux… ». Uploader un fichier accepté → succès.
+4. Réduire la limite de stockage (plan Starter) et tenter un upload dépassant le
+   quota → message « Stockage insuffisant… ».
+5. Vérifier que le bucket `documents` est toujours **privé**.
 
 ## Décisions client (Sprint 8)
 

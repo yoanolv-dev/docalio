@@ -4,8 +4,18 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { sanitizeFileName, validateFile } from "@/lib/files";
-import type { DocumentStatus, Workspace } from "@/lib/types/database";
+import { formatBytes, sanitizeFileName, validateFile } from "@/lib/files";
+import {
+  effectiveMaxFileBytes,
+  formatStorage,
+  resolvePlan,
+} from "@/lib/plans";
+import { getOrganizationUsage } from "@/lib/usage";
+import type {
+  DocumentStatus,
+  Organization,
+  Workspace,
+} from "@/lib/types/database";
 
 export type DocumentFormState = { ok: boolean; message?: string } | null;
 
@@ -66,8 +76,30 @@ export async function uploadDocumentAction(
     return { ok: false, message: "Sélectionnez un fichier à envoyer." };
   }
 
-  const validationError = validateFile(file);
+  // Plan de l'organisation : pilote la taille max par fichier et le quota global.
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("plan")
+    .eq("id", workspace.organization_id)
+    .maybeSingle<Pick<Organization, "plan">>();
+  const plan = resolvePlan(org);
+
+  // Limite 1 : taille du fichier (selon le plan).
+  const validationError = validateFile(file, effectiveMaxFileBytes(plan));
   if (validationError) return { ok: false, message: validationError };
+
+  // Limite 2 : quota de stockage total de l'organisation.
+  const storageLimit = plan.limits.storageBytes;
+  if (storageLimit !== null) {
+    const usage = await getOrganizationUsage(workspace.organization_id);
+    if (usage.storageUsed + file.size > storageLimit) {
+      const left = Math.max(0, storageLimit - usage.storageUsed);
+      return {
+        ok: false,
+        message: `Stockage insuffisant : votre plan ${plan.name} est limité à ${formatStorage(storageLimit)} (il reste ${formatBytes(left)}). Supprimez des fichiers ou passez à un plan supérieur.`,
+      };
+    }
+  }
 
   const title = text(formData, "title") || file.name.replace(/\.[^.]+$/, "");
   const documentId = randomUUID();
