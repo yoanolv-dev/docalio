@@ -17,7 +17,19 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Section, SectionHeading } from "@/components/marketing/section";
-import { ProductPreview } from "@/components/marketing/product-preview";
+import {
+  MockWindow,
+  MockPortal,
+  MockNotification,
+  MockDecisionToast,
+  MockCreateSpace,
+  MockUpload,
+  MockShare,
+  MockActivity,
+  MockDecision,
+  MockEmailChaos,
+  MockPortalMini,
+} from "@/components/marketing/mockups";
 import { FeatureCard } from "@/components/marketing/feature-card";
 import { PricingCards } from "@/components/marketing/pricing-cards";
 import { ComparisonTable } from "@/components/marketing/comparison-table";
@@ -69,21 +81,40 @@ const FEATURES = [
   },
 ];
 
-const STEPS = [
+const FLOW_STEPS: {
+  title: string;
+  description: string;
+  mockup: React.ReactNode;
+}[] = [
   {
-    title: "Créez un espace & déposez vos documents",
+    title: "Créez l'espace client",
     description:
-      "Un espace par client ou dossier. Glissez vos fichiers : devis, contrats, rapports.",
+      "Un espace par client ou par dossier, isolé des autres. Nom, société, couleur : votre dossier est prêt en moins d'une minute.",
+    mockup: <MockCreateSpace />,
   },
   {
-    title: "Partagez un portail sécurisé",
+    title: "Déposez vos documents",
     description:
-      "Générez un lien unique, expirable, à votre image. Aucun compte requis pour le client.",
+      "Glissez-déposez vos fichiers — devis, contrats, rapports. Chaque document reste privé tant que vous ne le rendez pas visible, en un clic.",
+    mockup: <MockUpload />,
   },
   {
-    title: "Suivez et recueillez les décisions",
+    title: "Partagez le portail",
     description:
-      "Ouvertures, téléchargements, validations : tout est tracé. Relancez au bon moment.",
+      "Un lien unique, sécurisé, expirable et révocable. Votre client accède à son espace sans créer de compte — à votre image, pas à la nôtre.",
+    mockup: <MockShare />,
+  },
+  {
+    title: "Suivez l'activité réelle",
+    description:
+      "Ouverture du portail, consultation, téléchargement : chaque action compte. Vous savez où en est le dossier sans relancer à l'aveugle.",
+    mockup: <MockActivity />,
+  },
+  {
+    title: "Recevez la décision",
+    description:
+      "Validation, demande de modification ou refus, avec commentaire. Et quand il faut relancer, Docalio vous prépare le message — prêt à copier.",
+    mockup: <MockDecision />,
   },
 ];
 
@@ -165,8 +196,12 @@ export default function HomePage() {
                 Essai gratuit 14 jours · Aucune carte bancaire requise
               </p>
             </div>
-            <div className="lg:pl-4">
-              <ProductPreview />
+            <div className="relative lg:pl-4">
+              <MockWindow url="docalio.app/p/d8f3a1•••" className="animate-fade-up">
+                <MockPortal />
+              </MockWindow>
+              <MockNotification className="absolute -right-2 -top-5 hidden w-56 animate-float-soft sm:flex lg:-right-4" />
+              <MockDecisionToast className="absolute -bottom-5 -left-2 hidden w-60 animate-float-soft [animation-delay:1.4s] sm:flex lg:left-0" />
             </div>
           </div>
         </div>
@@ -193,25 +228,66 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* Comment ça marche */}
+      {/* Le flux produit, démontré écran par écran */}
       <Section muted id="comment-ca-marche">
         <SectionHeading
-          eyebrow="Comment ça marche"
-          title="De vos fichiers à une décision client, en trois étapes"
-          description="Pensé pour être compris et utilisé en quelques minutes."
+          eyebrow="Le flux Docalio"
+          title="De vos fichiers à une décision client, sans friction"
+          description="Pas de promesse abstraite : voici exactement ce que vous et votre client voyez, étape par étape."
         />
-        <div className="mt-12 grid gap-6 sm:grid-cols-3">
-          {STEPS.map((step, i) => (
-            <div key={step.title} className="relative rounded-xl border border-border bg-card p-6">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
-                {i + 1}
-              </span>
-              <h3 className="mt-4 text-sm font-semibold">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {step.description}
-              </p>
+        <div className="mt-14 space-y-12 sm:space-y-16">
+          {FLOW_STEPS.map((step, i) => (
+            <div
+              key={step.title}
+              className="grid items-center gap-6 sm:gap-10 lg:grid-cols-2"
+            >
+              <div className={i % 2 === 1 ? "lg:order-2" : undefined}>
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow-sm">
+                  {i + 1}
+                </span>
+                <h3 className="mt-4 text-lg font-semibold tracking-tight sm:text-xl">
+                  {step.title}
+                </h3>
+                <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  {step.description}
+                </p>
+              </div>
+              <div
+                className={
+                  i % 2 === 1
+                    ? "mx-auto w-full max-w-sm lg:order-1"
+                    : "mx-auto w-full max-w-sm"
+                }
+              >
+                {step.mockup}
+              </div>
             </div>
           ))}
+        </div>
+      </Section>
+
+      {/* Avant / Après */}
+      <Section>
+        <SectionHeading
+          eyebrow="Avant / Après"
+          title="La fin du « vous avez bien reçu mon mail ? »"
+          description="Le même dossier client, vécu avec vos outils actuels puis avec Docalio."
+        />
+        <div className="mt-12 grid gap-6 lg:grid-cols-2">
+          <div>
+            <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+              <span className="h-2 w-2 rounded-full bg-red-400" />
+              Aujourd&apos;hui : email + Drive
+            </p>
+            <MockEmailChaos />
+          </div>
+          <div>
+            <p className="mb-3 flex items-center gap-2 text-sm font-semibold">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              Avec Docalio
+            </p>
+            <MockPortalMini />
+          </div>
         </div>
       </Section>
 

@@ -3,26 +3,42 @@ import { cn } from "@/lib/utils";
 
 type Cell = boolean | "partial";
 
-const COLUMNS = ["Docalio", "Email", "Google Drive", "WeTransfer"];
+const COLUMNS = [
+  "Docalio",
+  "Email",
+  "Drive / Dropbox",
+  "WeTransfer",
+  "DocSend",
+];
 
-const ROWS: { label: string; values: [Cell, Cell, Cell, Cell] }[] = [
-  { label: "Espace privé dédié par client", values: [true, false, "partial", false] },
+const ROWS: { label: string; values: [Cell, Cell, Cell, Cell, Cell] }[] = [
   {
-    label: "Suivi des ouvertures & téléchargements",
-    values: [true, false, "partial", "partial"],
+    label: "Espace privé dédié par client",
+    values: [true, false, "partial", false, "partial"],
   },
   {
-    label: "Contrôle fin du téléchargement",
-    values: [true, false, "partial", false],
+    label: "Suivi des ouvertures & téléchargements",
+    values: [true, false, "partial", "partial", true],
   },
   {
     label: "Décisions client (valider / modifier / refuser)",
-    values: [true, false, false, false],
+    values: [true, false, false, false, false],
   },
-  { label: "Liens expirables & révocables", values: [true, false, "partial", true] },
   {
-    label: "Portail à votre image",
-    values: [true, false, false, false],
+    label: "Relances guidées selon l'activité réelle",
+    values: [true, false, false, false, false],
+  },
+  {
+    label: "Contrôle fin du téléchargement",
+    values: [true, false, "partial", false, true],
+  },
+  {
+    label: "Liens expirables & révocables",
+    values: [true, false, "partial", true, true],
+  },
+  {
+    label: "Portail à votre image, sans compte client",
+    values: [true, false, false, false, "partial"],
   },
 ];
 
@@ -46,10 +62,10 @@ function CellValue({ value, primary }: { value: Cell; primary: boolean }) {
 export function ComparisonTable() {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[40rem] border-separate border-spacing-0 text-sm">
+      <table className="w-full min-w-[52rem] border-separate border-spacing-0 text-sm">
         <thead>
           <tr>
-            <th className="w-2/5 px-4 py-3 text-left font-medium text-muted-foreground" />
+            <th className="w-1/3 px-4 py-3 text-left font-medium text-muted-foreground" />
             {COLUMNS.map((col, i) => (
               <th
                 key={col}
