@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
-import type { WorkspaceStatus } from "@/lib/types/database";
+import { getOrganizationUsage } from "@/lib/usage";
+import { isLimitReached, resolvePlan } from "@/lib/plans";
+import type { Organization, WorkspaceStatus } from "@/lib/types/database";
 
 export type WorkspaceFormState = { ok: boolean; message?: string } | null;
 
@@ -16,6 +18,28 @@ function text(formData: FormData, key: string): string {
 
 function nullable(formData: FormData, key: string): string | null {
   return text(formData, key) || null;
+}
+
+/**
+ * Vérifie le quota d'espaces clients actifs du plan. Retourne un message
+ * d'erreur si la limite est atteinte, ou `null` si l'opération est autorisée.
+ * L'espace candidat n'étant pas encore compté comme actif, on bloque dès que le
+ * nombre d'actifs existants atteint la limite.
+ */
+async function activeWorkspaceLimitError(
+  organization: Pick<Organization, "plan"> | null,
+  orgId: string
+): Promise<string | null> {
+  const plan = resolvePlan(organization);
+  const limit = plan.limits.activeWorkspaces;
+  if (limit === null) return null;
+
+  const usage = await getOrganizationUsage(orgId);
+  if (isLimitReached(usage.activeWorkspaces, limit)) {
+    const plural = limit > 1 ? "s" : "";
+    return `Limite atteinte : votre plan ${plan.name} autorise ${limit} espace${plural} client${plural} actif${plural}. Archivez un espace existant ou passez à un plan supérieur.`;
+  }
+  return null;
 }
 
 export async function createWorkspaceAction(
@@ -37,6 +61,15 @@ export async function createWorkspaceAction(
   const status = text(formData, "status") as WorkspaceStatus;
   if (!STATUSES.includes(status)) {
     return { ok: false, message: "Statut invalide." };
+  }
+
+  // Limite du plan : nombre d'espaces clients actifs.
+  if (status === "active") {
+    const limitError = await activeWorkspaceLimitError(
+      membership.organization,
+      membership.organization.id
+    );
+    if (limitError) return { ok: false, message: limitError };
   }
 
   const { data, error } = await supabase
@@ -83,6 +116,29 @@ export async function updateWorkspaceAction(
   const status = text(formData, "status") as WorkspaceStatus;
   if (!STATUSES.includes(status)) {
     return { ok: false, message: "Statut invalide." };
+  }
+
+  // Limite du plan : on ne contrôle que le passage *vers* « actif » (réactiver
+  // un espace archivé). Un espace déjà actif qu'on modifie reste autorisé.
+  if (status === "active") {
+    const { data: current } = await supabase
+      .from("workspaces")
+      .select("status, organization_id")
+      .eq("id", id)
+      .maybeSingle<{ status: WorkspaceStatus; organization_id: string }>();
+
+    if (current && current.status !== "active") {
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("id, plan")
+        .eq("id", current.organization_id)
+        .maybeSingle<Pick<Organization, "id" | "plan">>();
+      const limitError = await activeWorkspaceLimitError(
+        org,
+        current.organization_id
+      );
+      if (limitError) return { ok: false, message: limitError };
+    }
   }
 
   const { error } = await supabase

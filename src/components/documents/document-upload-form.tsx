@@ -10,14 +10,17 @@ import {
   uploadDocumentAction,
   type DocumentFormState,
 } from "@/lib/actions/documents";
-import {
-  FILE_ACCEPT_ATTRIBUTE,
-  MAX_FILE_SIZE_MB,
-  formatBytes,
-  validateFile,
-} from "@/lib/files";
+import { FILE_ACCEPT_ATTRIBUTE, formatBytes, validateFile } from "@/lib/files";
+import { formatStorage } from "@/lib/plans";
 
-export function DocumentUploadForm({ workspaceId }: { workspaceId: string }) {
+export function DocumentUploadForm({
+  workspaceId,
+  maxFileBytes,
+}: {
+  workspaceId: string;
+  /** Taille max par fichier selon le plan de l'organisation. */
+  maxFileBytes: number;
+}) {
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -43,7 +46,7 @@ export function DocumentUploadForm({ workspaceId }: { workspaceId: string }) {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     setSelectedFile(file);
-    setFileError(file ? validateFile(file) : null);
+    setFileError(file ? validateFile(file, maxFileBytes) : null);
     if (file && !title) {
       setTitle(file.name.replace(/\.[^.]+$/, ""));
     }
@@ -107,8 +110,8 @@ export function DocumentUploadForm({ workspaceId }: { workspaceId: string }) {
               Cliquez pour sélectionner un fichier
             </p>
             <p className="text-xs text-muted-foreground">
-              PDF, Word, Excel, PowerPoint, image ou ZIP — {MAX_FILE_SIZE_MB} Mo
-              max
+              PDF, Word, Excel, PowerPoint, image ou ZIP —{" "}
+              {formatStorage(maxFileBytes)} max
             </p>
           </div>
         )}

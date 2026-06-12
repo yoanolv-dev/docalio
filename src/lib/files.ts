@@ -1,8 +1,7 @@
-// Règles fichiers du module Documents (V1).
+// Règles fichiers du module Documents.
 // Partagé entre la validation client (feedback immédiat) et serveur (autorité).
-
-export const MAX_FILE_SIZE_MB = 20;
-export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+// La taille maximale par fichier dépend du plan (cf. src/lib/plans.ts) et est
+// transmise explicitement à `validateFile`.
 
 export type AcceptedExtension =
   | "pdf"
@@ -70,12 +69,21 @@ export function extensionFromMime(mime: string | null | undefined): string {
   return MIME_TO_EXTENSION[mime] ?? "";
 }
 
-/** Taille lisible : 1.2 Mo, 540 Ko... */
+/** Taille lisible : 1.4 Go, 1.2 Mo, 540 Ko... (sans « .0 » superflu). */
 export function formatBytes(bytes: number | null): string {
   if (bytes === null || Number.isNaN(bytes)) return "—";
   if (bytes < 1024) return `${bytes} o`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
+  if (bytes < 1024 * 1024 * 1024) {
+    return `${trimZero(bytes / (1024 * 1024))} Mo`;
+  }
+  return `${trimZero(bytes / (1024 * 1024 * 1024))} Go`;
+}
+
+/** Une décimale, sans « .0 » inutile (1 → "1", 1.2 → "1.2"). */
+function trimZero(value: number): string {
+  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }
 
 /**
@@ -97,20 +105,23 @@ export function sanitizeFileName(fileName: string): string {
   return ext ? `${safeBase}.${ext}` : safeBase;
 }
 
-/** Message d'erreur de validation, ou null si le fichier est accepté. */
-export function validateFile(file: {
-  name: string;
-  size: number;
-}): string | null {
+/**
+ * Message d'erreur de validation, ou null si le fichier est accepté.
+ * `maxBytes` = taille max autorisée par le plan de l'organisation.
+ */
+export function validateFile(
+  file: { name: string; size: number },
+  maxBytes: number
+): string | null {
   const ext = getFileExtension(file.name);
   if (!isAcceptedExtension(ext)) {
     return `Format non supporté. Formats acceptés : ${ACCEPTED_EXTENSIONS.map((e) => e.toUpperCase()).join(", ")}.`;
   }
-  if (file.size > MAX_FILE_SIZE_BYTES) {
-    return `Fichier trop volumineux (${formatBytes(file.size)}). Maximum : ${MAX_FILE_SIZE_MB} Mo.`;
-  }
   if (file.size === 0) {
     return "Le fichier est vide.";
+  }
+  if (file.size > maxBytes) {
+    return `Fichier trop volumineux (${formatBytes(file.size)}). Maximum autorisé par votre plan : ${formatBytes(maxBytes)}.`;
   }
   return null;
 }

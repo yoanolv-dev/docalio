@@ -3,6 +3,12 @@
 
 export type OrganizationRole = "owner" | "admin" | "member";
 
+/** Plans d'abonnement (les limites vivent dans src/lib/plans.ts). */
+export type OrganizationPlan = "starter" | "pro" | "business" | "enterprise";
+
+/** État de l'abonnement. Géré côté serveur (facturation), pas via l'UI cliente. */
+export type PlanStatus = "trial" | "active" | "suspended";
+
 export interface Profile {
   id: string;
   email: string | null;
@@ -18,6 +24,9 @@ export interface Organization {
   slug: string;
   logo_url: string | null;
   primary_color: string | null;
+  plan: OrganizationPlan;
+  plan_status: PlanStatus;
+  trial_ends_at: string | null;
   created_at: string;
   updated_at: string;
 }
