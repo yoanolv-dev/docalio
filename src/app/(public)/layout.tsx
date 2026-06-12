@@ -1,4 +1,5 @@
-import { Navbar } from "@/components/layout/navbar";
+import { SiteHeader } from "@/components/marketing/site-header";
+import { SiteFooter } from "@/components/marketing/site-footer";
 
 export default function PublicLayout({
   children,
@@ -7,8 +8,9 @@ export default function PublicLayout({
 }) {
   return (
     <div className="flex min-h-full flex-col">
-      <Navbar />
+      <SiteHeader />
       <main className="flex-1">{children}</main>
+      <SiteFooter />
     </div>
   );
 }

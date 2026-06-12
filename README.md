@@ -152,10 +152,85 @@ Prérequis : `.env.local` rempli, migrations Supabase appliquées, `npm run dev`
   utilisation dans les paramètres, et application des limites importantes
   (espaces clients actifs, taille de fichier, stockage). Sans Stripe, mais avec
   une architecture prête pour la facturation.
+- **Sprint 10** — Notifications & relances : table `notifications` (RLS stricte,
+  insertion via RPC `SECURITY DEFINER`), centre de notifications (cloche + page),
+  badge non-lus, marquage lu / tout marquer lu, et carte « Prochaine action /
+  relance recommandée » avec message prêt à copier (templates contextualisés,
+  sans IA).
+- **Sprint 11** — Polish UX/UI : checklist d'onboarding « première valeur » sur
+  le dashboard, activité récente branchée sur les notifications, cartes de liste
+  enrichies, portail client plus rassurant, états de chargement / d'erreur et
+  page 404 premium.
+- **Sprint 12** — Site public : landing premium, pages `/fonctionnalites`,
+  `/tarifs` (réutilise `src/lib/plans.ts`), `/securite` (Trust Center),
+  `/cas-usage` (+ comparatif), `/contact`, mockup produit HTML/CSS, et SEO
+  (metadata, OpenGraph, `sitemap.xml`, `robots.txt`).
 
 La signature électronique et l'IA restent hors périmètre actuel. La
 **facturation Stripe** n'est pas intégrée : les plans et leurs limites existent
 côté produit (Sprint 9) et le branchement paiement viendra plus tard.
+
+## Site public & SEO (Sprint 12)
+
+Site marketing complet sous le groupe de routes `(public)` : `/` (landing),
+`/fonctionnalites`, `/tarifs`, `/securite` (Trust Center), `/cas-usage`
+(+ comparatif) et `/contact`. Header/footer marketing partagés
+(`src/components/marketing/`), mockup produit en HTML/CSS (aucune image, aucun
+faux logo/stat/certification). La page tarifs **réutilise `src/lib/plans.ts`**
+(source unique des offres). Le formulaire de contact compose un e-mail via
+`mailto` (pas de backend, pas de service tiers).
+
+**SEO** : metadata par page (titres/descriptions), Open Graph (`metadataBase`,
+locale `fr_FR`), `sitemap.xml` et `robots.txt` (espaces privés et portails
+`/p/` non indexés), structure sémantique H1/H2 et maillage entre pages.
+
+## Polish UX/UI (Sprint 11)
+
+Refonte ciblée « Calm Precision » : checklist d'onboarding « première valeur »
+sur le dashboard (5 étapes, progression réelle), activité récente branchée sur
+les notifications, cartes de liste enrichies, repère d'usage rassurant dans le
+portail client, skeletons de chargement (notifications, détail workspace,
+settings), error boundary du dashboard et page 404 premium.
+
+## Notifications & relances (Sprint 10)
+
+Docalio devient **actionnable** : il dit quoi faire ensuite.
+
+**Notifications** (table `notifications`, migration
+`supabase/migrations/20260612100000_notifications.sql`) :
+- Strictement liées à l'organisation. **RLS stricte** : un membre ne lit/màj que
+  les notifications de son organisation. Aucune insertion directe.
+- Générées **à la source** : les RPC `record_portal_event` et
+  `submit_document_decision` sont étendues (`create or replace`) pour insérer une
+  notification via le helper `SECURITY DEFINER` `create_notification`. Anti-spam
+  par fenêtre récente (ouverture / téléchargement / prévisualisation).
+- Types : portail ouvert, document téléchargé, document prévisualisé, décision
+  reçue (commentaire inclus). Le **wording vit côté code** (`type` + `metadata`
+  jsonb) : changer un libellé ne touche pas la base.
+- UI : cloche avec badge non-lus (header desktop + topbar mobile), page
+  `/dashboard/notifications`, marquer lu / tout marquer lu, activité récente sur
+  le dashboard.
+- **Aucun email/service tiers** : architecture prête (ex. colonne `emailed_at` +
+  worker plus tard) mais non intégrée.
+
+**Relances manuelles** (sans IA) : dans le détail d'un workspace, la carte
+« Prochaine action / Relance recommandée » dérive l'état du dossier (activité +
+décisions + documents + lien) et propose un **message prêt à copier**,
+contextualisé (workspace, organisation, dernier signal client) : pas ouvert,
+ouvert sans téléchargement, téléchargé sans réponse, approuvé, modification
+demandée, refusé, commentaire reçu.
+
+### Test manuel — Notifications & relances (Sprint 10)
+
+1. Ouvrir un portail `/p/{token}` (fenêtre privée) → côté dashboard, la cloche
+   affiche un badge et « Portail ouvert » apparaît.
+2. Télécharger un document autorisé → notification « Document téléchargé ».
+3. Soumettre une décision (valider / modifier / refuser) avec commentaire →
+   notification « Décision reçue » avec l'extrait de commentaire.
+4. Cloche → « Tout marquer comme lu » → le badge disparaît ; page
+   `/dashboard/notifications` → marquer une notification comme lue.
+5. Détail workspace → la carte « Prochaine action » reflète l'état du dossier ;
+   « Copier le message » place un message contextualisé dans le presse-papiers.
 
 ## Plans, quotas & limites (Sprint 9)
 
