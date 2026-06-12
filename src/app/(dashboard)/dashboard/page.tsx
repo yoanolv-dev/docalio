@@ -6,7 +6,9 @@ import { getCurrentMembership } from "@/lib/organizations";
 import { getWorkspaceStats } from "@/lib/workspaces";
 import { getDocumentStats } from "@/lib/documents";
 import { getRecentNotifications } from "@/lib/notifications";
+import { getOnboardingProgress } from "@/lib/onboarding";
 import { NotificationRow } from "@/components/notifications/notification-row";
+import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -46,10 +48,11 @@ export default async function DashboardPage() {
   const membership = await getCurrentMembership();
   if (!membership) redirect("/onboarding");
 
-  const [stats, docStats, recentNotifications] = await Promise.all([
+  const [stats, docStats, recentNotifications, onboarding] = await Promise.all([
     getWorkspaceStats(),
     getDocumentStats(),
     getRecentNotifications(6),
+    getOnboardingProgress(),
   ]);
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] ?? "là";
   const { organization, role } = membership;
@@ -68,6 +71,9 @@ export default async function DashboardPage() {
           </Button>
         }
       />
+
+      {/* Prise en main (jusqu'à ce que le parcours « première valeur » soit complet) */}
+      {!onboarding.done && <OnboardingChecklist progress={onboarding} />}
 
       {/* Contexte organisation */}
       <Card>

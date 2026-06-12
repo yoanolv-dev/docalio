@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
+import { formatDate } from "@/lib/utils";
 import type { Workspace, WorkspaceStatus } from "@/lib/types/database";
 
 type StatusFilter = WorkspaceStatus | "all";
@@ -54,32 +55,49 @@ export function WorkspacesList({ workspaces }: { workspaces: Workspace[] }) {
           Aucun espace ne correspond à votre recherche.
         </p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((w) => (
-            <Link key={w.id} href={`/dashboard/workspaces/${w.id}`}>
-              <Card className="h-full transition-all hover:border-ring hover:shadow-md">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div
-                      className="flex h-9 w-9 items-center justify-center rounded-lg"
-                      style={{
-                        backgroundColor:
-                          w.primary_color ?? "var(--color-primary)",
-                      }}
-                    >
-                      <Building2 className="h-4 w-4 text-primary-foreground" />
+        <>
+          <p className="text-xs text-muted-foreground">
+            {filtered.length} espace{filtered.length > 1 ? "s" : ""}
+            {filtered.length !== workspaces.length
+              ? ` sur ${workspaces.length}`
+              : ""}
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((w) => (
+              <Link
+                key={w.id}
+                href={`/dashboard/workspaces/${w.id}`}
+                className="group"
+              >
+                <Card className="h-full transition-all group-hover:border-ring group-hover:shadow-md">
+                  <CardContent className="flex h-full flex-col p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div
+                        className="flex h-9 w-9 items-center justify-center rounded-lg"
+                        style={{
+                          backgroundColor:
+                            w.primary_color ?? "var(--color-primary)",
+                        }}
+                      >
+                        <Building2 className="h-4 w-4 text-primary-foreground" />
+                      </div>
+                      <WorkspaceStatusBadge status={w.status} />
                     </div>
-                    <WorkspaceStatusBadge status={w.status} />
-                  </div>
-                  <p className="mt-3 truncate text-sm font-semibold">{w.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {w.client_company ?? "—"}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+                    <p className="mt-3 truncate text-sm font-semibold">
+                      {w.name}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {w.client_company ?? w.client_email ?? "Espace client"}
+                    </p>
+                    <p className="mt-3 border-t border-border pt-2.5 text-xs text-muted-foreground/80">
+                      Créé le {formatDate(w.created_at)}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

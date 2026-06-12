@@ -79,9 +79,23 @@ export default async function PortalPage({
           </h1>
           <p className="text-sm text-muted-foreground">
             {organization.name} partage avec vous les documents ci-dessous.
-            {workspace.client_company ? ` Espace dédié à ${workspace.client_company}.` : ""}
+            {workspace.client_company
+              ? ` Espace dédié à ${workspace.client_company}.`
+              : ""}
           </p>
         </div>
+
+        {/* Repère d'usage pour le client */}
+        {documents.length > 0 && (
+          <div className="flex items-start gap-2.5 rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <p>
+              Consultez et téléchargez vos documents en toute sécurité, puis
+              indiquez votre décision — validation, modification ou refus — en
+              quelques clics. Aucun compte n&apos;est nécessaire.
+            </p>
+          </div>
+        )}
 
         {/* Documents */}
         {documents.length === 0 ? (
