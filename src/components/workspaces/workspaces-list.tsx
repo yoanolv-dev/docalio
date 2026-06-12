@@ -2,17 +2,22 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Building2 } from "lucide-react";
+import { Building2, Eye, FileText, Link2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
-import { formatDate } from "@/lib/utils";
-import type { Workspace, WorkspaceStatus } from "@/lib/types/database";
+import { formatRelativeTime } from "@/lib/utils";
+import type { WorkspaceListItem } from "@/lib/workspaces";
+import type { WorkspaceStatus } from "@/lib/types/database";
 
 type StatusFilter = WorkspaceStatus | "all";
 
-export function WorkspacesList({ workspaces }: { workspaces: Workspace[] }) {
+export function WorkspacesList({
+  workspaces,
+}: {
+  workspaces: WorkspaceListItem[];
+}) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
 
@@ -69,7 +74,7 @@ export function WorkspacesList({ workspaces }: { workspaces: Workspace[] }) {
                 href={`/dashboard/workspaces/${w.id}`}
                 className="group"
               >
-                <Card className="h-full transition-all group-hover:border-ring group-hover:shadow-md">
+                <Card className="h-full transition-all group-hover:-translate-y-0.5 group-hover:border-ring/60 group-hover:shadow-md">
                   <CardContent className="flex h-full flex-col p-4">
                     <div className="flex items-start justify-between gap-2">
                       <div
@@ -83,15 +88,50 @@ export function WorkspacesList({ workspaces }: { workspaces: Workspace[] }) {
                       </div>
                       <WorkspaceStatusBadge status={w.status} />
                     </div>
+
                     <p className="mt-3 truncate text-sm font-semibold">
                       {w.name}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
                       {w.client_company ?? w.client_email ?? "Espace client"}
                     </p>
-                    <p className="mt-3 border-t border-border pt-2.5 text-xs text-muted-foreground/80">
-                      Créé le {formatDate(w.created_at)}
-                    </p>
+
+                    {/* Signaux réels : documents, portail, attente client */}
+                    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1">
+                        <FileText className="h-3.5 w-3.5" />
+                        {w.documentCount} doc{w.documentCount > 1 ? "s" : ""}
+                      </span>
+                      {w.visibleCount > 0 && (
+                        <span className="inline-flex items-center gap-1">
+                          <Eye className="h-3.5 w-3.5" />
+                          {w.visibleCount} visible
+                          {w.visibleCount > 1 ? "s" : ""}
+                        </span>
+                      )}
+                      {w.hasActiveLink && (
+                        <span
+                          className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400"
+                          title="Lien de portail actif"
+                        >
+                          <Link2 className="h-3.5 w-3.5" />
+                          Portail
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-2.5">
+                      <p className="truncate text-xs text-muted-foreground/80">
+                        {w.lastActivityAt
+                          ? `Activité ${formatRelativeTime(w.lastActivityAt).toLowerCase()}`
+                          : "Aucune activité client"}
+                      </p>
+                      {w.pendingDecisions > 0 && (
+                        <span className="inline-flex shrink-0 items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                          {w.pendingDecisions} en attente
+                        </span>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </Link>

@@ -19,17 +19,16 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDeleteDialog } from "@/components/shared/confirm-delete-dialog";
+import { CopyButton } from "@/components/shared/copy-button";
 import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
 import { EditWorkspaceDialog } from "@/components/workspaces/edit-workspace-dialog";
+import { WorkspacePipeline } from "@/components/workspaces/workspace-pipeline";
 import {
   WorkspaceEngagementStats,
   WorkspaceActivityTimeline,
 } from "@/components/workspaces/workspace-activity";
-import { DocumentList } from "@/components/documents/document-list";
-import { DocumentUploadForm } from "@/components/documents/document-upload-form";
-import { DecisionSummary } from "@/components/decisions/decision-summary";
+import { DocumentExplorer } from "@/components/documents/document-explorer";
 import { PortalShareCard } from "@/components/workspaces/portal-share-card";
 import { NextActionCard } from "@/components/workspaces/next-action-card";
 import { computeNextAction } from "@/lib/next-action";
@@ -54,7 +53,7 @@ function InfoRow({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="flex items-center justify-between gap-4 py-2 text-sm">
       <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium">{value || "—"}</span>
+      <span className="truncate text-right font-medium">{value || "—"}</span>
     </div>
   );
 }
@@ -85,6 +84,7 @@ export default async function WorkspaceDetailPage({
   const host = headerList.get("host") ?? "localhost:3000";
   const proto = headerList.get("x-forwarded-proto") ?? "http";
   const baseUrl = `${proto}://${host}`;
+  const portalUrl = shareLink ? `${baseUrl}/p/${shareLink.token}` : null;
 
   // Synthèse des décisions sur les documents visibles client
   const visibleDocs = documents.filter((d) => d.is_visible_to_client);
@@ -99,7 +99,6 @@ export default async function WorkspaceDetailPage({
       .length,
     pending: visibleDocs.length - decided.length,
   };
-  const hasDecisionContext = visibleDocs.length > 0;
 
   // Dernier commentaire client (signal le plus récent pour la relance).
   const commentedDecisions = Object.values(decisions)
@@ -110,7 +109,7 @@ export default async function WorkspaceDetailPage({
   const nextAction = computeNextAction({
     workspaceName: workspace.name,
     organizationName: membership?.organization.name ?? "votre équipe",
-    portalUrl: shareLink ? `${baseUrl}/p/${shareLink.token}` : null,
+    portalUrl,
     hasDocuments: documents.length > 0,
     hasVisibleDocuments: visibleDocs.length > 0,
     hasActiveLink: Boolean(shareLink),
@@ -139,7 +138,7 @@ export default async function WorkspaceDetailPage({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <div
-              className="flex h-12 w-12 items-center justify-center rounded-xl"
+              className="flex h-12 w-12 items-center justify-center rounded-xl shadow-sm"
               style={{
                 backgroundColor:
                   workspace.primary_color ?? "var(--color-primary)",
@@ -161,7 +160,16 @@ export default async function WorkspaceDetailPage({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {portalUrl && (
+              <CopyButton
+                value={portalUrl}
+                label="Copier le lien portail"
+                copiedLabel="Lien copié !"
+                variant="outline"
+                size="sm"
+              />
+            )}
             <EditWorkspaceDialog workspace={workspace} />
             {workspace.status !== "archived" && (
               <form action={archiveWorkspaceAction}>
@@ -174,12 +182,27 @@ export default async function WorkspaceDetailPage({
             )}
           </div>
         </div>
+
+        {/* Où en est le dossier — dérivé des données réelles */}
+        <Card>
+          <CardContent className="p-4 sm:p-5">
+            <WorkspacePipeline
+              input={{
+                documentCount: documents.length,
+                visibleCount: visibleDocs.length,
+                hasActiveLink: Boolean(shareLink),
+                opens: activity.totalOpens,
+                decidedCount: decided.length,
+                pendingCount: decisionCounts.pending,
+              }}
+            />
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Colonne principale */}
+        {/* Colonne principale : l'espace documentaire */}
         <div className="space-y-6 lg:col-span-2">
-          {/* Documents — espace partagé */}
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -194,36 +217,19 @@ export default async function WorkspaceDetailPage({
                 </CardTitle>
               </div>
               <CardDescription>
-                Fichiers de cet espace. Marquez-les « visibles » pour les
-                partager dans le portail client.
+                Glissez-déposez vos fichiers, puis rendez-les « visibles
+                client » en un clic pour les partager dans le portail.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <DocumentUploadForm
+            <CardContent>
+              <DocumentExplorer
+                documents={documents}
                 workspaceId={workspace.id}
+                decisions={decisions}
+                viewedDocumentIds={activity.viewedDocumentIds}
+                downloadedDocumentIds={activity.downloadedDocumentIds}
                 maxFileBytes={maxFileBytes}
               />
-              {hasDecisionContext && (
-                <DecisionSummary
-                  approved={decisionCounts.approved}
-                  changesRequested={decisionCounts.changesRequested}
-                  rejected={decisionCounts.rejected}
-                  pending={decisionCounts.pending}
-                />
-              )}
-              {documents.length === 0 ? (
-                <EmptyState
-                  icon={FileText}
-                  title="Aucun document"
-                  description="Ajoutez votre premier document : devis, rapport, contrat ou tout fichier utile à ce client."
-                />
-              ) : (
-                <DocumentList
-                  documents={documents}
-                  workspaceId={workspace.id}
-                  decisions={decisions}
-                />
-              )}
             </CardContent>
           </Card>
 
@@ -284,31 +290,29 @@ export default async function WorkspaceDetailPage({
             </CardContent>
           </Card>
 
-          {/* Zone de danger */}
-          <Card className="border-red-200 dark:border-red-900/50">
-            <CardHeader>
-              <CardTitle>Zone de danger</CardTitle>
-              <CardDescription>
-                La suppression est définitive : l&apos;espace et ses documents
-                seront perdus.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ConfirmDeleteDialog
-                action={deleteWorkspaceAction}
-                fields={{ workspace_id: workspace.id }}
-                title="Supprimer cet espace client ?"
-                description={`« ${workspace.name} » et tous ses documents seront définitivement supprimés. Cette action est irréversible.`}
-                confirmLabel="Supprimer l'espace"
-                trigger={
-                  <Button variant="destructive" size="sm">
-                    <Trash2 className="h-4 w-4" />
-                    Supprimer l&apos;espace
-                  </Button>
-                }
-              />
-            </CardContent>
-          </Card>
+          {/* Suppression — volontairement discrète */}
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-border px-4 py-3">
+            <p className="text-xs text-muted-foreground">
+              Supprimer cet espace et tous ses documents, définitivement.
+            </p>
+            <ConfirmDeleteDialog
+              action={deleteWorkspaceAction}
+              fields={{ workspace_id: workspace.id }}
+              title="Supprimer cet espace client ?"
+              description={`« ${workspace.name} » et tous ses documents seront définitivement supprimés. Cette action est irréversible.`}
+              confirmLabel="Supprimer l'espace"
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="shrink-0 text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Supprimer
+                </Button>
+              }
+            />
+          </div>
         </div>
       </div>
     </div>

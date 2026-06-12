@@ -23,7 +23,7 @@ import {
   Plus,
   FileStack,
   Eye,
-  PenLine,
+  Hourglass,
   ArrowRight,
   Bell,
 } from "lucide-react";
@@ -125,8 +125,8 @@ export default async function DashboardPage() {
         <h2 className="text-sm font-semibold text-muted-foreground">Documents</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard label="Total" value={docStats.total} icon={FileStack} tone="primary" />
-          <StatCard label="Brouillons" value={docStats.draft} icon={PenLine} />
           <StatCard label="Visibles client" value={docStats.visibleToClient} icon={Eye} tone="success" />
+          <StatCard label="En attente de décision" value={docStats.awaitingDecision} icon={Hourglass} tone="warning" />
         </div>
       </section>
 
