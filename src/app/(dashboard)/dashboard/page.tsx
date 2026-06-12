@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
 import { getWorkspaceStats } from "@/lib/workspaces";
 import { getDocumentStats } from "@/lib/documents";
+import { getRecentNotifications } from "@/lib/notifications";
+import { NotificationRow } from "@/components/notifications/notification-row";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -21,6 +23,7 @@ import {
   Eye,
   PenLine,
   ArrowRight,
+  Bell,
 } from "lucide-react";
 import { getInitials } from "@/lib/utils";
 
@@ -43,9 +46,10 @@ export default async function DashboardPage() {
   const membership = await getCurrentMembership();
   if (!membership) redirect("/onboarding");
 
-  const [stats, docStats] = await Promise.all([
+  const [stats, docStats, recentNotifications] = await Promise.all([
     getWorkspaceStats(),
     getDocumentStats(),
+    getRecentNotifications(6),
   ]);
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] ?? "là";
   const { organization, role } = membership;
@@ -120,24 +124,44 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Activité récente — placeholder */}
+      {/* Activité récente */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground">
-          Activité récente
-        </h2>
-        <EmptyState
-          icon={FileText}
-          title="Aucune activité pour le moment"
-          description="Créez votre premier espace client pour commencer à centraliser vos informations et partager des documents."
-          action={
-            <Button size="sm" asChild>
-              <Link href="/dashboard/workspaces/new">
-                <Plus className="h-4 w-4" />
-                Créer un espace client
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-muted-foreground">
+            Activité récente
+          </h2>
+          {recentNotifications.length > 0 && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/dashboard/notifications">
+                Tout voir
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-          }
-        />
+          )}
+        </div>
+        {recentNotifications.length === 0 ? (
+          <EmptyState
+            icon={Bell}
+            title="Aucune activité pour le moment"
+            description="Partagez un portail client : les ouvertures, téléchargements et décisions de vos clients apparaîtront ici en temps réel."
+            action={
+              <Button size="sm" asChild>
+                <Link href="/dashboard/workspaces/new">
+                  <Plus className="h-4 w-4" />
+                  Créer un espace client
+                </Link>
+              </Button>
+            }
+          />
+        ) : (
+          <Card className="overflow-hidden">
+            <div className="divide-y divide-border p-1.5">
+              {recentNotifications.map((n) => (
+                <NotificationRow key={n.id} notification={n} compact />
+              ))}
+            </div>
+          </Card>
+        )}
       </section>
     </div>
   );

@@ -2,12 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Settings, type LucideIcon } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  Bell,
+  Settings,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Vue d'ensemble", href: "/dashboard", icon: LayoutDashboard },
   { label: "Espaces clients", href: "/dashboard/workspaces", icon: Users },
+  { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
   { label: "Paramètres", href: "/dashboard/settings", icon: Settings },
 ];
 

@@ -7,7 +7,6 @@ import {
   Archive,
   Trash2,
   FileText,
-  CheckCircle,
   Building2,
   Share2,
   Activity as ActivityIcon,
@@ -32,6 +31,8 @@ import { DocumentList } from "@/components/documents/document-list";
 import { DocumentUploadForm } from "@/components/documents/document-upload-form";
 import { DecisionSummary } from "@/components/decisions/decision-summary";
 import { PortalShareCard } from "@/components/workspaces/portal-share-card";
+import { NextActionCard } from "@/components/workspaces/next-action-card";
+import { computeNextAction } from "@/lib/next-action";
 import {
   archiveWorkspaceAction,
   deleteWorkspaceAction,
@@ -99,6 +100,29 @@ export default async function WorkspaceDetailPage({
     pending: visibleDocs.length - decided.length,
   };
   const hasDecisionContext = visibleDocs.length > 0;
+
+  // Dernier commentaire client (signal le plus récent pour la relance).
+  const commentedDecisions = Object.values(decisions)
+    .filter((d) => d.comment)
+    .sort((a, b) => (b.updated_at ?? "").localeCompare(a.updated_at ?? ""));
+
+  // Relance recommandée / prochaine action (templates statiques contextualisés).
+  const nextAction = computeNextAction({
+    workspaceName: workspace.name,
+    organizationName: membership?.organization.name ?? "votre équipe",
+    portalUrl: shareLink ? `${baseUrl}/p/${shareLink.token}` : null,
+    hasDocuments: documents.length > 0,
+    hasVisibleDocuments: visibleDocs.length > 0,
+    hasActiveLink: Boolean(shareLink),
+    opens: activity.totalOpens,
+    downloads: activity.totalDownloads,
+    decisionsApproved: decisionCounts.approved,
+    decisionsChangesRequested: decisionCounts.changesRequested,
+    decisionsRejected: decisionCounts.rejected,
+    decisionsPending: decisionCounts.pending,
+    lastComment: commentedDecisions[0]?.comment ?? null,
+    lastCommentDecision: commentedDecisions[0]?.decision ?? null,
+  });
 
   return (
     <div className="space-y-6">
@@ -219,6 +243,9 @@ export default async function WorkspaceDetailPage({
 
         {/* Colonne latérale */}
         <div className="space-y-6">
+          {/* Prochaine action / relance recommandée */}
+          <NextActionCard action={nextAction} />
+
           {/* Portail client */}
           <Card>
             <CardHeader>
@@ -255,19 +282,6 @@ export default async function WorkspaceDetailPage({
               <WorkspaceEngagementStats activity={activity} />
               <WorkspaceActivityTimeline timeline={activity.timeline} />
             </CardContent>
-          </Card>
-
-          {/* Validation — à venir */}
-          <Card className="opacity-70">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                <CardTitle>Validation</CardTitle>
-              </div>
-              <CardDescription>
-                Bientôt : demandes et suivi de validation client.
-              </CardDescription>
-            </CardHeader>
           </Card>
 
           {/* Zone de danger */}

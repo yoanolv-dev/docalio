@@ -144,3 +144,33 @@ export interface ActivityEvent {
   visitor_id: string | null;
   created_at: string;
 }
+
+export type NotificationType =
+  | "portal_opened"
+  | "document_downloaded"
+  | "document_opened"
+  | "decision_received";
+
+/** Charge utile minimale d'une notification (le wording vit côté code). */
+export interface NotificationMetadata {
+  document_id?: string;
+  document_title?: string | null;
+  decision?: DecisionType;
+  comment?: string | null;
+}
+
+/**
+ * Notification interne d'organisation. Nommée `AppNotification` pour ne pas
+ * masquer le type global `Notification` du DOM.
+ */
+export interface AppNotification {
+  id: string;
+  organization_id: string;
+  workspace_id: string;
+  type: NotificationType;
+  metadata: NotificationMetadata;
+  read_at: string | null;
+  created_at: string;
+  /** Nom du workspace lié (joint à la lecture). */
+  workspace_name?: string | null;
+}
