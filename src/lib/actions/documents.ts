@@ -117,6 +117,11 @@ export async function uploadDocumentAction(
     };
   }
 
+  const posXRaw = text(formData, "pos_x");
+  const posYRaw = text(formData, "pos_y");
+  const posX = posXRaw ? Number(posXRaw) : null;
+  const posY = posYRaw ? Number(posYRaw) : null;
+
   const { error: insertError } = await supabase.from("documents").insert({
     id: documentId,
     organization_id: workspace.organization_id,
@@ -129,6 +134,8 @@ export async function uploadDocumentAction(
     file_path: filePath,
     file_type: file.type || null,
     file_size: file.size,
+    pos_x: posX !== null && Number.isFinite(posX) ? Math.round(posX) : null,
+    pos_y: posY !== null && Number.isFinite(posY) ? Math.round(posY) : null,
   });
 
   if (insertError) {

@@ -1,7 +1,7 @@
 import { ArrowLeft, Building2 } from "lucide-react";
 import { BrowserFrame } from "@/components/shots/browser-frame";
 import { AppShell } from "@/components/shots/app-shell";
-import { Drive } from "@/components/drive/drive";
+import { CanvasDrive } from "@/components/drive/canvas-drive";
 import { Badge } from "@/components/ui/badge";
 import {
   MOCK_DOCUMENTS,
@@ -14,7 +14,7 @@ import {
 export default function DriveShot() {
   return (
     <BrowserFrame url="docalio.app/dashboard" width={1240}>
-      <AppShell active="Espaces">
+      <AppShell>
         <div className="space-y-5">
           <div className="space-y-3">
             <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -39,17 +39,15 @@ export default function DriveShot() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <Drive
-              documents={MOCK_DOCUMENTS}
-              folders={MOCK_FOLDERS}
-              workspaceId="ws-demo"
-              decisions={MOCK_DECISIONS}
-              viewedDocumentIds={MOCK_VIEWED}
-              downloadedDocumentIds={MOCK_DOWNLOADED}
-              maxFileBytes={20 * 1024 * 1024}
-            />
-          </div>
+          <CanvasDrive
+            documents={MOCK_DOCUMENTS}
+            folders={MOCK_FOLDERS}
+            workspaceId="ws-demo"
+            decisions={MOCK_DECISIONS}
+            viewedDocumentIds={MOCK_VIEWED}
+            downloadedDocumentIds={MOCK_DOWNLOADED}
+            maxFileBytes={20 * 1024 * 1024}
+          />
         </div>
       </AppShell>
     </BrowserFrame>

@@ -1,98 +1,43 @@
-import {
-  Bell,
-  FileText,
-  FolderClosed,
-  Settings,
-} from "lucide-react";
-import { getInitials } from "@/lib/utils";
+import { Bell, FileText, Search } from "lucide-react";
 
 /**
- * Réplique statique de la coque applicative (sidebar + topbar) pour les
- * captures produit. Contrôle l'élément de navigation actif et n'embarque aucune
- * action serveur.
+ * Réplique statique de la coque applicative (barre supérieure) pour les
+ * captures produit. Reflète la navigation réelle : pas de sidebar, ⌘K + avatar.
  */
-export function AppShell({
-  active = "Espaces",
-  children,
-}: {
-  active?: "Espaces" | "Notifications" | "Paramètres";
-  children: React.ReactNode;
-}) {
-  const nav = [
-    { label: "Espaces", icon: FolderClosed },
-    { label: "Notifications", icon: Bell },
-    { label: "Paramètres", icon: Settings },
-  ];
-
+export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-[760px] bg-background">
-      <aside className="flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
-        <div className="flex h-14 items-center border-b border-sidebar-border px-4">
-          <div className="flex items-center gap-2">
+    <div className="min-h-[820px] bg-background">
+      <header className="border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-6">
+          <div className="flex shrink-0 items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
               <FileText className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="text-sm font-semibold tracking-tight">Docalio</span>
           </div>
-        </div>
-
-        <div className="border-b border-sidebar-border p-3">
-          <div className="flex items-center gap-2.5 rounded-md px-2 py-1.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary-subtle text-xs font-semibold text-primary">
-              {getInitials("Studio Hélène Roy")}
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">Studio Hélène Roy</p>
-              <p className="truncate text-xs text-muted-foreground">Propriétaire</p>
-            </div>
-          </div>
-        </div>
-
-        <nav className="flex flex-1 flex-col gap-0.5 p-3">
-          {nav.map((item) => {
-            const Icon = item.icon;
-            const isActive = item.label === active;
-            return (
-              <span
-                key={item.label}
-                className={
-                  "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium " +
-                  (isActive
-                    ? "bg-primary-subtle text-primary"
-                    : "text-sidebar-foreground/75")
-                }
-              >
-                <Icon className={"h-4 w-4 " + (isActive ? "text-primary" : "text-muted-foreground")} />
-                {item.label}
-              </span>
-            );
-          })}
-        </nav>
-
-        <div className="border-t border-sidebar-border p-3">
-          <div className="flex items-center gap-2.5 px-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-semibold">
-              HR
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">Hélène Roy</p>
-              <p className="truncate text-xs text-muted-foreground">helene@studio.fr</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-14 shrink-0 items-center justify-end border-b border-border px-6">
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground">
-            <Bell className="h-5 w-5" />
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
+          <span className="h-5 w-px bg-border" />
+          <span className="text-sm font-medium text-muted-foreground">
+            Studio Hélène Roy
           </span>
-        </header>
-        <main className="flex-1 overflow-hidden">
-          <div className="mx-auto max-w-5xl p-8">{children}</div>
-        </main>
-      </div>
+          <div className="ml-auto flex items-center gap-1.5">
+            <span className="flex h-9 items-center gap-2 rounded-full border border-border bg-card px-3 text-sm text-muted-foreground">
+              <Search className="h-4 w-4" />
+              Rechercher…
+              <kbd className="ml-1 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium">
+                ⌘K
+              </kbd>
+            </span>
+            <span className="relative flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground">
+              <Bell className="h-[18px] w-[18px]" />
+              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" />
+            </span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
+              HR
+            </span>
+          </div>
+        </div>
+      </header>
+      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
     </div>
   );
 }

@@ -9,9 +9,12 @@ import {
   Lock,
   ShieldCheck,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { ProductShot } from "@/components/marketing/product-shot";
+import { HeroCanvas } from "@/components/marketing/hero-canvas";
+import { Tilt, Reveal } from "@/components/marketing/scroll-fx";
 import { PricingCards } from "@/components/marketing/pricing-cards";
 import { ComparisonTable } from "@/components/marketing/comparison-table";
 import { Faq } from "@/components/marketing/faq";
@@ -96,26 +99,31 @@ const FAQ_ITEMS = [
 export default function HomePage() {
   return (
     <>
-      {/* Hero — éditorial, image produit en évidence */}
-      <section className="relative overflow-hidden">
+      {/* Hero — scène WebGL + titre éditorial */}
+      <section className="relative isolate overflow-hidden">
+        <div className="absolute inset-0 -z-20">
+          <HeroCanvas />
+        </div>
         <div
           aria-hidden
-          className="bg-grid pointer-events-none absolute inset-0 -z-10 opacity-[0.5] [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]"
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-background/50 via-background/75 to-background"
         />
-        <div className="mx-auto max-w-5xl px-4 pt-20 text-center sm:px-6 sm:pt-28">
+        <div className="mx-auto max-w-5xl px-4 pb-10 pt-28 text-center sm:px-6 sm:pt-36">
           <Link
             href="/fonctionnalites"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
           >
-            Nouveau · Drive client avec dossiers
+            Nouveau · Drive client spatial
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
-          <h1 className="text-balance mx-auto mt-6 max-w-3xl text-4xl font-semibold tracking-tight sm:text-6xl">
-            Le bon document, au bon client.
+          <h1 className="text-balance mx-auto mt-6 max-w-3xl text-5xl font-semibold tracking-tight sm:text-7xl">
+            Le bon document,
+            <br />
+            au bon client.
           </h1>
           <p className="text-pretty mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            Un espace privé par client. Déposez vos documents comme dans un
-            Drive, partagez un lien sécurisé sans compte, et recueillez les
+            Un espace privé par client. Organisez vos documents sur un canvas
+            vivant, partagez un lien sécurisé sans compte, recueillez les
             décisions — au même endroit.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -125,7 +133,7 @@ export default function HomePage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
+            <Button size="lg" variant="outline" className="bg-card/70 backdrop-blur" asChild>
               <Link href="/contact">Demander une démo</Link>
             </Button>
           </div>
@@ -134,13 +142,15 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Capture produit principale */}
-        <div className="mx-auto mt-14 max-w-6xl px-4 pb-16 sm:px-6 sm:pb-24">
-          <ProductShot
-            src="/product/dashboard.png"
-            alt="Le tableau de bord Docalio : la liste de vos espaces clients."
-            priority
-          />
+        {/* Capture produit principale, inclinée en 3D */}
+        <div className="mx-auto -mb-8 max-w-6xl px-4 pb-16 [perspective:1600px] sm:px-6">
+          <Tilt max={6}>
+            <ProductShot
+              src="/product/dashboard.png"
+              alt="Le tableau de bord Docalio : la liste de vos espaces clients."
+              priority
+            />
+          </Tilt>
         </div>
       </section>
 
@@ -162,11 +172,11 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* Sections produit alternées, captures réelles */}
+      {/* Sections produit alternées, captures réelles inclinées */}
       {FEATURE_SECTIONS.map((s, i) => (
         <Section key={s.title}>
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <div className={i % 2 === 1 ? "lg:order-2" : undefined}>
+            <Reveal className={i % 2 === 1 ? "lg:order-2" : undefined}>
               <p className="text-sm font-semibold text-primary">{s.eyebrow}</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
                 {s.title}
@@ -182,12 +192,15 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-            </div>
-            <ProductShot
-              src={s.shot}
-              alt={s.alt}
-              className={i % 2 === 1 ? "lg:order-1" : undefined}
-            />
+            </Reveal>
+            <Reveal
+              delay={80}
+              className={cn("[perspective:1600px]", i % 2 === 1 && "lg:order-1")}
+            >
+              <Tilt max={6}>
+                <ProductShot src={s.shot} alt={s.alt} />
+              </Tilt>
+            </Reveal>
           </div>
         </Section>
       ))}

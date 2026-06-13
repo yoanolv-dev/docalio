@@ -40,6 +40,8 @@ function doc(
     status: "sent",
     allow_download: true,
     is_visible_to_client: true,
+    pos_x: null,
+    pos_y: null,
     created_by: null,
     created_at: daysAgo(6),
     updated_at: daysAgo(6),
@@ -48,19 +50,19 @@ function doc(
 }
 
 export const MOCK_FOLDERS: Folder[] = [
-  { id: "f-contrats", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Contrats", created_by: null, created_at: daysAgo(20), updated_at: daysAgo(20) },
-  { id: "f-factures", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Factures", created_by: null, created_at: daysAgo(20), updated_at: daysAgo(20) },
-  { id: "f-creation", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Création", created_by: null, created_at: daysAgo(18), updated_at: daysAgo(18) },
+  { id: "f-contrats", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Contrats", pos_x: 40, pos_y: 40, created_by: null, created_at: daysAgo(20), updated_at: daysAgo(20) },
+  { id: "f-factures", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Factures", pos_x: 268, pos_y: 40, created_by: null, created_at: daysAgo(20), updated_at: daysAgo(20) },
+  { id: "f-creation", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Création", pos_x: 496, pos_y: 40, created_by: null, created_at: daysAgo(18), updated_at: daysAgo(18) },
 ];
 
 export const MOCK_DOCUMENTS: Document[] = [
-  doc("d1", "Proposition commerciale", "pdf", 2_400_000, { folder_id: null }),
+  doc("d1", "Proposition commerciale", "pdf", 2_400_000, { folder_id: null, pos_x: 40, pos_y: 196 }),
   doc("d2", "Charte graphique — v3", "pdf", 8_900_000, { folder_id: "f-creation" }),
   doc("d3", "Logo — variantes", "png", 1_200_000, { folder_id: "f-creation", allow_download: false }),
   doc("d4", "Contrat de prestation", "docx", 540_000, { folder_id: "f-contrats" }),
   doc("d5", "Avenant — délais", "docx", 320_000, { folder_id: "f-contrats", is_visible_to_client: false }),
   doc("d6", "Facture 2026-014", "pdf", 180_000, { folder_id: "f-factures" }),
-  doc("d7", "Devis signé", "pdf", 410_000, { folder_id: null }),
+  doc("d7", "Devis signé", "pdf", 410_000, { folder_id: null, pos_x: 268, pos_y: 196 }),
 ];
 
 export const MOCK_DECISIONS: Record<string, DocumentDecision> = {

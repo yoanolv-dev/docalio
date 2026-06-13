@@ -8,7 +8,7 @@ import { MOCK_WORKSPACES } from "@/lib/shots/mock";
 export default function DashboardShot() {
   return (
     <BrowserFrame url="docalio.app/dashboard" width={1240}>
-      <AppShell active="Espaces">
+      <AppShell>
         <div className="space-y-8">
           <header className="flex items-end justify-between gap-4">
             <div>

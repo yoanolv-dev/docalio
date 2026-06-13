@@ -44,7 +44,8 @@ async function getWorkspaceRef(
 export async function createFolderAction(
   workspaceId: string,
   parentId: string | null,
-  rawName: string
+  rawName: string,
+  pos?: { x: number; y: number }
 ): Promise<DriveResult> {
   const { supabase, user } = await requireUser();
 
@@ -60,12 +61,35 @@ export async function createFolderAction(
     workspace_id: workspace.id,
     parent_id: parentId,
     name,
+    pos_x: pos?.x ?? null,
+    pos_y: pos?.y ?? null,
     created_by: user.id,
   });
 
   if (error) return { ok: false, message: "Création impossible. Réessayez." };
 
   revalidatePath(`/dashboard/workspaces/${workspaceId}`);
+  return { ok: true };
+}
+
+/**
+ * Persiste la position d'un élément sur le canvas spatial. Volontairement sans
+ * revalidatePath : la mise à jour est purement visuelle et déjà appliquée côté
+ * client (revalider réinitialiserait le canvas).
+ */
+export async function setItemPositionAction(
+  kind: "folder" | "document",
+  id: string,
+  x: number,
+  y: number
+): Promise<DriveResult> {
+  const { supabase } = await requireUser();
+  const table = kind === "folder" ? "folders" : "documents";
+  const { error } = await supabase
+    .from(table)
+    .update({ pos_x: Math.round(x), pos_y: Math.round(y) })
+    .eq("id", id);
+  if (error) return { ok: false, message: "Position non enregistrée." };
   return { ok: true };
 }
 

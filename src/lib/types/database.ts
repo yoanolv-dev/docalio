@@ -65,6 +65,9 @@ export interface Document {
   status: DocumentStatus;
   allow_download: boolean;
   is_visible_to_client: boolean;
+  /** Position sur le canvas spatial (null = auto-disposé). */
+  pos_x: number | null;
+  pos_y: number | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -77,6 +80,9 @@ export interface Folder {
   workspace_id: string;
   parent_id: string | null;
   name: string;
+  /** Position sur le canvas spatial (null = auto-disposé). */
+  pos_x: number | null;
+  pos_y: number | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

@@ -27,7 +27,7 @@ import {
   WorkspaceEngagementStats,
   WorkspaceActivityTimeline,
 } from "@/components/workspaces/workspace-activity";
-import { Drive } from "@/components/drive/drive";
+import { CanvasDrive } from "@/components/drive/canvas-drive";
 import { PortalShareCard } from "@/components/workspaces/portal-share-card";
 import { NextActionCard } from "@/components/workspaces/next-action-card";
 import { computeNextAction } from "@/lib/next-action";
@@ -211,19 +211,15 @@ export default async function WorkspaceDetailPage({
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Colonne principale : l'espace documentaire */}
         <div className="space-y-6 lg:col-span-2">
-          <Card>
-            <CardContent className="p-4 sm:p-5">
-              <Drive
-                documents={documents}
-                folders={folders}
-                workspaceId={workspace.id}
-                decisions={decisions}
-                viewedDocumentIds={activity.viewedDocumentIds}
-                downloadedDocumentIds={activity.downloadedDocumentIds}
-                maxFileBytes={maxFileBytes}
-              />
-            </CardContent>
-          </Card>
+          <CanvasDrive
+            documents={documents}
+            folders={folders}
+            workspaceId={workspace.id}
+            decisions={decisions}
+            viewedDocumentIds={activity.viewedDocumentIds}
+            downloadedDocumentIds={activity.downloadedDocumentIds}
+            maxFileBytes={maxFileBytes}
+          />
 
           {/* Informations client */}
           <Card>

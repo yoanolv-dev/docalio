@@ -21,6 +21,9 @@ create table if not exists public.folders (
   workspace_id     uuid not null,
   parent_id        uuid,
   name             text not null check (char_length(name) between 1 and 120),
+  -- Position sur le canvas spatial (px monde, relatives au dossier parent).
+  pos_x            double precision,
+  pos_y            double precision,
   created_by       uuid references public.profiles (id),
   created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now(),
@@ -28,6 +31,10 @@ create table if not exists public.folders (
   foreign key (workspace_id, organization_id)
     references public.workspaces (id, organization_id) on delete cascade
 );
+
+-- Colonnes de position (idempotent si la table préexiste).
+alter table public.folders add column if not exists pos_x double precision;
+alter table public.folders add column if not exists pos_y double precision;
 
 -- Index uniques nécessaires aux FK composites ci-dessous.
 create unique index if not exists folders_id_workspace_id_uidx
@@ -101,6 +108,10 @@ alter table public.documents
   references public.folders (id, workspace_id) on delete cascade;
 
 create index if not exists documents_folder_id_idx on public.documents (folder_id);
+
+-- Position des documents sur le canvas spatial (px monde, relatives au dossier).
+alter table public.documents add column if not exists pos_x double precision;
+alter table public.documents add column if not exists pos_y double precision;
 
 -- -----------------------------------------------------------------------------
 -- RPC publique get_portal : on ajoute folder_id à chaque document et la liste

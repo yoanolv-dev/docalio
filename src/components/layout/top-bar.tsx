@@ -1,0 +1,77 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { FileText, Search } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/notification-bell";
+import { CommandPalette } from "@/components/layout/command-palette";
+import { getInitials } from "@/lib/utils";
+import type { AppNotification } from "@/lib/types/database";
+
+/**
+ * Barre supérieure unique du dashboard. Pas de sidebar : la navigation passe
+ * par la palette de commandes (⌘K), volontairement épurée.
+ */
+export function TopBar({
+  orgName,
+  userName,
+  userEmail,
+  unreadCount,
+  recentNotifications,
+}: {
+  orgName: string;
+  userName: string | null;
+  userEmail: string;
+  unreadCount: number;
+  recentNotifications: AppNotification[];
+}) {
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  return (
+    <>
+      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
+          <Link href="/dashboard" className="flex shrink-0 items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
+              <FileText className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="text-sm font-semibold tracking-tight">Docalio</span>
+          </Link>
+
+          <span className="hidden h-5 w-px bg-border sm:block" />
+          <span className="hidden min-w-0 truncate text-sm font-medium text-muted-foreground sm:block">
+            {orgName}
+          </span>
+
+          <div className="ml-auto flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              className="group flex h-9 items-center gap-2 rounded-full border border-border bg-card px-3 text-sm text-muted-foreground transition-colors hover:border-ring/50 hover:text-foreground"
+              aria-label="Rechercher et naviguer"
+            >
+              <Search className="h-4 w-4" />
+              <span className="hidden lg:inline">Rechercher…</span>
+              <kbd className="ml-1 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium lg:inline">
+                ⌘K
+              </kbd>
+            </button>
+
+            <NotificationBell unreadCount={unreadCount} recent={recentNotifications} />
+
+            <Link
+              href="/dashboard/settings"
+              aria-label="Paramètres du compte"
+              title={userName ?? userEmail}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background transition-opacity hover:opacity-90"
+            >
+              {getInitials(userName ?? userEmail)}
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+    </>
+  );
+}
