@@ -41,7 +41,7 @@ export async function createGroupAction(rawName: string): Promise<AccessResult> 
   });
   if (error) return { ok: false, message: "Création impossible. Réessayez." };
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings/equipe");
   return { ok: true };
 }
 
@@ -56,7 +56,7 @@ export async function deleteGroupAction(groupId: string): Promise<AccessResult> 
     .eq("id", groupId);
   if (error) return { ok: false, message: "Suppression impossible. Réessayez." };
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings/equipe");
   return { ok: true };
 }
 
@@ -77,7 +77,7 @@ export async function addGroupMemberAction(
     return { ok: false, message: "Ajout impossible. Réessayez." };
   }
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings/equipe");
   return { ok: true };
 }
 
@@ -96,7 +96,7 @@ export async function removeGroupMemberAction(
     .eq("user_id", userId);
   if (error) return { ok: false, message: "Retrait impossible. Réessayez." };
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings/equipe");
   return { ok: true };
 }
 

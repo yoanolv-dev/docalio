@@ -30,21 +30,21 @@ const LINKS: MenuLink[] = [
   },
   {
     label: "Équipe & accès",
-    description: "Invitez et gérez les rôles",
+    description: "Invitez, gérez rôles & groupes",
     icon: Users,
-    href: "/dashboard/settings#equipe",
+    href: "/dashboard/settings/equipe",
   },
   {
     label: "Abonnement",
     description: "Plan, usage & facturation",
     icon: CreditCard,
-    href: "/dashboard/settings#abonnement",
+    href: "/dashboard/settings/abonnement",
   },
   {
     label: "Paramètres",
     description: "Identité de l'organisation",
     icon: Settings,
-    href: "/dashboard/settings#identite",
+    href: "/dashboard/settings/organisation",
   },
 ];
 
