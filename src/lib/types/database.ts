@@ -54,6 +54,7 @@ export interface Document {
   id: string;
   organization_id: string;
   workspace_id: string;
+  folder_id: string | null;
   title: string;
   description: string | null;
   category: string | null;
@@ -64,6 +65,18 @@ export interface Document {
   status: DocumentStatus;
   allow_download: boolean;
   is_visible_to_client: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Dossier du Drive (arborescence par workspace). */
+export interface Folder {
+  id: string;
+  organization_id: string;
+  workspace_id: string;
+  parent_id: string | null;
+  name: string;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -105,8 +118,16 @@ export interface PortalDocument {
   file_type: string | null;
   file_size: number | null;
   status: DocumentStatus;
+  folder_id: string | null;
   allow_download: boolean;
   created_at: string;
+}
+
+/** Dossier exposé au portail (uniquement ceux menant à un document visible). */
+export interface PortalFolder {
+  id: string;
+  parent_id: string | null;
+  name: string;
 }
 
 export interface PortalData {
@@ -119,6 +140,7 @@ export interface PortalData {
     name: string;
     client_company: string | null;
   };
+  folders: PortalFolder[];
   documents: PortalDocument[];
 }
 

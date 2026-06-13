@@ -106,6 +106,20 @@ export function sanitizeFileName(fileName: string): string {
 }
 
 /**
+ * Chemin Storage canonique d'un document dans le bucket privé.
+ * Forme : organizations/{org}/workspaces/{ws}/{documentId}-{safeName}
+ * Construit exclusivement côté serveur (empêche tout path traversal).
+ */
+export function formatStoragePath(
+  organizationId: string,
+  workspaceId: string,
+  documentId: string,
+  safeName: string
+): string {
+  return `organizations/${organizationId}/workspaces/${workspaceId}/${documentId}-${safeName}`;
+}
+
+/**
  * Message d'erreur de validation, ou null si le fichier est accepté.
  * `maxBytes` = taille max autorisée par le plan de l'organisation.
  */

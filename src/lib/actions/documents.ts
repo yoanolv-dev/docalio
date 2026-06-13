@@ -4,7 +4,12 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { formatBytes, sanitizeFileName, validateFile } from "@/lib/files";
+import {
+  formatBytes,
+  formatStoragePath,
+  sanitizeFileName,
+  validateFile,
+} from "@/lib/files";
 import {
   effectiveMaxFileBytes,
   formatStorage,
@@ -88,9 +93,15 @@ export async function uploadDocumentAction(
   }
 
   const title = text(formData, "title") || file.name.replace(/\.[^.]+$/, "");
+  const folderId = nullable(formData, "folder_id");
   const documentId = randomUUID();
   const safeName = sanitizeFileName(file.name);
-  const filePath = `organizations/${workspace.organization_id}/workspaces/${workspace.id}/${documentId}-${safeName}`;
+  const filePath = formatStoragePath(
+    workspace.organization_id,
+    workspace.id,
+    documentId,
+    safeName
+  );
 
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKET)
@@ -110,6 +121,7 @@ export async function uploadDocumentAction(
     id: documentId,
     organization_id: workspace.organization_id,
     workspace_id: workspace.id,
+    folder_id: folderId,
     created_by: user.id,
     title,
     description: nullable(formData, "description"),

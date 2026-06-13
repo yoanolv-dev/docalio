@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   Archive,
   Trash2,
-  FileText,
   Building2,
   Share2,
   Activity as ActivityIcon,
@@ -28,7 +27,7 @@ import {
   WorkspaceEngagementStats,
   WorkspaceActivityTimeline,
 } from "@/components/workspaces/workspace-activity";
-import { DocumentExplorer } from "@/components/documents/document-explorer";
+import { Drive } from "@/components/drive/drive";
 import { PortalShareCard } from "@/components/workspaces/portal-share-card";
 import { NextActionCard } from "@/components/workspaces/next-action-card";
 import { computeNextAction } from "@/lib/next-action";
@@ -38,6 +37,7 @@ import {
 } from "@/lib/actions/workspaces";
 import { getWorkspace } from "@/lib/workspaces";
 import { listWorkspaceDocuments } from "@/lib/documents";
+import { listWorkspaceFolders } from "@/lib/folders";
 import { getActiveShareLink } from "@/lib/share-links";
 import { getWorkspaceActivity } from "@/lib/activity";
 import { getWorkspaceDecisions } from "@/lib/decisions";
@@ -67,15 +67,23 @@ export default async function WorkspaceDetailPage({
   const workspace = await getWorkspace(id);
   if (!workspace) notFound();
 
-  const [documents, shareLink, activity, decisions, headerList, membership] =
-    await Promise.all([
-      listWorkspaceDocuments(workspace.id),
-      getActiveShareLink(workspace.id),
-      getWorkspaceActivity(workspace.id),
-      getWorkspaceDecisions(workspace.id),
-      headers(),
-      getCurrentMembership(),
-    ]);
+  const [
+    documents,
+    folders,
+    shareLink,
+    activity,
+    decisions,
+    headerList,
+    membership,
+  ] = await Promise.all([
+    listWorkspaceDocuments(workspace.id),
+    listWorkspaceFolders(workspace.id),
+    getActiveShareLink(workspace.id),
+    getWorkspaceActivity(workspace.id),
+    getWorkspaceDecisions(workspace.id),
+    headers(),
+    getCurrentMembership(),
+  ]);
 
   const maxFileBytes = effectiveMaxFileBytes(
     resolvePlan(membership?.organization)
@@ -204,26 +212,10 @@ export default async function WorkspaceDetailPage({
         {/* Colonne principale : l'espace documentaire */}
         <div className="space-y-6 lg:col-span-2">
           <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-primary" />
-                <CardTitle>
-                  Documents
-                  {documents.length > 0 && (
-                    <span className="ml-2 text-sm font-normal text-muted-foreground">
-                      {documents.length}
-                    </span>
-                  )}
-                </CardTitle>
-              </div>
-              <CardDescription>
-                Glissez-déposez vos fichiers, puis rendez-les « visibles
-                client » en un clic pour les partager dans le portail.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DocumentExplorer
+            <CardContent className="p-4 sm:p-5">
+              <Drive
                 documents={documents}
+                folders={folders}
                 workspaceId={workspace.id}
                 decisions={decisions}
                 viewedDocumentIds={activity.viewedDocumentIds}
