@@ -136,11 +136,11 @@ export default async function WorkspaceDetailPage({
       {/* En-tête */}
       <div className="space-y-4">
         <Link
-          href="/dashboard/workspaces"
+          href="/dashboard"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Espaces clients
+          Tous les espaces
         </Link>
 
         <div className="flex flex-wrap items-start justify-between gap-4">

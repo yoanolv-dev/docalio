@@ -3,17 +3,25 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  Users,
+  FolderClosed,
   Bell,
   Settings,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: "Vue d'ensemble", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Espaces clients", href: "/dashboard/workspaces", icon: Users },
+const NAV_ITEMS: {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  match?: (pathname: string) => boolean;
+}[] = [
+  {
+    label: "Espaces",
+    href: "/dashboard",
+    icon: FolderClosed,
+    match: (p) => p === "/dashboard" || p.startsWith("/dashboard/workspaces"),
+  },
   { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
   { label: "Paramètres", href: "/dashboard/settings", icon: Settings },
 ];
@@ -25,10 +33,9 @@ export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
     <nav className="flex flex-col gap-0.5">
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
-        const isActive =
-          item.href === "/dashboard"
-            ? pathname === "/dashboard"
-            : pathname.startsWith(item.href);
+        const isActive = item.match
+          ? item.match(pathname)
+          : pathname.startsWith(item.href);
 
         return (
           <Link
