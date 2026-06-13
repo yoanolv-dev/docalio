@@ -62,8 +62,8 @@ export default async function PortalPage({
   if (!portal) return <PortalInvalid />;
 
   const decisions = await getPortalDecisions(token);
-  const { organization, workspace, documents } = portal;
-  const accent = organization.primary_color ?? "#4f46e5";
+  const { organization, workspace, documents, folders } = portal;
+  const accent = organization.primary_color ?? "#1c2a4e";
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -131,6 +131,7 @@ export default async function PortalPage({
         <PortalDocuments
           token={token}
           documents={documents}
+          folders={folders}
           initialDecisions={decisions}
           accent={accent}
         />
