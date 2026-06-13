@@ -10,7 +10,7 @@ import { Faq } from "@/components/marketing/faq";
 export const metadata: Metadata = {
   title: "Tarifs",
   description:
-    "Des offres simples et transparentes : Starter 19 €, Pro 39 €, Business 79 €, et Enterprise sur devis. Essai gratuit 14 jours, sans carte bancaire.",
+    "Tarification simple au siège : Solo gratuit, Pro 9 €, Business 18 € par utilisateur et par mois, Enterprise sur devis. Les partages externes sont illimités et gratuits.",
   alternates: { canonical: "/tarifs" },
 };
 
@@ -28,7 +28,7 @@ const PRICING_FAQ = [
   {
     question: "Que se passe-t-il si j’atteins une limite ?",
     answer:
-      "Docalio vous prévient clairement (stockage, espaces clients actifs, taille de fichier) et vous pouvez passer à une offre supérieure à tout moment.",
+      "Docalio vous prévient clairement (stockage, taille de fichier) et vous pouvez passer à une offre supérieure à tout moment. Vos espaces et vos partages externes restent illimités.",
   },
   {
     question: "Puis-je changer d’offre plus tard ?",
@@ -42,8 +42,8 @@ export default function PricingPage() {
     <>
       <PageHero
         eyebrow="Tarifs"
-        title="Un tarif simple, qui grandit avec vous"
-        description="Choisissez l’offre adaptée à votre activité. Sans engagement, essai gratuit 14 jours, aucune carte bancaire requise."
+        title="Au siège. Les partages externes restent gratuits."
+        description="Vous ne payez que pour vos utilisateurs internes. Espaces et partages clients illimités, sans engagement, essai gratuit 14 jours, sans carte bancaire."
       />
 
       <Section className="pt-12 sm:pt-14">
@@ -55,8 +55,10 @@ export default function PricingPage() {
             </span>
             <p className="text-sm">
               <span className="font-semibold">Offre bêta —</span> Pro à{" "}
-              <span className="font-semibold">29 €/mois pendant 6 mois</span>,
-              accompagnement à la mise en route offert.
+              <span className="font-semibold">
+                4,50 €/utilisateur/mois pendant 6 mois
+              </span>
+              , accompagnement à la mise en route offert.
             </p>
           </div>
           <Button size="sm" asChild>

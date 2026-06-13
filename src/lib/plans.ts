@@ -30,9 +30,13 @@ export interface PlanLimits {
 
 export interface PlanDefinition {
   id: OrganizationPlan;
-  name: string;
-  /** Prix mensuel en euros, ou `null` pour « sur devis ». */
+  /**
+   * Prix mensuel PAR UTILISATEUR (siège) en euros. `0` = gratuit,
+   * `null` = sur devis. Les destinataires externes (portail client) ne sont
+   * jamais facturés : seuls les sièges internes comptent.
+   */
   priceEur: number | null;
+  name: string;
   tagline: string;
   limits: PlanLimits;
   /** Personnalisation du portail (logo/couleurs) mise en avant à partir de Pro. */
@@ -52,69 +56,68 @@ export const BUCKET_MAX_FILE_BYTES = 1 * GB;
 export const PLANS: Record<OrganizationPlan, PlanDefinition> = {
   starter: {
     id: "starter",
-    name: "Starter",
-    priceEur: 19,
-    tagline: "Pour lancer votre activité documentaire.",
+    name: "Solo",
+    priceEur: 0,
+    tagline: "Pour démarrer, en solo ou à deux.",
     limits: {
-      storageBytes: 10 * GB,
-      activeWorkspaces: 10,
-      users: 1,
-      maxFileBytes: 250 * MB,
+      storageBytes: 5 * GB,
+      activeWorkspaces: null,
+      users: 2,
+      maxFileBytes: 100 * MB,
       historyDays: 30,
     },
     branding: false,
     prioritySupport: false,
     highlights: [
-      "10 Go de stockage",
-      "10 espaces clients actifs",
-      "1 utilisateur",
-      "Fichiers jusqu'à 250 Mo",
-      "Historique 30 jours",
+      "Jusqu'à 2 utilisateurs",
+      "Espaces internes & clients illimités",
+      "Partages externes illimités — gratuits",
+      "5 Go de stockage",
+      "Fichiers jusqu'à 100 Mo",
     ],
   },
   pro: {
     id: "pro",
     name: "Pro",
-    priceEur: 39,
-    tagline: "Pour les indépendants et petites équipes.",
+    priceEur: 9,
+    tagline: "Pour les équipes qui collaborent au quotidien.",
     limits: {
-      storageBytes: 50 * GB,
-      activeWorkspaces: 50,
-      users: 3,
-      maxFileBytes: 500 * MB,
+      storageBytes: 100 * GB,
+      activeWorkspaces: null,
+      users: null,
+      maxFileBytes: 1 * GB,
       historyDays: 180,
     },
     branding: true,
     prioritySupport: false,
     highlights: [
-      "50 Go de stockage",
-      "50 espaces clients actifs",
-      "3 utilisateurs",
-      "Fichiers jusqu'à 500 Mo",
-      "Historique 6 mois",
-      "Branding léger du portail",
+      "Utilisateurs illimités (au siège)",
+      "Espaces internes & clients illimités",
+      "Partages externes illimités — gratuits",
+      "Groupes & accès par espace",
+      "100 Go de stockage · fichiers 1 Go",
+      "Branding du portail client",
     ],
   },
   business: {
     id: "business",
     name: "Business",
-    priceEur: 79,
-    tagline: "Pour les équipes qui montent en charge.",
+    priceEur: 18,
+    tagline: "Pour les organisations qui montent en charge.",
     limits: {
-      storageBytes: 200 * GB,
-      activeWorkspaces: 150,
-      users: 10,
+      storageBytes: 500 * GB,
+      activeWorkspaces: null,
+      users: null,
       maxFileBytes: 1 * GB,
       historyDays: 365,
     },
     branding: true,
     prioritySupport: true,
     highlights: [
-      "200 Go de stockage",
-      "150 espaces clients actifs",
-      "10 utilisateurs",
-      "Fichiers jusqu'à 1 Go",
+      "Tout le plan Pro",
+      "500 Go de stockage",
       "Historique 12 mois",
+      "Contrôle d'accès avancé par groupe",
       "Support prioritaire",
     ],
   },
@@ -122,7 +125,7 @@ export const PLANS: Record<OrganizationPlan, PlanDefinition> = {
     id: "enterprise",
     name: "Enterprise",
     priceEur: null,
-    tagline: "Limites personnalisées et accompagnement dédié.",
+    tagline: "Sécurité, conformité et accompagnement dédié.",
     limits: {
       storageBytes: null,
       activeWorkspaces: null,
@@ -134,9 +137,8 @@ export const PLANS: Record<OrganizationPlan, PlanDefinition> = {
     prioritySupport: true,
     highlights: [
       "Stockage sur mesure",
-      "Espaces clients illimités",
       "Utilisateurs illimités",
-      "Historique sur mesure",
+      "SSO, exigences de conformité",
       "Support dédié & SLA",
     ],
   },
@@ -208,7 +210,12 @@ export function formatCount(limit: number | null): string {
   return limit === null ? "Illimité" : String(limit);
 }
 
-/** Prix mensuel lisible ("19 €/mois", "Sur devis"). */
+/**
+ * Prix lisible. Tarification au siège : "Gratuit", "9 €/utilisateur/mois",
+ * ou "Sur devis".
+ */
 export function formatPlanPrice(plan: PlanDefinition): string {
-  return plan.priceEur === null ? "Sur devis" : `${plan.priceEur} €/mois`;
+  if (plan.priceEur === null) return "Sur devis";
+  if (plan.priceEur === 0) return "Gratuit";
+  return `${plan.priceEur} €/utilisateur/mois`;
 }
