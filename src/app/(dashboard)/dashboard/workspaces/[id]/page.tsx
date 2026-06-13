@@ -8,7 +8,9 @@ import {
   ChevronDown,
   Trash2,
   Building2,
+  Lock,
   Share2,
+  Users,
   Activity as ActivityIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -66,6 +68,8 @@ export default async function WorkspaceDetailPage({
   const workspace = await getWorkspace(id);
   if (!workspace) notFound();
 
+  const isInternal = workspace.space_type === "internal";
+
   const [
     documents,
     folders,
@@ -104,50 +108,82 @@ export default async function WorkspaceDetailPage({
   // repliable mobile (le Drive reste plein écran par défaut sur mobile).
   const rail = (
     <>
-      {/* Portail client */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Share2 className="h-4 w-4 text-primary" />
-            <CardTitle className="text-base">Portail client</CardTitle>
-          </div>
-          <CardDescription>
-            Partagez les documents visibles via un lien sécurisé, sans compte.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <PortalShareCard
-            workspaceId={workspace.id}
-            link={shareLink}
-            baseUrl={baseUrl}
-            slug={workspace.slug}
-          />
-        </CardContent>
-      </Card>
+      {/* Partage : portail client (externe) ou accès équipe (interne) */}
+      {isInternal ? (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base">Accès interne</CardTitle>
+            </div>
+            <CardDescription>
+              Cet espace est visible par votre équipe.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-start gap-3 rounded-lg bg-muted/50 p-3">
+              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">
+                La gestion fine des accès par groupe d&apos;utilisateurs
+                (qui voit quel espace) arrive très prochainement.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Share2 className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base">Portail client</CardTitle>
+            </div>
+            <CardDescription>
+              Partagez les documents visibles via un lien sécurisé, sans compte.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PortalShareCard
+              workspaceId={workspace.id}
+              link={shareLink}
+              baseUrl={baseUrl}
+              slug={workspace.slug}
+            />
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Activité client */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <ActivityIcon className="h-4 w-4 text-primary" />
-            <CardTitle className="text-base">Activité client</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <WorkspaceEngagementStats activity={activity} />
-          <WorkspaceActivityTimeline timeline={activity.timeline} />
-        </CardContent>
-      </Card>
+      {/* Activité client — pertinent pour un espace externe (portail) */}
+      {!isInternal && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <ActivityIcon className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base">Activité client</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <WorkspaceEngagementStats activity={activity} />
+            <WorkspaceActivityTimeline timeline={activity.timeline} />
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Informations client */}
+      {/* Informations */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Informations</CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-border pt-0">
-          <InfoRow label="Société cliente" value={workspace.client_company} />
-          <InfoRow label="Email" value={workspace.client_email} />
-          <InfoRow label="Téléphone" value={workspace.client_phone} />
+          {!isInternal && (
+            <>
+              <InfoRow
+                label="Société cliente"
+                value={workspace.client_company}
+              />
+              <InfoRow label="Email" value={workspace.client_email} />
+              <InfoRow label="Téléphone" value={workspace.client_phone} />
+            </>
+          )}
           <InfoRow label="Note interne" value={workspace.internal_note} />
         </CardContent>
       </Card>
@@ -195,23 +231,42 @@ export default async function WorkspaceDetailPage({
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm"
             style={{ backgroundColor: workspace.primary_color ?? "var(--color-primary)" }}
           >
-            <Building2 className="h-5 w-5 text-primary-foreground" />
+            {isInternal ? (
+              <Lock className="h-5 w-5 text-primary-foreground" />
+            ) : (
+              <Building2 className="h-5 w-5 text-primary-foreground" />
+            )}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h1 className="truncate text-xl font-semibold tracking-tight">
                 {workspace.name}
               </h1>
-              <WorkspaceStatusBadge status={workspace.status} />
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                {isInternal ? (
+                  <>
+                    <Lock className="h-3 w-3" />
+                    Interne
+                  </>
+                ) : (
+                  <>
+                    <Building2 className="h-3 w-3" />
+                    Client
+                  </>
+                )}
+              </span>
+              {!isInternal && <WorkspaceStatusBadge status={workspace.status} />}
             </div>
             <p className="truncate text-xs text-muted-foreground">
-              {workspace.client_company ?? "Espace client"}
+              {isInternal
+                ? "Espace interne"
+                : workspace.client_company ?? "Espace client"}
             </p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {portalUrl && (
+          {!isInternal && portalUrl && (
             <CopyButton
               value={portalUrl}
               label="Copier le lien portail"
@@ -220,7 +275,11 @@ export default async function WorkspaceDetailPage({
               size="sm"
             />
           )}
-          <EditWorkspaceDialog workspace={workspace} />
+          <EditWorkspaceDialog
+            workspace={workspace}
+            usageType={membership?.organization.usage_type}
+            sector={membership?.organization.sector}
+          />
           {workspace.status !== "archived" && (
             <form action={archiveWorkspaceAction}>
               <input type="hidden" name="workspace_id" value={workspace.id} />
@@ -233,19 +292,21 @@ export default async function WorkspaceDetailPage({
         </div>
       </div>
 
-      {/* Où en est le dossier — bandeau compact */}
-      <div className="shrink-0 rounded-xl border border-border bg-card px-4 py-2.5">
-        <WorkspacePipeline
-          input={{
-            documentCount: documents.length,
-            visibleCount: visibleDocs.length,
-            hasActiveLink: Boolean(shareLink),
-            opens: activity.totalOpens,
-            decidedCount: decided.length,
-            pendingCount,
-          }}
-        />
-      </div>
+      {/* Où en est le dossier — bandeau compact (portail client) */}
+      {!isInternal && (
+        <div className="shrink-0 rounded-xl border border-border bg-card px-4 py-2.5">
+          <WorkspacePipeline
+            input={{
+              documentCount: documents.length,
+              visibleCount: visibleDocs.length,
+              hasActiveLink: Boolean(shareLink),
+              opens: activity.totalOpens,
+              decidedCount: decided.length,
+              pendingCount,
+            }}
+          />
+        </div>
+      )}
 
       {/* Corps : Drive plein écran + rail latéral (desktop) */}
       <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_340px]">

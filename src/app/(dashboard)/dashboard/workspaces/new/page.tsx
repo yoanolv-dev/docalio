@@ -7,15 +7,18 @@ import { createWorkspaceAction } from "@/lib/actions/workspaces";
 import { getCurrentMembership } from "@/lib/organizations";
 import { getOrganizationUsage } from "@/lib/usage";
 import { isLimitReached, resolvePlan } from "@/lib/plans";
+import { vocabularyFor } from "@/lib/sectors";
 
 export const metadata: Metadata = {
-  title: "Nouvel espace client",
+  title: "Nouvel espace",
 };
 
 export default async function NewWorkspacePage() {
   const membership = await getCurrentMembership();
   const plan = resolvePlan(membership?.organization);
   const activeLimit = plan.limits.activeWorkspaces;
+  const usageType = membership?.organization.usage_type ?? "external";
+  const vocab = vocabularyFor(usageType);
 
   let activeLimitReached = false;
   if (membership && activeLimit !== null) {
@@ -26,20 +29,20 @@ export default async function NewWorkspacePage() {
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
       <PageHeader
-        title="Créer un espace client"
-        description="Renseignez les informations de votre client ou prospect."
+        title={vocab.createTitle}
+        description="Déposez vos documents, organisez-les en dossiers, partagez si besoin."
         backHref="/dashboard/workspaces"
-        backLabel="Espaces clients"
+        backLabel={vocab.listTitle}
       />
 
       {activeLimitReached && (
         <div className="flex max-w-2xl items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
-            Vous avez atteint la limite de {activeLimit} espaces clients actifs
-            de votre plan {plan.name}. Vous pouvez créer cet espace en «&nbsp;Prospect&nbsp;»,
-            mais pour l&apos;activer, archivez d&apos;abord un espace actif ou
-            passez à un plan supérieur.
+            Vous avez atteint la limite de {activeLimit} {vocab.plural} actifs
+            de votre plan {plan.name}. Vous pouvez créer cet espace en
+            «&nbsp;Prospect&nbsp;», mais pour l&apos;activer, archivez
+            d&apos;abord un espace actif ou passez à un plan supérieur.
           </p>
         </div>
       )}
@@ -49,6 +52,8 @@ export default async function NewWorkspacePage() {
           <WorkspaceForm
             action={createWorkspaceAction}
             submitLabel="Créer l'espace"
+            usageType={usageType}
+            sector={membership?.organization.sector}
           />
         </CardContent>
       </Card>

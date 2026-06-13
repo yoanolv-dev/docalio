@@ -2,23 +2,27 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, FileText, Link2, Search } from "lucide-react";
+import { ChevronRight, FileText, Link2, Lock, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
+import { vocabularyFor } from "@/lib/sectors";
 import { cn, formatRelativeTime, getInitials } from "@/lib/utils";
 import type { WorkspaceListItem } from "@/lib/workspaces";
-import type { WorkspaceStatus } from "@/lib/types/database";
+import type { UsageType, WorkspaceStatus } from "@/lib/types/database";
 
 type StatusFilter = WorkspaceStatus | "all";
 
 export function WorkspacesList({
   workspaces,
+  usageType,
 }: {
   workspaces: WorkspaceListItem[];
+  usageType?: UsageType | null;
 }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
+  const vocab = vocabularyFor(usageType);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -39,7 +43,7 @@ export function WorkspacesList({
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Rechercher un client…"
+            placeholder={`Rechercher un ${vocab.singular}…`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-9"
@@ -98,7 +102,14 @@ export function WorkspacesList({
                     </p>
                   </div>
                 </div>
-                <WorkspaceStatusBadge status={w.status} />
+                {w.space_type === "internal" ? (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    <Lock className="h-3 w-3" />
+                    Interne
+                  </span>
+                ) : (
+                  <WorkspaceStatusBadge status={w.status} />
+                )}
               </div>
 
               <div className="flex items-center gap-3 text-xs text-muted-foreground">

@@ -18,12 +18,19 @@ export interface Profile {
   updated_at: string;
 }
 
+/** Usage principal déclaré à l'onboarding (pilote le vocabulaire de l'app). */
+export type UsageType = "internal" | "external" | "mixed";
+
 export interface Organization {
   id: string;
   name: string;
   slug: string;
   logo_url: string | null;
   primary_color: string | null;
+  /** Secteur d'activité (cf. src/lib/sectors.ts) — personnalisation. */
+  sector: string | null;
+  /** Usage principal : interne, externe (clients) ou les deux. */
+  usage_type: UsageType;
   plan: OrganizationPlan;
   plan_status: PlanStatus;
   trial_ends_at: string | null;
@@ -40,6 +47,9 @@ export interface OrganizationMember {
 }
 
 export type WorkspaceStatus = "prospect" | "active" | "archived";
+
+/** Un espace est soit interne (équipe), soit externe (partage client). */
+export type SpaceType = "internal" | "external";
 
 export type DocumentStatus =
   | "draft"
@@ -92,6 +102,8 @@ export interface Workspace {
   id: string;
   organization_id: string;
   name: string;
+  /** Interne (équipe) ou externe (partage client). */
+  space_type: SpaceType;
   /** Identifiant d'URL pour le sous-domaine de marque (ex. « margot »). */
   slug: string | null;
   client_company: string | null;

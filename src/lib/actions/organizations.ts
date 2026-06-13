@@ -24,6 +24,11 @@ export async function createOrganizationAction(
   const name = String(formData.get("name") ?? "").trim();
   const slugInput = String(formData.get("slug") ?? "").trim();
   const color = String(formData.get("primary_color") ?? "").trim() || null;
+  const sector = String(formData.get("sector") ?? "").trim() || null;
+  const usageRaw = String(formData.get("usage_type") ?? "").trim();
+  const usageType = ["internal", "external", "mixed"].includes(usageRaw)
+    ? usageRaw
+    : "external";
 
   if (!name) return { ok: false, message: "Le nom de l'organisation est requis." };
 
@@ -46,7 +51,7 @@ export async function createOrganizationAction(
     { onConflict: "id" }
   );
 
-  const { error } = await supabase.rpc("create_organization", {
+  const { data: org, error } = await supabase.rpc("create_organization", {
     org_name: name,
     org_slug: slug,
     org_color: color,
@@ -63,6 +68,17 @@ export async function createOrganizationAction(
       ok: false,
       message: "Impossible de créer l'organisation. Veuillez réessayer.",
     };
+  }
+
+  // Profil de personnalisation (secteur + usage). Le créateur est owner :
+  // la RLS l'autorise à mettre à jour son organisation. Best-effort —
+  // l'onboarding réussit même si cette mise à jour échoue.
+  const orgId = (org as { id?: string } | null)?.id;
+  if (orgId) {
+    await supabase
+      .from("organizations")
+      .update({ sector, usage_type: usageType })
+      .eq("id", orgId);
   }
 
   revalidatePath("/", "layout");
