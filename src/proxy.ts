@@ -25,9 +25,16 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Si la résolution de session échoue (réseau / configuration), on dégrade
+  // proprement : aucun utilisateur. Les routes protégées redirigent alors vers
+  // /login plutôt que de renvoyer une erreur 500.
+  let user = null;
+  try {
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch {
+    user = null;
+  }
 
   const pathname = request.nextUrl.pathname;
 

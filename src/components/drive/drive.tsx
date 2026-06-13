@@ -22,6 +22,8 @@ import {
   FolderClosed,
   FolderPlus,
   House,
+  LayoutGrid,
+  List,
   LoaderCircle,
   Lock,
   MoreHorizontal,
@@ -794,7 +796,7 @@ export function Drive({
               aria-label={v === "grid" ? "Vue grille" : "Vue liste"}
               className={cn("flex h-7 w-8 items-center justify-center rounded transition-colors", view === v ? "bg-primary-subtle text-primary" : "text-muted-foreground hover:text-foreground")}
             >
-              {v === "grid" ? <FolderClosed className="h-4 w-4" /> : <FileUp className="h-4 w-4" />}
+              {v === "grid" ? <LayoutGrid className="h-4 w-4" /> : <List className="h-4 w-4" />}
             </button>
           ))}
         </div>
