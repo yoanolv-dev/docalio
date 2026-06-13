@@ -8,6 +8,7 @@ import {
   type DragEvent as ReactDragEvent,
   type MouseEvent as ReactMouseEvent,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowUp,
   ChevronDown,
@@ -26,6 +27,7 @@ import {
   House,
   LayoutGrid,
   List as ListIcon,
+  LoaderCircle,
   Lock,
   MoreHorizontal,
   Pencil,
@@ -107,6 +109,8 @@ interface UploadItem {
   name: string;
   status: "uploading" | "done" | "error";
   message?: string;
+  /** Dossier de destination — pour afficher une tuile fantôme au bon endroit. */
+  folderId: string | null;
 }
 
 interface ExplorerDriveProps {
@@ -128,6 +132,7 @@ export function ExplorerDrive({
   downloadedDocumentIds,
   maxFileBytes,
 }: ExplorerDriveProps) {
+  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const dragData = useRef<{ keys: string[] } | null>(null);
   const extDepth = useRef(0);
@@ -385,6 +390,10 @@ export function ExplorerDrive({
   // ---------------------------------------------------------------------------
   // Upload
   // ---------------------------------------------------------------------------
+  // Upload rapide : les fichiers apparaissent immédiatement (tuiles fantômes),
+  // partent en parallèle (jusqu'à 4 simultanés) puis le Drive se rafraîchit une
+  // seule fois pour matérialiser les vrais documents. Plus de file d'attente
+  // séquentielle, ni d'attente d'un rechargement complet de page.
   async function uploadFiles(files: File[], folderId: string | null) {
     if (files.length === 0) return;
     const accepted: { id: string; file: File }[] = [];
@@ -392,13 +401,17 @@ export function ExplorerDrive({
       const id = crypto.randomUUID();
       const err = validateFile(file, maxFileBytes);
       if (err) {
-        setUploads((u) => [...u, { id, name: file.name, status: "error", message: err }]);
+        setUploads((u) => [...u, { id, name: file.name, status: "error", message: err, folderId }]);
         continue;
       }
       accepted.push({ id, file });
-      setUploads((u) => [...u, { id, name: file.name, status: "uploading" }]);
+      setUploads((u) => [...u, { id, name: file.name, status: "uploading", folderId }]);
     }
-    for (const { id, file } of accepted) {
+    if (accepted.length === 0) return;
+
+    let anyOk = false;
+    let cursor = 0;
+    const uploadOne = async ({ id, file }: { id: string; file: File }) => {
       const fd = new FormData();
       fd.set("workspace_id", workspaceId);
       if (folderId) fd.set("folder_id", folderId);
@@ -409,6 +422,7 @@ export function ExplorerDrive({
       } catch {
         r = { ok: false, message: "L'envoi a échoué." };
       }
+      if (r?.ok) anyOk = true;
       setUploads((u) =>
         u.map((it) =>
           it.id === id
@@ -416,9 +430,29 @@ export function ExplorerDrive({
             : it
         )
       );
-      if (r?.ok) window.setTimeout(() => setUploads((u) => u.filter((it) => it.id !== id)), 3500);
-    }
+      if (r?.ok) window.setTimeout(() => setUploads((u) => u.filter((it) => it.id !== id)), 2500);
+    };
+
+    const CONCURRENCY = 4;
+    const worker = async () => {
+      while (cursor < accepted.length) {
+        await uploadOne(accepted[cursor++]);
+      }
+    };
+    await Promise.all(
+      Array.from({ length: Math.min(CONCURRENCY, accepted.length) }, worker)
+    );
+
+    // Matérialise les nouveaux documents en une seule passe (pas de rechargement
+    // page complet) : remplace les tuiles fantômes par les vraies données.
+    if (anyOk) router.refresh();
   }
+
+  // Tuiles fantômes du dossier courant : feedback visuel instantané pendant
+  // l'envoi, avant que `router.refresh()` ne ramène les vrais documents.
+  const ghostUploads = uploads.filter(
+    (u) => u.status === "uploading" && u.folderId === currentFolderId
+  );
 
   // ---------------------------------------------------------------------------
   // Opérations
@@ -742,6 +776,9 @@ export function ExplorerDrive({
                   />
                 );
               })}
+              {ghostUploads.map((g) => (
+                <GhostTile key={g.id} name={g.name} />
+              ))}
             </div>
           ) : (
             <table className="w-full border-collapse text-sm">
@@ -790,12 +827,15 @@ export function ExplorerDrive({
                     />
                   );
                 })}
+                {ghostUploads.map((g) => (
+                  <GhostRow key={g.id} name={g.name} />
+                ))}
               </tbody>
             </table>
           )}
 
           {/* État vide */}
-          {isEmpty && !extDragging && (
+          {isEmpty && ghostUploads.length === 0 && !extDragging && (
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
               <CloudUpload className="h-9 w-9 text-muted-foreground/50" />
               <p className="text-sm font-medium">{currentFolderId ? "Dossier vide" : "Aucun document"}</p>
@@ -1192,6 +1232,49 @@ function FileTile({
         {visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
       </button>
     </div>
+  );
+}
+
+// =============================================================================
+// Tuiles / lignes fantômes (upload en cours) — feedback instantané
+// =============================================================================
+function GhostTile({ name }: { name: string }) {
+  return (
+    <div className="flex animate-pulse select-none flex-col items-center gap-2 rounded-lg border border-dashed border-primary/40 bg-primary-subtle/40 px-2 py-3 text-center">
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-subtle text-primary">
+        <LoaderCircle className="h-5 w-5 animate-spin" />
+      </span>
+      <div className="w-full">
+        <p className="truncate text-xs font-medium" title={name}>
+          {name}
+        </p>
+        <p className="text-[11px] text-muted-foreground">Envoi…</p>
+      </div>
+    </div>
+  );
+}
+
+function GhostRow({ name }: { name: string }) {
+  return (
+    <tr className="animate-pulse select-none border-b border-border/60">
+      <td className="py-1.5 pl-3">
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary-subtle text-primary">
+            <LoaderCircle className="h-4 w-4 animate-spin" />
+          </span>
+          <span className="truncate font-medium text-muted-foreground" title={name}>
+            {name}
+          </span>
+        </span>
+      </td>
+      <td className="hidden px-3 py-1.5 text-muted-foreground sm:table-cell">
+        Envoi…
+      </td>
+      <td className="hidden px-3 py-1.5 lg:table-cell" />
+      <td className="hidden px-3 py-1.5 sm:table-cell" />
+      <td className="hidden px-3 py-1.5 md:table-cell" />
+      <td className="px-2 py-1.5" />
+    </tr>
   );
 }
 

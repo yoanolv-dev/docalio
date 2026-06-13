@@ -25,7 +25,6 @@ import { ConfirmDeleteDialog } from "@/components/shared/confirm-delete-dialog";
 import { CopyButton } from "@/components/shared/copy-button";
 import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
 import { EditWorkspaceDialog } from "@/components/workspaces/edit-workspace-dialog";
-import { WorkspacePipeline } from "@/components/workspaces/workspace-pipeline";
 import {
   WorkspaceEngagementStats,
   WorkspaceActivityTimeline,
@@ -98,11 +97,6 @@ export default async function WorkspaceDetailPage({
   const portalUrl = shareLink
     ? buildPortalUrl(baseUrl, shareLink.token, workspace.slug)
     : null;
-
-  // Synthèse des décisions sur les documents visibles client (pipeline).
-  const visibleDocs = documents.filter((d) => d.is_visible_to_client);
-  const decided = visibleDocs.filter((d) => decisions[d.id]);
-  const pendingCount = visibleDocs.length - decided.length;
 
   // Contenu du rail latéral : partagé entre la colonne desktop et le volet
   // repliable mobile (le Drive reste plein écran par défaut sur mobile).
@@ -291,22 +285,6 @@ export default async function WorkspaceDetailPage({
           )}
         </div>
       </div>
-
-      {/* Où en est le dossier — bandeau compact (portail client) */}
-      {!isInternal && (
-        <div className="shrink-0 rounded-xl border border-border bg-card px-4 py-2.5">
-          <WorkspacePipeline
-            input={{
-              documentCount: documents.length,
-              visibleCount: visibleDocs.length,
-              hasActiveLink: Boolean(shareLink),
-              opens: activity.totalOpens,
-              decidedCount: decided.length,
-              pendingCount,
-            }}
-          />
-        </div>
-      )}
 
       {/* Corps : Drive plein écran + rail latéral (desktop) */}
       <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_340px]">
