@@ -5,8 +5,6 @@ import { FolderClosed, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
 import { listWorkspacesWithMeta } from "@/lib/workspaces";
-import { getOnboardingProgress } from "@/lib/onboarding";
-import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
 import { WorkspacesList } from "@/components/workspaces/workspaces-list";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
@@ -24,10 +22,7 @@ export default async function DashboardPage() {
   const membership = await getCurrentMembership();
   if (!membership) redirect("/onboarding");
 
-  const [workspaces, onboarding] = await Promise.all([
-    listWorkspacesWithMeta(),
-    getOnboardingProgress(),
-  ]);
+  const workspaces = await listWorkspacesWithMeta();
 
   const firstName =
     user?.user_metadata?.full_name?.split(" ")[0] ?? null;
@@ -51,12 +46,6 @@ export default async function DashboardPage() {
           </Link>
         </Button>
       </header>
-
-      {!onboarding.done && (
-        <div className="shrink-0">
-          <OnboardingChecklist progress={onboarding} />
-        </div>
-      )}
 
       <div className="min-h-0 flex-1">
         {workspaces.length === 0 ? (

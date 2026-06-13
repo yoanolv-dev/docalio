@@ -72,8 +72,16 @@ export function WorkspacesList({
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground">
-                    {getInitials(w.client_company ?? w.name)}
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white"
+                    style={{ backgroundColor: w.primary_color ?? "var(--color-primary)" }}
+                  >
+                    {w.logo_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={w.logo_url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      getInitials(w.client_company ?? w.name)
+                    )}
                   </span>
                   <div className="min-w-0">
                     <p className="truncate font-medium leading-tight" title={w.name}>

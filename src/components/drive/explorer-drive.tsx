@@ -1100,7 +1100,9 @@ function FolderTile({
       >
         <MoreHorizontal className="h-4 w-4" />
       </button>
-      <Folder className="h-12 w-12 text-primary" strokeWidth={1.25} />
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-subtle text-primary">
+        <Folder className="h-6 w-6" strokeWidth={1.75} />
+      </span>
       <div className="w-full">
         <p className="truncate text-xs font-medium" title={folder.name}>
           {folder.name}
