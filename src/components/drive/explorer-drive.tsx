@@ -561,9 +561,9 @@ export function ExplorerDrive({
   const rootDropActive = dropTarget === ROOT;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
       {/* Barre d'outils + barre d'adresse */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-muted/40 px-2.5 py-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border bg-muted/40 px-2.5 py-2">
         <div className="flex items-center gap-0.5">
           <button
             type="button"
@@ -657,7 +657,7 @@ export function ExplorerDrive({
       />
 
       {/* Corps : arborescence + contenu */}
-      <div className="grid h-[clamp(360px,52vh,520px)] grid-cols-1 md:grid-cols-[220px_1fr]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[220px_1fr]">
         {/* Volet d'arborescence */}
         <aside className="hidden overflow-y-auto border-r border-border bg-muted/20 py-2 md:block">
           <button
@@ -818,7 +818,7 @@ export function ExplorerDrive({
       </div>
 
       {/* Barre d'état */}
-      <div className="flex items-center justify-between gap-3 border-t border-border bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-t border-border bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground">
         <span>
           {totalCount} élément{totalCount > 1 ? "s" : ""}
         </span>
@@ -829,7 +829,7 @@ export function ExplorerDrive({
 
       {/* File d'upload */}
       {uploads.length > 0 && (
-        <ul className="space-y-1.5 border-t border-border p-2">
+        <ul className="max-h-32 shrink-0 space-y-1.5 overflow-y-auto border-t border-border p-2">
           {uploads.map((it) => (
             <li key={it.id} className="flex items-center gap-3 rounded-lg bg-muted/50 px-3 py-2">
               <span
@@ -872,7 +872,7 @@ export function ExplorerDrive({
       )}
 
       {opError && (
-        <p className="border-t border-border bg-destructive/10 px-3 py-2 text-sm text-destructive">{opError}</p>
+        <p className="shrink-0 border-t border-border bg-destructive/10 px-3 py-2 text-sm text-destructive">{opError}</p>
       )}
 
       <ContextMenu state={menu} onClose={() => setMenu(null)} />

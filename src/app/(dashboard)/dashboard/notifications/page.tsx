@@ -20,7 +20,7 @@ export default async function NotificationsPage() {
   const hasUnread = notifications.some((n) => !n.read_at);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-3xl space-y-6">
       <PageHeader
         title="Notifications"
         description="L'activité de vos clients : ouvertures, téléchargements et décisions."

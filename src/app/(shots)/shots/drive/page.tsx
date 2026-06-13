@@ -39,15 +39,17 @@ export default function DriveShot() {
             </div>
           </div>
 
-          <ExplorerDrive
-            documents={MOCK_DOCUMENTS}
-            folders={MOCK_FOLDERS}
-            workspaceId="ws-demo"
-            decisions={MOCK_DECISIONS}
-            viewedDocumentIds={MOCK_VIEWED}
-            downloadedDocumentIds={MOCK_DOWNLOADED}
-            maxFileBytes={20 * 1024 * 1024}
-          />
+          <div className="h-[620px]">
+            <ExplorerDrive
+              documents={MOCK_DOCUMENTS}
+              folders={MOCK_FOLDERS}
+              workspaceId="ws-demo"
+              decisions={MOCK_DECISIONS}
+              viewedDocumentIds={MOCK_VIEWED}
+              downloadedDocumentIds={MOCK_DOWNLOADED}
+              maxFileBytes={20 * 1024 * 1024}
+            />
+          </div>
         </div>
       </AppShell>
     </BrowserFrame>

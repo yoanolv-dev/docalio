@@ -8,10 +8,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* =============================================================================
-   Docalio — Design system « Nordique »
-   Blanc franc, neutres purs (zinc, jamais slate bleuté), un seul accent :
-   bleu nuit. Beaucoup d'air, hairlines plutôt qu'ombres, typographie large.
-   Objectif : sobriété éditoriale, l'inverse du SaaS générique.
+   Docalio — Design system « Blanc & Bleu »
+   Blanc franc, neutres bleutés (échelle slate), un seul accent : bleu clair
+   et net (blue-600). Beaucoup d'air, hairlines plutôt qu'ombres lourdes.
+   Objectif : un SaaS lumineux, propre, immédiatement lisible.
 
    Les variables gardent leurs noms (bg-primary, text-muted-foreground, …) :
    changer les valeurs reskin tout le produit d'un coup.
@@ -21,49 +21,49 @@
   /* Verrouille les contrôles natifs (formulaires, scrollbars) sur le clair. */
   color-scheme: light;
 
-  /* Surfaces — blanc franc, gris neutres très clairs */
+  /* Surfaces — blanc, gris bleutés très clairs (échelle slate) */
   --background: #ffffff;
   --card: #ffffff;
-  --card-foreground: #101012;
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #101012;
+  --popover-foreground: #0f172a;
 
-  /* Texte — encre quasi-noire neutre (pas de bleu slate) */
-  --foreground: #101012;
-  --muted: #f6f6f7;                 /* zinc-50/100 */
-  --muted-foreground: #71717a;      /* zinc-500 */
+  /* Texte — encre slate (bleu-gris profond), jamais noir pur */
+  --foreground: #0f172a;            /* slate-900 */
+  --muted: #f1f5f9;                 /* slate-100 */
+  --muted-foreground: #64748b;      /* slate-500 */
 
-  /* Marque — bleu nuit, unique accent coloré */
-  --primary: #1c2a4e;               /* midnight navy */
-  --primary-hover: #25365f;
+  /* Marque — bleu franc, clair et net */
+  --primary: #2563eb;               /* blue-600 */
+  --primary-hover: #1d4ed8;         /* blue-700 */
   --primary-foreground: #ffffff;
-  --primary-subtle: #eef1f6;        /* voile navy très clair */
+  --primary-subtle: #eff6ff;        /* blue-50 — voile bleu */
 
-  /* Neutres interactifs */
-  --secondary: #f6f6f7;
-  --secondary-foreground: #101012;
-  --accent: #f4f4f5;
-  --accent-foreground: #101012;
+  /* Neutres interactifs (survols teintés bleu, raccord avec la marque) */
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --accent: #eff6ff;                /* blue-50 */
+  --accent-foreground: #1e3a8a;     /* blue-900 */
 
-  /* Sémantique — discrète, réservée aux signaux réels (décisions, erreurs) */
-  --destructive: #b91c1c;
+  /* Sémantique */
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --success: #15803d;
-  --warning: #b45309;
-  --info: #1c2a4e;
+  --success: #16a34a;
+  --warning: #d97706;
+  --info: #2563eb;
 
-  /* Bordures & focus — hairlines */
-  --border: #ececed;
-  --input: #d9d9dc;
-  --ring: #1c2a4e;
+  /* Bordures & focus */
+  --border: #e2e8f0;                /* slate-200 */
+  --input: #cbd5e1;                 /* slate-300 */
+  --ring: #2563eb;
 
   /* Navigation latérale */
-  --sidebar: #ffffff;
-  --sidebar-foreground: #3f3f46;    /* zinc-700 */
-  --sidebar-border: #ececed;
-  --sidebar-accent: #f4f4f5;
+  --sidebar: #f8fafc;               /* slate-50 */
+  --sidebar-foreground: #475569;    /* slate-600 */
+  --sidebar-border: #e2e8f0;
+  --sidebar-accent: #eff6ff;
 
-  --radius: 0.625rem;
+  --radius: 0.75rem;
 }
 
 @theme inline {

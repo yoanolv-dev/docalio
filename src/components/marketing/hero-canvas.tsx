@@ -71,7 +71,7 @@ export function HeroCanvas() {
       return tex;
     }
 
-    const accents = ["#1c2a4e", "#1c2a4e", "#93a8d8", "#101012"];
+    const accents = ["#2563eb", "#3b82f6", "#93c5fd", "#1d4ed8"];
     const textures = accents.map(makeCardTexture);
 
     const group = new THREE.Group();

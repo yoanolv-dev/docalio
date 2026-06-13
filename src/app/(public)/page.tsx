@@ -110,6 +110,11 @@ export default function HomePage() {
           aria-hidden
           className="absolute inset-0 -z-10 bg-gradient-to-b from-background/50 via-background/75 to-background"
         />
+        {/* Halo bleu doux — signature « blanc & bleu » */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[620px] bg-[radial-gradient(60%_55%_at_50%_0%,rgba(37,99,235,0.16),transparent_72%)]"
+        />
         <div className="mx-auto max-w-5xl px-4 pb-10 pt-28 text-center sm:px-6 sm:pt-36">
           <Link
             href="/fonctionnalites"
@@ -121,7 +126,7 @@ export default function HomePage() {
           <h1 className="text-balance mx-auto mt-6 max-w-3xl text-5xl font-semibold tracking-tight sm:text-7xl">
             Le bon document,
             <br />
-            au bon client.
+            <span className="text-primary">au bon client.</span>
           </h1>
           <p className="text-pretty mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
             Un espace privé par client. Rangez vos documents comme dans

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import {
   ArrowLeft,
   Archive,
+  ChevronDown,
   Trash2,
   Building2,
   Share2,
@@ -29,8 +30,6 @@ import {
 } from "@/components/workspaces/workspace-activity";
 import { ExplorerDrive } from "@/components/drive/explorer-drive";
 import { PortalShareCard } from "@/components/workspaces/portal-share-card";
-import { NextActionCard } from "@/components/workspaces/next-action-card";
-import { computeNextAction } from "@/lib/next-action";
 import {
   archiveWorkspaceAction,
   deleteWorkspaceAction,
@@ -43,7 +42,6 @@ import { getWorkspaceActivity } from "@/lib/activity";
 import { getWorkspaceDecisions } from "@/lib/decisions";
 import { getCurrentMembership } from "@/lib/organizations";
 import { effectiveMaxFileBytes, resolvePlan } from "@/lib/plans";
-import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Espace client",
@@ -51,7 +49,7 @@ export const metadata: Metadata = {
 
 function InfoRow({ label, value }: { label: string; value: string | null }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-2 text-sm">
+    <div className="flex items-center justify-between gap-4 py-1.5 text-sm">
       <span className="text-muted-foreground">{label}</span>
       <span className="truncate text-right font-medium">{value || "—"}</span>
     </div>
@@ -94,123 +92,160 @@ export default async function WorkspaceDetailPage({
   const baseUrl = `${proto}://${host}`;
   const portalUrl = shareLink ? `${baseUrl}/p/${shareLink.token}` : null;
 
-  // Synthèse des décisions sur les documents visibles client
+  // Synthèse des décisions sur les documents visibles client (pipeline).
   const visibleDocs = documents.filter((d) => d.is_visible_to_client);
   const decided = visibleDocs.filter((d) => decisions[d.id]);
-  const decisionCounts = {
-    approved: decided.filter((d) => decisions[d.id].decision === "approved")
-      .length,
-    changesRequested: decided.filter(
-      (d) => decisions[d.id].decision === "changes_requested"
-    ).length,
-    rejected: decided.filter((d) => decisions[d.id].decision === "rejected")
-      .length,
-    pending: visibleDocs.length - decided.length,
-  };
+  const pendingCount = visibleDocs.length - decided.length;
 
-  // Dernier commentaire client (signal le plus récent pour la relance).
-  const commentedDecisions = Object.values(decisions)
-    .filter((d) => d.comment)
-    .sort((a, b) => (b.updated_at ?? "").localeCompare(a.updated_at ?? ""));
+  // Contenu du rail latéral : partagé entre la colonne desktop et le volet
+  // repliable mobile (le Drive reste plein écran par défaut sur mobile).
+  const rail = (
+    <>
+      {/* Portail client */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <Share2 className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">Portail client</CardTitle>
+          </div>
+          <CardDescription>
+            Partagez les documents visibles via un lien sécurisé, sans compte.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PortalShareCard
+            workspaceId={workspace.id}
+            link={shareLink}
+            baseUrl={baseUrl}
+          />
+        </CardContent>
+      </Card>
 
-  // Relance recommandée / prochaine action (templates statiques contextualisés).
-  const nextAction = computeNextAction({
-    workspaceName: workspace.name,
-    organizationName: membership?.organization.name ?? "votre équipe",
-    portalUrl,
-    hasDocuments: documents.length > 0,
-    hasVisibleDocuments: visibleDocs.length > 0,
-    hasActiveLink: Boolean(shareLink),
-    opens: activity.totalOpens,
-    downloads: activity.totalDownloads,
-    decisionsApproved: decisionCounts.approved,
-    decisionsChangesRequested: decisionCounts.changesRequested,
-    decisionsRejected: decisionCounts.rejected,
-    decisionsPending: decisionCounts.pending,
-    lastComment: commentedDecisions[0]?.comment ?? null,
-    lastCommentDecision: commentedDecisions[0]?.decision ?? null,
-  });
+      {/* Activité client */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <ActivityIcon className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">Activité client</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <WorkspaceEngagementStats activity={activity} />
+          <WorkspaceActivityTimeline timeline={activity.timeline} />
+        </CardContent>
+      </Card>
+
+      {/* Informations client */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Informations</CardTitle>
+        </CardHeader>
+        <CardContent className="divide-y divide-border pt-0">
+          <InfoRow label="Société cliente" value={workspace.client_company} />
+          <InfoRow label="Email" value={workspace.client_email} />
+          <InfoRow label="Téléphone" value={workspace.client_phone} />
+          <InfoRow label="Note interne" value={workspace.internal_note} />
+        </CardContent>
+      </Card>
+
+      {/* Suppression — discrète */}
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-border px-4 py-3">
+        <p className="text-xs text-muted-foreground">
+          Supprimer cet espace et tous ses documents.
+        </p>
+        <ConfirmDeleteDialog
+          action={deleteWorkspaceAction}
+          fields={{ workspace_id: workspace.id }}
+          title="Supprimer cet espace client ?"
+          description={`« ${workspace.name} » et tous ses documents seront définitivement supprimés. Cette action est irréversible.`}
+          confirmLabel="Supprimer l'espace"
+          trigger={
+            <Button
+              variant="ghost"
+              size="sm"
+              className="shrink-0 text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+              Supprimer
+            </Button>
+          }
+        />
+      </div>
+    </>
+  );
 
   return (
-    <div className="space-y-6">
-      {/* En-tête */}
-      <div className="space-y-4">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Tous les espaces
-        </Link>
-
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-xl shadow-sm"
-              style={{
-                backgroundColor:
-                  workspace.primary_color ?? "var(--color-primary)",
-              }}
-            >
-              <Building2 className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-semibold tracking-tight">
-                  {workspace.name}
-                </h1>
-                <WorkspaceStatusBadge status={workspace.status} />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {workspace.client_company ?? "Espace client"} · Créé le{" "}
-                {formatDate(workspace.created_at)}
-              </p>
-            </div>
+    <div className="flex h-full flex-col gap-3">
+      {/* En-tête compact : identité + actions */}
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <Link
+            href="/dashboard"
+            title="Tous les espaces"
+            aria-label="Tous les espaces"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm"
+            style={{ backgroundColor: workspace.primary_color ?? "var(--color-primary)" }}
+          >
+            <Building2 className="h-5 w-5 text-primary-foreground" />
           </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {portalUrl && (
-              <CopyButton
-                value={portalUrl}
-                label="Copier le lien portail"
-                copiedLabel="Lien copié !"
-                variant="outline"
-                size="sm"
-              />
-            )}
-            <EditWorkspaceDialog workspace={workspace} />
-            {workspace.status !== "archived" && (
-              <form action={archiveWorkspaceAction}>
-                <input type="hidden" name="workspace_id" value={workspace.id} />
-                <Button type="submit" variant="ghost" size="sm">
-                  <Archive className="h-4 w-4" />
-                  Archiver
-                </Button>
-              </form>
-            )}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="truncate text-xl font-semibold tracking-tight">
+                {workspace.name}
+              </h1>
+              <WorkspaceStatusBadge status={workspace.status} />
+            </div>
+            <p className="truncate text-xs text-muted-foreground">
+              {workspace.client_company ?? "Espace client"}
+            </p>
           </div>
         </div>
 
-        {/* Où en est le dossier — dérivé des données réelles */}
-        <Card>
-          <CardContent className="p-4 sm:p-5">
-            <WorkspacePipeline
-              input={{
-                documentCount: documents.length,
-                visibleCount: visibleDocs.length,
-                hasActiveLink: Boolean(shareLink),
-                opens: activity.totalOpens,
-                decidedCount: decided.length,
-                pendingCount: decisionCounts.pending,
-              }}
+        <div className="flex flex-wrap items-center gap-2">
+          {portalUrl && (
+            <CopyButton
+              value={portalUrl}
+              label="Copier le lien portail"
+              copiedLabel="Lien copié !"
+              variant="outline"
+              size="sm"
             />
-          </CardContent>
-        </Card>
+          )}
+          <EditWorkspaceDialog workspace={workspace} />
+          {workspace.status !== "archived" && (
+            <form action={archiveWorkspaceAction}>
+              <input type="hidden" name="workspace_id" value={workspace.id} />
+              <Button type="submit" variant="ghost" size="sm">
+                <Archive className="h-4 w-4" />
+                <span className="hidden sm:inline">Archiver</span>
+              </Button>
+            </form>
+          )}
+        </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Colonne principale : l'espace documentaire */}
-        <div className="space-y-6 lg:col-span-2">
+      {/* Où en est le dossier — bandeau compact */}
+      <div className="shrink-0 rounded-xl border border-border bg-card px-4 py-2.5">
+        <WorkspacePipeline
+          input={{
+            documentCount: documents.length,
+            visibleCount: visibleDocs.length,
+            hasActiveLink: Boolean(shareLink),
+            opens: activity.totalOpens,
+            decidedCount: decided.length,
+            pendingCount,
+          }}
+        />
+      </div>
+
+      {/* Corps : Drive plein écran + rail latéral (desktop) */}
+      <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-h-0">
           <ExplorerDrive
             documents={documents}
             folders={folders}
@@ -220,89 +255,24 @@ export default async function WorkspaceDetailPage({
             downloadedDocumentIds={activity.downloadedDocumentIds}
             maxFileBytes={maxFileBytes}
           />
-
-          {/* Informations client */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Informations</CardTitle>
-            </CardHeader>
-            <CardContent className="divide-y divide-border pt-0">
-              <InfoRow label="Société cliente" value={workspace.client_company} />
-              <InfoRow label="Email" value={workspace.client_email} />
-              <InfoRow label="Téléphone" value={workspace.client_phone} />
-              <InfoRow label="Note interne" value={workspace.internal_note} />
-            </CardContent>
-          </Card>
         </div>
 
-        {/* Colonne latérale */}
-        <div className="space-y-6">
-          {/* Prochaine action / relance recommandée */}
-          <NextActionCard action={nextAction} />
-
-          {/* Portail client */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Share2 className="h-4 w-4 text-primary" />
-                <CardTitle>Portail client</CardTitle>
-              </div>
-              <CardDescription>
-                Partagez les documents visibles via un lien sécurisé, sans
-                compte.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PortalShareCard
-                workspaceId={workspace.id}
-                link={shareLink}
-                baseUrl={baseUrl}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Activité client */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <ActivityIcon className="h-4 w-4 text-primary" />
-                <CardTitle>Activité client</CardTitle>
-              </div>
-              <CardDescription>
-                Suivez les consultations et téléchargements de votre client.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <WorkspaceEngagementStats activity={activity} />
-              <WorkspaceActivityTimeline timeline={activity.timeline} />
-            </CardContent>
-          </Card>
-
-          {/* Suppression — volontairement discrète */}
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-border px-4 py-3">
-            <p className="text-xs text-muted-foreground">
-              Supprimer cet espace et tous ses documents, définitivement.
-            </p>
-            <ConfirmDeleteDialog
-              action={deleteWorkspaceAction}
-              fields={{ workspace_id: workspace.id }}
-              title="Supprimer cet espace client ?"
-              description={`« ${workspace.name} » et tous ses documents seront définitivement supprimés. Cette action est irréversible.`}
-              confirmLabel="Supprimer l'espace"
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="shrink-0 text-muted-foreground hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Supprimer
-                </Button>
-              }
-            />
-          </div>
-        </div>
+        <aside className="hidden min-h-0 flex-col gap-3 overflow-y-auto pr-0.5 lg:flex">
+          {rail}
+        </aside>
       </div>
+
+      {/* Mobile : partage & activité repliés (Drive plein écran par défaut) */}
+      <details className="group shrink-0 overflow-hidden rounded-xl border border-border bg-card lg:hidden">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-2.5 text-sm font-medium [&::-webkit-details-marker]:hidden">
+          <span className="inline-flex items-center gap-2">
+            <Share2 className="h-4 w-4 text-primary" />
+            Partage & activité
+          </span>
+          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="space-y-3 border-t border-border p-3">{rail}</div>
+      </details>
     </div>
   );
 }

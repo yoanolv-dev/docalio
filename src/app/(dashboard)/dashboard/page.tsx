@@ -33,9 +33,9 @@ export default async function DashboardPage() {
     user?.user_metadata?.full_name?.split(" ")[0] ?? null;
 
   return (
-    <div className="space-y-6">
+    <div className="flex h-full flex-col gap-4">
       {/* En-tête — sobre, une seule action */}
-      <header className="flex flex-wrap items-end justify-between gap-4">
+      <header className="flex shrink-0 flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm text-muted-foreground">
             {firstName ? `Bonjour ${firstName},` : "Bonjour,"}
@@ -52,25 +52,33 @@ export default async function DashboardPage() {
         </Button>
       </header>
 
-      {!onboarding.done && <OnboardingChecklist progress={onboarding} />}
-
-      {workspaces.length === 0 ? (
-        <EmptyState
-          icon={FolderClosed}
-          title="Créez votre premier espace"
-          description="Un espace par client : déposez les documents, partagez un lien sécurisé, suivez les consultations et les décisions."
-          action={
-            <Button asChild>
-              <Link href="/dashboard/workspaces/new">
-                <Plus className="h-4 w-4" />
-                Créer un espace
-              </Link>
-            </Button>
-          }
-        />
-      ) : (
-        <WorkspacesList workspaces={workspaces} />
+      {!onboarding.done && (
+        <div className="shrink-0">
+          <OnboardingChecklist progress={onboarding} />
+        </div>
       )}
+
+      <div className="min-h-0 flex-1">
+        {workspaces.length === 0 ? (
+          <div className="flex h-full items-center justify-center">
+            <EmptyState
+              icon={FolderClosed}
+              title="Créez votre premier espace"
+              description="Un espace par client : déposez les documents, partagez un lien sécurisé, suivez les consultations et les décisions."
+              action={
+                <Button asChild>
+                  <Link href="/dashboard/workspaces/new">
+                    <Plus className="h-4 w-4" />
+                    Créer un espace
+                  </Link>
+                </Button>
+              }
+            />
+          </div>
+        ) : (
+          <WorkspacesList workspaces={workspaces} />
+        )}
+      </div>
     </div>
   );
 }

@@ -22,7 +22,7 @@ export default async function SettingsPage() {
   const currentPlan = resolvePlan(membership.organization).id;
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8">
       <PageHeader
         title="Paramètres de l'organisation"
         description="Gérez votre abonnement, votre utilisation et l'identité de votre organisation."

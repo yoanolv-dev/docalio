@@ -36,7 +36,7 @@ export default async function DashboardLayout({
   ]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
       <TopBar
         orgName={membership.organization.name}
         userName={userName}
@@ -44,7 +44,7 @@ export default async function DashboardLayout({
         unreadCount={unreadCount}
         recentNotifications={recentNotifications}
       />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:py-10">
+      <main className="min-h-0 w-full flex-1 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
         {children}
       </main>
     </div>

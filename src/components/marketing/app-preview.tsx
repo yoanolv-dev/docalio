@@ -75,7 +75,9 @@ export function DashboardPreview() {
               Nouvel espace
             </span>
           </div>
-          <WorkspacesList workspaces={MOCK_WORKSPACES} />
+          <div className="h-[400px]">
+            <WorkspacesList workspaces={MOCK_WORKSPACES} />
+          </div>
         </div>
       </div>
     </BrowserFrame>
@@ -100,15 +102,17 @@ export function DrivePreview() {
               <p className="text-xs text-muted-foreground">Espace documentaire · Boulangerie Margot</p>
             </div>
           </div>
-          <ExplorerDrive
-            documents={MOCK_DOCUMENTS}
-            folders={MOCK_FOLDERS}
-            workspaceId="ws-demo"
-            decisions={MOCK_DECISIONS}
-            viewedDocumentIds={MOCK_VIEWED}
-            downloadedDocumentIds={MOCK_DOWNLOADED}
-            maxFileBytes={20 * 1024 * 1024}
-          />
+          <div className="h-[440px]">
+            <ExplorerDrive
+              documents={MOCK_DOCUMENTS}
+              folders={MOCK_FOLDERS}
+              workspaceId="ws-demo"
+              decisions={MOCK_DECISIONS}
+              viewedDocumentIds={MOCK_VIEWED}
+              downloadedDocumentIds={MOCK_DOWNLOADED}
+              maxFileBytes={20 * 1024 * 1024}
+            />
+          </div>
         </div>
       </div>
     </BrowserFrame>

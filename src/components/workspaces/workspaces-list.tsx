@@ -34,8 +34,8 @@ export function WorkspacesList({
   }, [workspaces, query, status]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+    <div className="flex h-full flex-col gap-4">
+      <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -59,11 +59,11 @@ export function WorkspacesList({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border px-4 py-12 text-center text-sm text-muted-foreground">
+        <p className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-border px-4 py-12 text-center text-sm text-muted-foreground">
           Aucun espace ne correspond à votre recherche.
         </p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid min-h-0 flex-1 auto-rows-max gap-3 overflow-y-auto pr-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {filtered.map((w) => (
             <Link
               key={w.id}

@@ -29,8 +29,8 @@ export function TopBar({
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
+      <header className="z-40 shrink-0 border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="flex h-14 w-full items-center gap-3 px-3 sm:px-5">
           <Link href="/dashboard" className="flex shrink-0 items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
               <FileText className="h-4 w-4 text-primary-foreground" />
