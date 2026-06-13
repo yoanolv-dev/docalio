@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LogoUploader } from "@/components/settings/logo-uploader";
 import {
   updateOrganizationAction,
   type FormState,
@@ -52,14 +53,12 @@ export function OrganizationSettingsForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="logo_url">URL du logo</Label>
-        <Input
-          id="logo_url"
-          name="logo_url"
-          type="url"
-          placeholder="https://..."
-          defaultValue={organization.logo_url ?? ""}
+        <Label>Logo de l&apos;organisation</Label>
+        <LogoUploader
+          scope="org"
+          defaultValue={organization.logo_url}
           disabled={!canEdit}
+          hint="Affiché sur vos portails clients. PNG, JPG ou WebP — 2 Mo max."
         />
       </div>
 

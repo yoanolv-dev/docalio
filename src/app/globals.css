@@ -1,95 +1,69 @@
 @import "tailwindcss";
 
+/* Le produit est verrouillé sur le thème clair « nordique ». On redéfinit la
+   variante `dark:` de Tailwind pour qu'elle ne dépende plus de la préférence
+   système (sinon des utilitaires `dark:` isolés s'activeraient sur un OS en
+   mode sombre et casseraient le rendu). Aucune classe `.dark` n'est ajoutée :
+   ces utilitaires restent donc inertes. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* =============================================================================
-   Docalio — Design tokens (« Calm Precision »)
-   Palette : neutres slate + indigo de marque. Light par défaut, dark via OS.
-   Les variables sont mappées en utilitaires Tailwind via @theme inline
-   (bg-primary, text-muted-foreground, border-border, ...).
+   Docalio — Design system « Blanc & Bleu »
+   Blanc franc, neutres bleutés (échelle slate), un seul accent : bleu clair
+   et net (blue-600). Beaucoup d'air, hairlines plutôt qu'ombres lourdes.
+   Objectif : un SaaS lumineux, propre, immédiatement lisible.
+
+   Les variables gardent leurs noms (bg-primary, text-muted-foreground, …) :
+   changer les valeurs reskin tout le produit d'un coup.
    ============================================================================= */
 
 :root {
-  /* Surfaces */
-  --background: #f8fafc;            /* fond applicatif (slate-50) */
+  /* Verrouille les contrôles natifs (formulaires, scrollbars) sur le clair. */
+  color-scheme: light;
+
+  /* Surfaces — blanc, gris bleutés très clairs (échelle slate) */
+  --background: #ffffff;
   --card: #ffffff;
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
 
-  /* Texte */
+  /* Texte — encre slate (bleu-gris profond), jamais noir pur */
   --foreground: #0f172a;            /* slate-900 */
   --muted: #f1f5f9;                 /* slate-100 */
   --muted-foreground: #64748b;      /* slate-500 */
 
-  /* Marque */
-  --primary: #4f46e5;               /* indigo-600 */
-  --primary-hover: #4338ca;         /* indigo-700 */
+  /* Marque — bleu franc, clair et net */
+  --primary: #2563eb;               /* blue-600 */
+  --primary-hover: #1d4ed8;         /* blue-700 */
   --primary-foreground: #ffffff;
-  --primary-subtle: #eef2ff;        /* indigo-50 */
+  --primary-subtle: #eff6ff;        /* blue-50 — voile bleu */
 
-  /* Neutres interactifs */
+  /* Neutres interactifs (survols teintés bleu, raccord avec la marque) */
   --secondary: #f1f5f9;
   --secondary-foreground: #0f172a;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
+  --accent: #eff6ff;                /* blue-50 */
+  --accent-foreground: #1e3a8a;     /* blue-900 */
 
   /* Sémantique */
-  --destructive: #dc2626;           /* red-600 */
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --success: #059669;               /* emerald-600 */
-  --warning: #d97706;               /* amber-600 */
-  --info: #0284c7;                  /* sky-600 */
+  --success: #16a34a;
+  --warning: #d97706;
+  --info: #2563eb;
 
   /* Bordures & focus */
   --border: #e2e8f0;                /* slate-200 */
-  --input: #cbd5e1;                 /* slate-300 — inputs légèrement plus marqués */
-  --ring: #4f46e5;
+  --input: #cbd5e1;                 /* slate-300 */
+  --ring: #2563eb;
 
   /* Navigation latérale */
-  --sidebar: #ffffff;
-  --sidebar-foreground: #334155;    /* slate-700 */
+  --sidebar: #f8fafc;               /* slate-50 */
+  --sidebar-foreground: #475569;    /* slate-600 */
   --sidebar-border: #e2e8f0;
-  --sidebar-accent: #f1f5f9;
+  --sidebar-accent: #eff6ff;
 
-  --radius: 0.5rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b101b;
-    --card: #111827;
-    --card-foreground: #f1f5f9;
-    --popover: #111827;
-    --popover-foreground: #f1f5f9;
-
-    --foreground: #f1f5f9;
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
-
-    --primary: #6366f1;             /* indigo-500 — plus lumineux sur fond sombre */
-    --primary-hover: #818cf8;
-    --primary-foreground: #ffffff;
-    --primary-subtle: rgba(99, 102, 241, 0.14);
-
-    --secondary: #1e293b;
-    --secondary-foreground: #f1f5f9;
-    --accent: #1e293b;
-    --accent-foreground: #f1f5f9;
-
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --info: #38bdf8;
-
-    --border: #1e293b;
-    --input: #334155;
-    --ring: #6366f1;
-
-    --sidebar: #0f1623;
-    --sidebar-foreground: #cbd5e1;
-    --sidebar-border: #1e293b;
-    --sidebar-accent: #1e293b;
-  }
+  --radius: 0.75rem;
 }
 
 @theme inline {
@@ -125,10 +99,10 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent: var(--sidebar-accent);
 
-  --radius-sm: calc(var(--radius) - 0.125rem);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 0.25rem);
-  --radius-xl: calc(var(--radius) + 0.5rem);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
 }
 
 /* ============================================================================
@@ -139,6 +113,11 @@
   border-color: var(--border);
 }
 
+html {
+  /* Échelle typographique nordique : un cran plus généreux. */
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
@@ -146,18 +125,18 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "cv11", "ss01";
+  letter-spacing: -0.011em;
+}
+
+/* Titres : resserrés, tranchants — signature éditoriale. */
+h1, h2, h3 {
+  letter-spacing: -0.03em;
 }
 
 ::selection {
-  background-color: var(--primary-subtle);
-  color: var(--primary);
-}
-
-@media (prefers-color-scheme: dark) {
-  ::selection {
-    background-color: rgba(99, 102, 241, 0.35);
-    color: #f1f5f9;
-  }
+  background-color: var(--primary);
+  color: var(--primary-foreground);
 }
 
 /* Scrollbars fines et discrètes */
@@ -177,8 +156,24 @@ body {
   background: transparent;
 }
 
+/* Équilibre des titres sur plusieurs lignes (rendu éditorial). */
+.text-balance {
+  text-wrap: balance;
+}
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* Quadrillage discret (sections marketing « papier millimétré »). */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--border) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--border) 60%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
 /* ============================================================================
-   Micro-animations (dialogs, apparitions)
+   Micro-animations (dialogs, apparitions, upload, skeletons)
    ============================================================================ */
 
 @keyframes overlay-in {
@@ -200,11 +195,40 @@ body {
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Barre de progression indéterminée (uploads en cours). */
+@keyframes progress-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+/* Apparition d'un menu contextuel (drive). */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -217,5 +241,25 @@ body {
 }
 
 @utility animate-fade-up {
-  animation: fade-up 250ms ease-out both;
+  animation: fade-up 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility animate-scale-in {
+  animation: scale-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility animate-progress-slide {
+  animation: progress-slide 1.2s ease-in-out infinite;
+}
+
+@utility animate-menu-in {
+  animation: menu-in 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-scale-in,
+  .animate-menu-in {
+    animation: none;
+  }
 }

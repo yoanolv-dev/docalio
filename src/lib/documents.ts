@@ -19,23 +19,32 @@ export async function listWorkspaceDocuments(
 
 export interface DocumentStats {
   total: number;
-  draft: number;
   visibleToClient: number;
+  /** Documents partagés qui n'ont pas encore reçu de décision client. */
+  awaitingDecision: number;
 }
 
 /** Statistiques documents pour le dashboard principal. */
 export async function getDocumentStats(): Promise<DocumentStats> {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("documents")
-    .select("status, is_visible_to_client");
+  const [docs, decisions] = await Promise.all([
+    supabase.from("documents").select("id, is_visible_to_client"),
+    supabase.from("document_decisions").select("document_id"),
+  ]);
 
   const rows =
-    (data as Pick<Document, "status" | "is_visible_to_client">[] | null) ?? [];
+    (docs.data as Pick<Document, "id" | "is_visible_to_client">[] | null) ??
+    [];
+  const decided = new Set(
+    ((decisions.data as { document_id: string }[] | null) ?? []).map(
+      (d) => d.document_id
+    )
+  );
 
+  const visible = rows.filter((d) => d.is_visible_to_client);
   return {
     total: rows.length,
-    draft: rows.filter((d) => d.status === "draft").length,
-    visibleToClient: rows.filter((d) => d.is_visible_to_client).length,
+    visibleToClient: visible.length,
+    awaitingDecision: visible.filter((d) => !decided.has(d.id)).length,
   };
 }

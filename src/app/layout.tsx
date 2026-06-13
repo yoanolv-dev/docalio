@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,12 +14,35 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
   title: {
-    default: "Docalio — Portail documentaire intelligent",
+    default: "Docalio — Le portail documentaire client sécurisé",
     template: "%s | Docalio",
   },
-  description:
-    "Docalio permet aux entreprises de créer des espaces clients, partager des documents sécurisés et collecter des validations.",
+  description: SITE.description,
+  applicationName: "Docalio",
+  keywords: [
+    "portail client",
+    "partage de documents sécurisé",
+    "espace client",
+    "suivi de documents",
+    "validation client",
+    "alternative Drive",
+    "data room légère",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "Docalio",
+    title: "Docalio — Le portail documentaire client sécurisé",
+    description: SITE.description,
+    url: SITE.url,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Docalio — Le portail documentaire client sécurisé",
+    description: SITE.description,
+  },
 };
 
 export default function RootLayout({

@@ -2,18 +2,27 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Building2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { ChevronRight, FileText, Link2, Lock, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
-import type { Workspace, WorkspaceStatus } from "@/lib/types/database";
+import { vocabularyFor } from "@/lib/sectors";
+import { cn, formatRelativeTime, getInitials } from "@/lib/utils";
+import type { WorkspaceListItem } from "@/lib/workspaces";
+import type { UsageType, WorkspaceStatus } from "@/lib/types/database";
 
 type StatusFilter = WorkspaceStatus | "all";
 
-export function WorkspacesList({ workspaces }: { workspaces: Workspace[] }) {
+export function WorkspacesList({
+  workspaces,
+  usageType,
+}: {
+  workspaces: WorkspaceListItem[];
+  usageType?: UsageType | null;
+}) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
+  const vocab = vocabularyFor(usageType);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -29,54 +38,113 @@ export function WorkspacesList({ workspaces }: { workspaces: Workspace[] }) {
   }, [workspaces, query, status]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Input
-          placeholder="Rechercher un espace, une société..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="sm:max-w-xs"
-        />
+    <div className="flex h-full flex-col gap-4">
+      <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder={`Rechercher un ${vocab.singular}…`}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
         <Select
           value={status}
           onChange={(e) => setStatus(e.target.value as StatusFilter)}
-          className="sm:w-44"
+          className="sm:w-40"
+          aria-label="Filtrer par statut"
         >
-          <option value="all">Tous les statuts</option>
-          <option value="prospect">Prospect</option>
-          <option value="active">Actif</option>
-          <option value="archived">Archivé</option>
+          <option value="all">Tous</option>
+          <option value="prospect">Prospects</option>
+          <option value="active">Actifs</option>
+          <option value="archived">Archivés</option>
         </Select>
       </div>
 
       {filtered.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
+        <p className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-border px-4 py-12 text-center text-sm text-muted-foreground">
           Aucun espace ne correspond à votre recherche.
         </p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid min-h-0 flex-1 auto-rows-max gap-3 overflow-y-auto pr-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {filtered.map((w) => (
-            <Link key={w.id} href={`/dashboard/workspaces/${w.id}`}>
-              <Card className="h-full transition-all hover:border-ring hover:shadow-md">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div
-                      className="flex h-9 w-9 items-center justify-center rounded-lg"
-                      style={{
-                        backgroundColor:
-                          w.primary_color ?? "var(--color-primary)",
-                      }}
-                    >
-                      <Building2 className="h-4 w-4 text-primary-foreground" />
-                    </div>
-                    <WorkspaceStatusBadge status={w.status} />
+            <Link
+              key={w.id}
+              href={`/dashboard/workspaces/${w.id}`}
+              className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-[0_8px_28px_-14px_rgba(0,0,0,0.22)]"
+            >
+              {/* Liseré de marque du client (apparaît au survol) */}
+              <span
+                aria-hidden
+                className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 transition-transform duration-200 group-hover:scale-x-100"
+                style={{ backgroundColor: w.primary_color ?? "var(--color-primary)" }}
+              />
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white"
+                    style={{ backgroundColor: w.primary_color ?? "var(--color-primary)" }}
+                  >
+                    {w.logo_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={w.logo_url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      getInitials(w.client_company ?? w.name)
+                    )}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium leading-tight" title={w.name}>
+                      {w.name}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {w.client_company ?? w.client_email ?? "Espace client"}
+                    </p>
                   </div>
-                  <p className="mt-3 truncate text-sm font-semibold">{w.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {w.client_company ?? "—"}
-                  </p>
-                </CardContent>
-              </Card>
+                </div>
+                {w.space_type === "internal" ? (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    <Lock className="h-3 w-3" />
+                    Interne
+                  </span>
+                ) : (
+                  <WorkspaceStatusBadge status={w.status} />
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5" />
+                  {w.documentCount}
+                </span>
+                {w.hasActiveLink && (
+                  <span
+                    className="inline-flex items-center gap-1.5 text-foreground"
+                    title="Portail partagé"
+                  >
+                    <Link2 className="h-3.5 w-3.5" />
+                    Partagé
+                  </span>
+                )}
+                {w.pendingDecisions > 0 && (
+                  <span className="inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 font-medium text-warning">
+                    {w.pendingDecisions} en attente
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
+                <span className="truncate">
+                  {w.lastActivityAt
+                    ? formatRelativeTime(w.lastActivityAt)
+                    : "Pas encore d'activité"}
+                </span>
+                <ChevronRight
+                  className={cn(
+                    "h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5"
+                  )}
+                />
+              </div>
             </Link>
           ))}
         </div>

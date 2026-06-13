@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
-import { FileText, FolderOpen, ShieldCheck, Link2 } from "lucide-react";
-import { EmptyState } from "@/components/shared/empty-state";
-import { PortalDocumentList } from "@/components/portal/portal-document-list";
+import {
+  FileText,
+  Link2,
+  LockKeyhole,
+  ShieldCheck,
+  UserCheck,
+} from "lucide-react";
+import { PortalDocuments } from "@/components/portal/portal-documents";
 import { PortalTracker } from "@/components/portal/portal-tracker";
 import { getPortalData, getPortalDecisions } from "@/lib/share-links";
 import { getInitials } from "@/lib/utils";
@@ -28,6 +33,24 @@ function PortalInvalid() {
   );
 }
 
+const REASSURANCE = [
+  {
+    icon: UserCheck,
+    title: "Sans compte",
+    text: "Aucune inscription, aucun mot de passe à retenir.",
+  },
+  {
+    icon: LockKeyhole,
+    title: "Accès privé",
+    text: "Ce lien vous est destiné — les fichiers ne sont pas publics.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Transferts sécurisés",
+    text: "Chaque consultation passe par un lien chiffré temporaire.",
+  },
+];
+
 export default async function PortalPage({
   params,
 }: {
@@ -39,78 +62,119 @@ export default async function PortalPage({
   if (!portal) return <PortalInvalid />;
 
   const decisions = await getPortalDecisions(token);
-  const { organization, workspace, documents } = portal;
-  const accent = organization.primary_color ?? "var(--color-primary)";
+  const { organization, workspace, documents, folders } = portal;
+  // Branding par client : la couleur et le logo de l'espace priment sur ceux de
+  // l'organisation, pour un portail vraiment personnalisé par client.
+  const accent =
+    workspace.primary_color ?? organization.primary_color ?? "#2563eb";
+  const logoUrl = workspace.logo_url ?? organization.logo_url;
 
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div
+      className="relative min-h-screen bg-muted/30"
+      style={{ ["--brand" as string]: accent }}
+    >
       <PortalTracker token={token} />
 
+      {/* Halo de marque (en arrière-plan) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-64"
+        style={{
+          background: `radial-gradient(70% 100% at 50% 0%, color-mix(in oklab, ${accent} 14%, transparent), transparent 72%)`,
+        }}
+      />
+
+      {/* Filet de marque */}
+      <div aria-hidden className="h-1.5" style={{ backgroundColor: accent }} />
+
       {/* En-tête de marque */}
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-5 sm:px-6">
-          {organization.logo_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={organization.logo_url}
-              alt={organization.name}
-              className="h-10 w-10 rounded-lg object-cover"
-            />
-          ) : (
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold text-white"
-              style={{ backgroundColor: accent }}
-            >
-              {getInitials(organization.name)}
+      <header className="relative border-b border-border bg-card/80 backdrop-blur">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
+          <div className="flex items-center gap-3">
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logoUrl}
+                alt={organization.name}
+                className="h-10 w-10 rounded-lg object-cover shadow-sm"
+              />
+            ) : (
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold text-white shadow-sm"
+                style={{ backgroundColor: accent }}
+              >
+                {getInitials(organization.name)}
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-semibold">{organization.name}</p>
+              <p className="text-xs text-muted-foreground">
+                Espace documentaire
+              </p>
             </div>
-          )}
-          <div>
-            <p className="text-sm font-semibold">{organization.name}</p>
-            <p className="text-xs text-muted-foreground">Espace documentaire</p>
           </div>
+          <span className="hidden items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground sm:inline-flex">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            Accès sécurisé
+          </span>
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
+      <main className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6 sm:py-12">
         {/* Accueil */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <p
+            className="text-xs font-semibold uppercase tracking-wide"
+            style={{ color: accent }}
+          >
+            Votre espace privé
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
             {workspace.name}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            {organization.name} partage avec vous les documents ci-dessous.
-            {workspace.client_company ? ` Espace dédié à ${workspace.client_company}.` : ""}
+          <p className="max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            {organization.name} a préparé cet espace
+            {workspace.client_company
+              ? ` pour ${workspace.client_company}`
+              : " pour vous"}
+            . Consultez vos documents, téléchargez-les et indiquez votre
+            décision en quelques clics.
           </p>
         </div>
 
-        {/* Documents */}
-        {documents.length === 0 ? (
-          <EmptyState
-            icon={FolderOpen}
-            title="Aucun document partagé"
-            description="Les documents partagés par votre contact apparaîtront ici."
-          />
-        ) : (
-          <section className="space-y-3">
-            <h2 className="text-sm font-semibold text-muted-foreground">
-              Documents ({documents.length})
-            </h2>
-            <PortalDocumentList
-              token={token}
-              documents={documents}
-              decisions={decisions}
-            />
-          </section>
-        )}
+        {/* Documents + progression */}
+        <PortalDocuments
+          token={token}
+          documents={documents}
+          folders={folders}
+          initialDecisions={decisions}
+          accent={accent}
+        />
 
-        {/* Réassurance + signature */}
-        <div className="flex items-center justify-center gap-1.5 pt-2 text-xs text-muted-foreground">
-          <ShieldCheck className="h-3.5 w-3.5" />
-          Accès sécurisé — aucun compte requis
+        {/* Réassurance */}
+        <div className="grid gap-3 sm:grid-cols-3">
+          {REASSURANCE.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.title}
+                className="rounded-xl border border-border bg-card p-4"
+              >
+                <Icon className="h-4 w-4 text-muted-foreground" />
+                <p className="mt-2 text-xs font-semibold">{item.title}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  {item.text}
+                </p>
+              </div>
+            );
+          })}
         </div>
+
+        {/* Signature */}
         <div className="flex items-center justify-center gap-1.5 border-t border-border pt-6 text-xs text-muted-foreground">
           <FileText className="h-3.5 w-3.5" />
-          Propulsé par Docalio
+          Propulsé par Docalio — l&apos;espace documentaire client
         </div>
       </main>
     </div>

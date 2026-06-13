@@ -8,6 +8,10 @@ export interface WorkspaceActivity {
   lastOpenAt: string | null;
   lastDownloadAt: string | null;
   timeline: ActivityEvent[];
+  /** Documents consultés (aperçu) par le client — pour dériver leur état. */
+  viewedDocumentIds: string[];
+  /** Documents téléchargés par le client — pour dériver leur état. */
+  downloadedDocumentIds: string[];
 }
 
 type TimelineRow = {
@@ -28,7 +32,7 @@ export async function getWorkspaceActivity(
 ): Promise<WorkspaceActivity> {
   const supabase = await createClient();
 
-  const [opensCount, downloads, lastOpen, timeline] = await Promise.all([
+  const [opensCount, downloads, opened, lastOpen, timeline] = await Promise.all([
     supabase
       .from("activity_events")
       .select("*", { count: "exact", head: true })
@@ -40,6 +44,12 @@ export async function getWorkspaceActivity(
       .eq("workspace_id", workspaceId)
       .eq("event_type", "document_downloaded")
       .order("created_at", { ascending: false }),
+    supabase
+      .from("activity_events")
+      .select("document_id")
+      .eq("workspace_id", workspaceId)
+      .eq("event_type", "document_opened")
+      .not("document_id", "is", null),
     supabase
       .from("activity_events")
       .select("created_at")
@@ -60,7 +70,16 @@ export async function getWorkspaceActivity(
     (downloads.data as { document_id: string | null; created_at: string }[] | null) ??
     [];
   const distinctDocs = new Set(
-    downloadRows.map((r) => r.document_id).filter(Boolean)
+    downloadRows
+      .map((r) => r.document_id)
+      .filter((id): id is string => Boolean(id))
+  );
+  const openedRows =
+    (opened.data as { document_id: string | null }[] | null) ?? [];
+  const viewedDocs = new Set(
+    openedRows
+      .map((r) => r.document_id)
+      .filter((id): id is string => Boolean(id))
   );
 
   const timelineRows = (timeline.data as TimelineRow[] | null) ?? [];
@@ -69,6 +88,8 @@ export async function getWorkspaceActivity(
     totalOpens: opensCount.count ?? 0,
     totalDownloads: downloadRows.length,
     documentsDownloaded: distinctDocs.size,
+    viewedDocumentIds: [...viewedDocs],
+    downloadedDocumentIds: [...distinctDocs],
     lastOpenAt: (lastOpen.data as { created_at: string } | null)?.created_at ?? null,
     lastDownloadAt: downloadRows[0]?.created_at ?? null,
     timeline: timelineRows.map((row) => ({

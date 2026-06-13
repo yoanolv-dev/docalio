@@ -1,14 +1,11 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
-import { Sidebar } from "@/components/layout/sidebar";
-import { MobileTopbar } from "@/components/layout/mobile-topbar";
-
-const ROLE_LABELS: Record<string, string> = {
-  owner: "Propriétaire",
-  admin: "Administrateur",
-  member: "Membre",
-};
+import {
+  getRecentNotifications,
+  getUnreadNotificationCount,
+} from "@/lib/notifications";
+import { TopBar } from "@/components/layout/top-bar";
 
 export default async function DashboardLayout({
   children,
@@ -30,27 +27,26 @@ export default async function DashboardLayout({
     redirect("/onboarding");
   }
 
-  const roleLabel = ROLE_LABELS[membership.role] ?? membership.role;
   const userName =
     (user.user_metadata?.full_name as string | undefined) ?? null;
 
+  const [unreadCount, recentNotifications] = await Promise.all([
+    getUnreadNotificationCount(),
+    getRecentNotifications(8),
+  ]);
+
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
+      <TopBar
         orgName={membership.organization.name}
-        roleLabel={roleLabel}
         userName={userName}
         userEmail={user.email ?? ""}
+        unreadCount={unreadCount}
+        recentNotifications={recentNotifications}
       />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <MobileTopbar
-          orgName={membership.organization.name}
-          roleLabel={roleLabel}
-        />
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">{children}</div>
-        </main>
-      </div>
+      <main className="min-h-0 w-full flex-1 scroll-smooth overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
+        {children}
+      </main>
     </div>
   );
 }

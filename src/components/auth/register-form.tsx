@@ -21,6 +21,15 @@ function translateError(message: string): string {
   return "Une erreur est survenue. Veuillez réessayer.";
 }
 
+/** Cible de redirection post-inscription (paramètre `next`), bornée aux chemins
+ *  internes pour éviter toute redirection ouverte. */
+function safeNextPath(): string {
+  if (typeof window === "undefined") return "/dashboard";
+  const n = new URLSearchParams(window.location.search).get("next");
+  if (n && n.startsWith("/") && !n.startsWith("//")) return n;
+  return "/dashboard";
+}
+
 export function RegisterForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -35,13 +44,14 @@ export function RegisterForm() {
     setError(null);
     setLoading(true);
 
+    const next = safeNextPath();
     const supabase = createClient();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
 
@@ -53,7 +63,7 @@ export function RegisterForm() {
 
     // Confirm email désactivé → session immédiate → on enchaîne vers l'app.
     if (data.session) {
-      router.push("/dashboard");
+      router.push(next);
       router.refresh();
       return;
     }

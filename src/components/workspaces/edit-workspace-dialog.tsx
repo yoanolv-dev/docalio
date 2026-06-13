@@ -15,9 +15,17 @@ import {
   updateWorkspaceAction,
   type WorkspaceFormState,
 } from "@/lib/actions/workspaces";
-import type { Workspace } from "@/lib/types/database";
+import type { UsageType, Workspace } from "@/lib/types/database";
 
-export function EditWorkspaceDialog({ workspace }: { workspace: Workspace }) {
+export function EditWorkspaceDialog({
+  workspace,
+  usageType,
+  sector,
+}: {
+  workspace: Workspace;
+  usageType?: UsageType | null;
+  sector?: string | null;
+}) {
   const [open, setOpen] = useState(false);
 
   // Ferme la modale une fois la mise à jour réussie.
@@ -46,6 +54,8 @@ export function EditWorkspaceDialog({ workspace }: { workspace: Workspace }) {
           action={action}
           workspace={workspace}
           submitLabel="Enregistrer les modifications"
+          usageType={usageType}
+          sector={sector}
         />
       </DialogContent>
     </Dialog>

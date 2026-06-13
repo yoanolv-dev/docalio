@@ -6,11 +6,51 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
 import { getOrganizationUsage } from "@/lib/usage";
 import { isLimitReached, resolvePlan } from "@/lib/plans";
-import type { Organization, WorkspaceStatus } from "@/lib/types/database";
+import type {
+  Organization,
+  SpaceType,
+  WorkspaceStatus,
+} from "@/lib/types/database";
 
 export type WorkspaceFormState = { ok: boolean; message?: string } | null;
 
 const STATUSES: WorkspaceStatus[] = ["prospect", "active", "archived"];
+
+function readSpaceType(formData: FormData): SpaceType {
+  return text(formData, "space_type") === "internal" ? "internal" : "external";
+}
+
+/**
+ * Modèle de dossiers à pré-créer (champ « folders » : noms séparés par « | »).
+ * Les espaces sont créés vides par défaut ; ce modèle accélère la mise en place
+ * selon le secteur. Best-effort : un échec de seed n'annule pas la création.
+ */
+async function seedFolders(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  args: {
+    organizationId: string;
+    workspaceId: string;
+    createdBy: string;
+    raw: string;
+  }
+): Promise<void> {
+  const names = args.raw
+    .split("|")
+    .map((n) => n.trim())
+    .filter((n) => n.length > 0 && n.length <= 120)
+    .slice(0, 12);
+  if (names.length === 0) return;
+
+  await supabase.from("folders").insert(
+    names.map((name) => ({
+      organization_id: args.organizationId,
+      workspace_id: args.workspaceId,
+      parent_id: null,
+      name,
+      created_by: args.createdBy,
+    }))
+  );
+}
 
 function text(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -18,6 +58,31 @@ function text(formData: FormData, key: string): string {
 
 function nullable(formData: FormData, key: string): string | null {
   return text(formData, key) || null;
+}
+
+/** Normalise un identifiant d'URL (sous-domaine) : minuscules, a-z0-9-, borné. */
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+}
+
+/** Lit + valide le slug du formulaire. Retourne { slug } ou { error }. */
+function readSlug(formData: FormData): { slug: string | null; error?: string } {
+  const raw = text(formData, "slug");
+  if (!raw) return { slug: null };
+  const slug = slugify(raw);
+  if (slug.length < 2) {
+    return {
+      slug: null,
+      error: "Identifiant d'URL invalide (lettres, chiffres et tirets, 2 min.).",
+    };
+  }
+  return { slug };
 }
 
 /**
@@ -72,16 +137,27 @@ export async function createWorkspaceAction(
     if (limitError) return { ok: false, message: limitError };
   }
 
+  const { slug, error: slugError } = readSlug(formData);
+  if (slugError) return { ok: false, message: slugError };
+
+  const spaceType = readSpaceType(formData);
+  // Les champs « client » (société, contact, branding, sous-domaine) n'ont de
+  // sens que pour un espace externe. Un espace interne les ignore.
+  const isExternal = spaceType === "external";
+
   const { data, error } = await supabase
     .from("workspaces")
     .insert({
       organization_id: membership.organization.id,
       created_by: user.id,
       name,
-      client_company: nullable(formData, "client_company"),
-      client_email: nullable(formData, "client_email"),
-      client_phone: nullable(formData, "client_phone"),
+      space_type: spaceType,
+      slug: isExternal ? slug : null,
+      client_company: isExternal ? nullable(formData, "client_company") : null,
+      client_email: isExternal ? nullable(formData, "client_email") : null,
+      client_phone: isExternal ? nullable(formData, "client_phone") : null,
       status,
+      logo_url: isExternal ? nullable(formData, "logo_url") : null,
       primary_color: nullable(formData, "primary_color"),
       internal_note: nullable(formData, "internal_note"),
     })
@@ -89,8 +165,21 @@ export async function createWorkspaceAction(
     .single();
 
   if (error || !data) {
+    if (error?.code === "23505") {
+      return {
+        ok: false,
+        message: "Ce sous-domaine est déjà utilisé. Choisissez-en un autre.",
+      };
+    }
     return { ok: false, message: "Création impossible. Veuillez réessayer." };
   }
+
+  await seedFolders(supabase, {
+    organizationId: membership.organization.id,
+    workspaceId: data.id,
+    createdBy: user.id,
+    raw: text(formData, "folders"),
+  });
 
   revalidatePath("/dashboard/workspaces");
   revalidatePath("/dashboard");
@@ -141,20 +230,35 @@ export async function updateWorkspaceAction(
     }
   }
 
+  const { slug, error: slugError } = readSlug(formData);
+  if (slugError) return { ok: false, message: slugError };
+
+  const spaceType = readSpaceType(formData);
+  const isExternal = spaceType === "external";
+
   const { error } = await supabase
     .from("workspaces")
     .update({
       name,
-      client_company: nullable(formData, "client_company"),
-      client_email: nullable(formData, "client_email"),
-      client_phone: nullable(formData, "client_phone"),
+      space_type: spaceType,
+      slug: isExternal ? slug : null,
+      client_company: isExternal ? nullable(formData, "client_company") : null,
+      client_email: isExternal ? nullable(formData, "client_email") : null,
+      client_phone: isExternal ? nullable(formData, "client_phone") : null,
       status,
+      logo_url: isExternal ? nullable(formData, "logo_url") : null,
       primary_color: nullable(formData, "primary_color"),
       internal_note: nullable(formData, "internal_note"),
     })
     .eq("id", id);
 
   if (error) {
+    if (error.code === "23505") {
+      return {
+        ok: false,
+        message: "Ce sous-domaine est déjà utilisé. Choisissez-en un autre.",
+      };
+    }
     return { ok: false, message: "Mise à jour impossible. Veuillez réessayer." };
   }
 

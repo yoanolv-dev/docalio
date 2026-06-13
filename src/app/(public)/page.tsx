@@ -1,156 +1,311 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import type { Metadata } from "next";
 import {
-  FileText,
-  Shield,
-  Bell,
-  CheckCircle,
   ArrowRight,
-  Users,
+  ArrowUpRight,
+  CheckCircle2,
+  Eye,
+  FolderLock,
+  Lock,
+  ShieldCheck,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import {
+  DashboardPreview,
+  DrivePreview,
+  PortalPreview,
+} from "@/components/marketing/app-preview";
+import { HeroCanvas } from "@/components/marketing/hero-canvas";
+import { Tilt, Reveal } from "@/components/marketing/scroll-fx";
+import { PricingCards } from "@/components/marketing/pricing-cards";
+import { ComparisonTable } from "@/components/marketing/comparison-table";
+import { Faq } from "@/components/marketing/faq";
 
-const features = [
+export const metadata: Metadata = {
+  title: "Docalio — L'espace documentaire client",
+  description:
+    "Un espace privé par client : déposez vos documents comme dans un Drive, partagez un lien sécurisé sans compte, suivez les consultations et recueillez les décisions.",
+  alternates: { canonical: "/" },
+};
+
+const FEATURE_SECTIONS = [
   {
-    icon: Users,
-    title: "Espaces clients dédiés",
+    eyebrow: "Votre Drive client",
+    title: "Vos documents, rangés comme dans l'explorateur Windows",
     description:
-      "Créez un espace personnalisé pour chaque client avec ses propres documents et accès sécurisés.",
+      "Arborescence de dossiers, glisser-déposer, renommer, dupliquer, supprimer, vue grandes icônes ou détails. Rien à apprendre. Chaque fichier reste privé tant que vous ne le rendez pas visible — d'un seul clic.",
+    points: [
+      "Volet d'arborescence, fil d'Ariane et double-clic, comme à la maison",
+      "Glissez vos fichiers pour les importer ou les déplacer",
+      "« Visible client » en un clic, le reste demeure privé",
+    ],
+    Preview: DrivePreview,
   },
   {
-    icon: Shield,
-    title: "Partage sécurisé par token",
+    eyebrow: "Le portail client",
+    title: "Un espace clair, à votre image, sans compte à créer",
     description:
-      "Chaque portail client est protégé par un lien unique et sécurisé, sans compte requis.",
+      "Votre client ouvre un lien et comprend immédiatement quoi faire : consulter, télécharger, puis valider ou demander une modification. Vous suivez tout en temps réel.",
+    points: [
+      "Aucune inscription : un simple lien sécurisé",
+      "Documents rangés par dossier, progression visible",
+      "Décisions commentées : validé, à modifier, refusé",
+    ],
+    Preview: PortalPreview,
+  },
+];
+
+const VALUES = [
+  {
+    icon: FolderLock,
+    title: "Privé par défaut",
+    text: "Stockage privé, liens expirables et révocables, téléchargement contrôlé fichier par fichier.",
   },
   {
-    icon: CheckCircle,
-    title: "Validation & refus",
-    description:
-      "Collectez les validations de vos clients directement depuis le portail, avec horodatage.",
+    icon: Eye,
+    title: "Vous savez où ça en est",
+    text: "Ouvertures, consultations, téléchargements : fini les relances à l'aveugle.",
   },
   {
-    icon: Bell,
-    title: "Relances automatiques",
-    description:
-      "Générez des relances intelligentes pour les documents en attente de validation.",
+    icon: CheckCircle2,
+    title: "Des décisions, pas des emails",
+    text: "Validation, modification ou refus recueillis directement dans l'espace, avec commentaire.",
+  },
+];
+
+const FAQ_ITEMS = [
+  {
+    question: "En quoi est-ce différent d'un Drive ou de WeTransfer ?",
+    answer:
+      "Docalio n'est pas un simple stockage. Chaque client a un espace privé, organisé en dossiers, que vous partagez via un lien — et où votre client consulte, télécharge et décide. Vous suivez tout, sans relancer à l'aveugle.",
+  },
+  {
+    question: "Mes clients doivent-ils créer un compte ?",
+    answer:
+      "Non. L'accès se fait par un lien sécurisé unique, sans inscription. Vous gardez le contrôle : le lien est expirable et révocable à tout moment.",
+  },
+  {
+    question: "Mes documents sont-ils réellement protégés ?",
+    answer:
+      "Oui. Le stockage est privé par défaut, l'accès aux fichiers passe par des liens signés temporaires, et chaque organisation est isolée des autres au niveau de la base de données.",
+  },
+  {
+    question: "Comment fonctionne l'essai ?",
+    answer:
+      "Vous démarrez gratuitement pendant 14 jours, sans carte bancaire, avec l'ensemble des fonctionnalités.",
   },
 ];
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border">
-        {/* Halo de fond subtil */}
+      {/* Hero — scène WebGL + titre éditorial */}
+      <section className="relative isolate overflow-hidden">
+        <div className="absolute inset-0 -z-20">
+          <HeroCanvas />
+        </div>
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-[-10rem] -z-10 mx-auto h-[24rem] max-w-3xl rounded-full bg-primary-subtle opacity-60 blur-3xl"
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-background/50 via-background/75 to-background"
         />
-        <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6 sm:py-28 lg:py-32">
-          <div className="flex flex-col items-center text-center">
-            <Badge variant="default" className="mb-6">
-              Portail documentaire B2B
-            </Badge>
-            <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-              Partagez vos documents.{" "}
-              <span className="text-primary">Collectez les validations.</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              Docalio centralise la gestion documentaire client — espaces
-              dédiés, partage sécurisé, suivi des consultations et validations
-              en temps réel.
-            </p>
-            <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
-              <Button size="lg" asChild>
-                <Link href="/register">
-                  Démarrer gratuitement
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button variant="outline" size="lg" asChild>
-                <Link href="#features">Voir les fonctionnalités</Link>
-              </Button>
-            </div>
-            <p className="mt-5 text-xs text-muted-foreground">
-              Aucune carte bancaire requise · Gratuit pendant 14 jours
-            </p>
+        {/* Halo bleu doux — signature « blanc & bleu » */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[620px] bg-[radial-gradient(60%_55%_at_50%_0%,rgba(37,99,235,0.16),transparent_72%)]"
+        />
+        <div className="mx-auto max-w-5xl px-4 pb-10 pt-28 text-center sm:px-6 sm:pt-36">
+          <Link
+            href="/fonctionnalites"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
+          >
+            Nouveau · Drive client façon explorateur
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+          <h1 className="text-balance mx-auto mt-6 max-w-3xl text-5xl font-semibold tracking-tight sm:text-7xl">
+            Le bon document,
+            <br />
+            <span className="text-primary">au bon client.</span>
+          </h1>
+          <p className="text-pretty mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+            Un espace privé par client. Rangez vos documents comme dans
+            l&apos;explorateur de votre ordinateur, partagez un lien sécurisé
+            sans compte, recueillez les décisions — au même endroit.
+          </p>
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button size="lg" asChild>
+              <Link href="/register">
+                Commencer gratuitement
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" className="bg-card/70 backdrop-blur" asChild>
+              <Link href="/contact">Demander une démo</Link>
+            </Button>
           </div>
+          <p className="mt-5 text-xs text-muted-foreground">
+            14 jours d&apos;essai · Sans carte bancaire
+          </p>
+        </div>
+
+        {/* Aperçu produit live, incliné en 3D */}
+        <div className="mx-auto -mb-8 max-w-6xl px-4 pb-16 [perspective:1600px] sm:px-6">
+          <Tilt max={6}>
+            <DashboardPreview />
+          </Tilt>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="bg-muted/40">
-        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Tout ce dont vous avez besoin
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Une plateforme simple et puissante pour gérer vos documents
-              clients.
-            </p>
+      {/* Valeurs */}
+      <Section muted className="py-14 sm:py-16">
+        <div className="grid gap-8 sm:grid-cols-3">
+          {VALUES.map((v) => {
+            const Icon = v.icon;
+            return (
+              <div key={v.title}>
+                <Icon className="h-5 w-5 text-foreground" />
+                <p className="mt-3 font-medium">{v.title}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  {v.text}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </Section>
+
+      {/* Sections produit alternées, aperçus live inclinés */}
+      {FEATURE_SECTIONS.map((s, i) => {
+        const Preview = s.Preview;
+        return (
+          <Section key={s.title}>
+            <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+              <Reveal className={i % 2 === 1 ? "lg:order-2" : undefined}>
+                <p className="text-sm font-semibold text-primary">{s.eyebrow}</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+                  {s.title}
+                </h2>
+                <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                  {s.description}
+                </p>
+                <ul className="mt-6 space-y-2.5">
+                  {s.points.map((p) => (
+                    <li key={p} className="flex items-start gap-2.5 text-sm">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
+              <Reveal
+                delay={80}
+                className={cn("[perspective:1600px]", i % 2 === 1 && "lg:order-1")}
+              >
+                <Tilt max={6}>
+                  <Preview />
+                </Tilt>
+              </Reveal>
+            </div>
+          </Section>
+        );
+      })}
+
+      {/* Sécurité */}
+      <Section muted>
+        <div className="grid items-center gap-10 lg:grid-cols-2">
+          <div>
+            <SectionHeading
+              align="left"
+              eyebrow="Sécurité & confidentialité"
+              title="La confiance, intégrée à l'architecture"
+              description="Vos documents sont sensibles. Docalio est pensé pour les protéger par défaut, pas en option."
+            />
+            <Button className="mt-6" variant="outline" asChild>
+              <Link href="/securite">
+                Notre approche sécurité
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
           </div>
-          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature) => {
-              const Icon = feature.icon;
+          <ul className="space-y-3">
+            {[
+              { icon: FolderLock, text: "Stockage privé — aucun fichier public" },
+              { icon: Lock, text: "Accès par liens signés temporaires" },
+              { icon: ShieldCheck, text: "Isolation stricte entre organisations" },
+              { icon: Eye, text: "Suivi respectueux de la vie privée (RGPD-friendly)" },
+            ].map((item) => {
+              const Icon = item.icon;
               return (
-                <div
-                  key={feature.title}
-                  className="rounded-xl border border-border bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-md"
+                <li
+                  key={item.text}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-4"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-subtle">
-                    <Icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="mt-4 text-sm font-semibold">{feature.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {feature.description}
-                  </p>
-                </div>
+                  <Icon className="h-4 w-4 shrink-0 text-foreground" />
+                  <span className="text-sm font-medium">{item.text}</span>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </div>
-      </section>
+      </Section>
 
-      {/* CTA */}
-      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
-        <div className="overflow-hidden rounded-2xl bg-primary px-8 py-14 text-center">
-          <FileText className="mx-auto h-10 w-10 text-primary-foreground/70" />
-          <h2 className="mt-5 text-2xl font-semibold tracking-tight text-primary-foreground sm:text-3xl">
-            Prêt à simplifier vos échanges documentaires ?
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-primary-foreground/80">
-            Rejoignez les équipes qui font confiance à Docalio.
-          </p>
-          <Button size="lg" variant="secondary" className="mt-7" asChild>
-            <Link href="/register">Créer un compte gratuit</Link>
+      {/* Comparaison */}
+      <Section>
+        <SectionHeading
+          eyebrow="Pourquoi Docalio"
+          title="Plus clair qu'un email. Plus actionnable qu'un Drive."
+          description="Là où les outils génériques s'arrêtent au transfert, Docalio gère l'expérience client de bout en bout."
+        />
+        <div className="mt-10">
+          <ComparisonTable />
+        </div>
+      </Section>
+
+      {/* Tarifs */}
+      <Section muted>
+        <SectionHeading
+          eyebrow="Tarifs"
+          title="Un tarif simple, qui grandit avec vous"
+          description="Sans engagement. Démarrez gratuitement, choisissez votre offre ensuite."
+        />
+        <div className="mt-12">
+          <PricingCards plans={["starter", "pro", "business"]} />
+        </div>
+        <div className="mt-8 text-center">
+          <Button variant="outline" asChild>
+            <Link href="/tarifs">
+              Voir le détail des offres
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </Button>
         </div>
-      </section>
+      </Section>
 
-      {/* Footer */}
-      <footer className="border-t border-border">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Docalio. Tous droits réservés.
-          </p>
-          <nav className="flex items-center gap-4">
-            <Link
-              href="/legal"
-              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Mentions légales
-            </Link>
-            <Link
-              href="/privacy"
-              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Confidentialité
-            </Link>
-          </nav>
+      {/* FAQ */}
+      <Section>
+        <SectionHeading eyebrow="FAQ" title="Questions fréquentes" />
+        <div className="mt-10">
+          <Faq items={FAQ_ITEMS} />
         </div>
-      </footer>
+      </Section>
+
+      {/* CTA final */}
+      <Section className="py-16 sm:py-20">
+        <div className="rounded-3xl border border-border bg-foreground px-8 py-16 text-center text-background">
+          <h2 className="text-balance mx-auto max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
+            Donnez à vos clients un espace à la hauteur de votre travail
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-background/70">
+            Créez votre premier espace client sécurisé en quelques minutes.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button size="lg" variant="secondary" asChild>
+              <Link href="/register">Commencer gratuitement</Link>
+            </Button>
+          </div>
+        </div>
+      </Section>
     </>
   );
 }

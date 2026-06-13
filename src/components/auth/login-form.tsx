@@ -18,6 +18,15 @@ function translateError(message: string): string {
   return "Connexion impossible. Veuillez réessayer.";
 }
 
+/** Cible de redirection post-connexion (paramètre `next`), bornée aux chemins
+ *  internes pour éviter toute redirection ouverte. */
+function safeNextPath(): string {
+  if (typeof window === "undefined") return "/dashboard";
+  const n = new URLSearchParams(window.location.search).get("next");
+  if (n && n.startsWith("/") && !n.startsWith("//")) return n;
+  return "/dashboard";
+}
+
 export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -42,8 +51,9 @@ export function LoginForm() {
       return;
     }
 
+    // `next` permet de revenir sur un lien d'invitation après connexion.
     // Le layout du dashboard redirige vers /onboarding si aucune organisation.
-    router.push("/dashboard");
+    router.push(safeNextPath());
     router.refresh();
   }
 

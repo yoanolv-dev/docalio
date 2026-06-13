@@ -4,32 +4,23 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { formatBytes, sanitizeFileName, validateFile } from "@/lib/files";
+import {
+  formatBytes,
+  formatStoragePath,
+  sanitizeFileName,
+  validateFile,
+} from "@/lib/files";
 import {
   effectiveMaxFileBytes,
   formatStorage,
   resolvePlan,
 } from "@/lib/plans";
 import { getOrganizationUsage } from "@/lib/usage";
-import type {
-  DocumentStatus,
-  Organization,
-  Workspace,
-} from "@/lib/types/database";
+import type { Organization, Workspace } from "@/lib/types/database";
 
 export type DocumentFormState = { ok: boolean; message?: string } | null;
 
 const STORAGE_BUCKET = "documents";
-
-const STATUSES: DocumentStatus[] = [
-  "draft",
-  "sent",
-  "viewed",
-  "downloaded",
-  "approved",
-  "rejected",
-  "archived",
-];
 
 function text(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -102,9 +93,15 @@ export async function uploadDocumentAction(
   }
 
   const title = text(formData, "title") || file.name.replace(/\.[^.]+$/, "");
+  const folderId = nullable(formData, "folder_id");
   const documentId = randomUUID();
   const safeName = sanitizeFileName(file.name);
-  const filePath = `organizations/${workspace.organization_id}/workspaces/${workspace.id}/${documentId}-${safeName}`;
+  const filePath = formatStoragePath(
+    workspace.organization_id,
+    workspace.id,
+    documentId,
+    safeName
+  );
 
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKET)
@@ -120,10 +117,16 @@ export async function uploadDocumentAction(
     };
   }
 
+  const posXRaw = text(formData, "pos_x");
+  const posYRaw = text(formData, "pos_y");
+  const posX = posXRaw ? Number(posXRaw) : null;
+  const posY = posYRaw ? Number(posYRaw) : null;
+
   const { error: insertError } = await supabase.from("documents").insert({
     id: documentId,
     organization_id: workspace.organization_id,
     workspace_id: workspace.id,
+    folder_id: folderId,
     created_by: user.id,
     title,
     description: nullable(formData, "description"),
@@ -131,6 +134,8 @@ export async function uploadDocumentAction(
     file_path: filePath,
     file_type: file.type || null,
     file_size: file.size,
+    pos_x: posX !== null && Number.isFinite(posX) ? Math.round(posX) : null,
+    pos_y: posY !== null && Number.isFinite(posY) ? Math.round(posY) : null,
   });
 
   if (insertError) {
@@ -147,7 +152,11 @@ export async function uploadDocumentAction(
   return { ok: true, message: `« ${title} » a été ajouté.` };
 }
 
-/** Modifie titre / description / catégorie / statut / visibilité / téléchargement. */
+/**
+ * Modifie titre / description / catégorie. La visibilité et le téléchargement
+ * passent par les actions rapides dédiées ; l'état de partage est dérivé
+ * (cf. src/lib/document-state.ts), il n'est plus saisi à la main.
+ */
 export async function updateDocumentAction(
   _prev: DocumentFormState,
   formData: FormData
@@ -160,20 +169,12 @@ export async function updateDocumentAction(
   const title = text(formData, "title");
   if (!title) return { ok: false, message: "Le titre est requis." };
 
-  const status = text(formData, "status") as DocumentStatus;
-  if (!STATUSES.includes(status)) {
-    return { ok: false, message: "Statut invalide." };
-  }
-
   const { error } = await supabase
     .from("documents")
     .update({
       title,
       description: nullable(formData, "description"),
       category: nullable(formData, "category"),
-      status,
-      allow_download: formData.get("allow_download") === "on",
-      is_visible_to_client: formData.get("is_visible_to_client") === "on",
     })
     .eq("id", id);
 
@@ -185,6 +186,66 @@ export async function updateDocumentAction(
   if (workspaceId) revalidatePath(`/dashboard/workspaces/${workspaceId}`);
   revalidatePath("/dashboard");
   return { ok: true, message: "Modifications enregistrées." };
+}
+
+export type QuickToggleResult = { ok: boolean; message?: string };
+
+/**
+ * Action rapide : rend un document visible (ou non) dans le portail client.
+ * Lecture via RLS : hors organisation → introuvable, rien n'est modifié.
+ */
+export async function setDocumentVisibilityAction(
+  documentId: string,
+  visible: boolean
+): Promise<QuickToggleResult> {
+  const { supabase } = await requireUser();
+
+  const { data: doc } = await supabase
+    .from("documents")
+    .select("id, workspace_id")
+    .eq("id", documentId)
+    .maybeSingle<{ id: string; workspace_id: string }>();
+  if (!doc) return { ok: false, message: "Document introuvable." };
+
+  const { error } = await supabase
+    .from("documents")
+    .update({ is_visible_to_client: visible })
+    .eq("id", documentId);
+
+  if (error) {
+    return { ok: false, message: "Mise à jour impossible. Réessayez." };
+  }
+
+  revalidatePath(`/dashboard/workspaces/${doc.workspace_id}`);
+  revalidatePath("/dashboard");
+  return { ok: true };
+}
+
+/** Action rapide : autorise (ou non) le téléchargement côté client. */
+export async function setDocumentDownloadAction(
+  documentId: string,
+  allow: boolean
+): Promise<QuickToggleResult> {
+  const { supabase } = await requireUser();
+
+  const { data: doc } = await supabase
+    .from("documents")
+    .select("id, workspace_id")
+    .eq("id", documentId)
+    .maybeSingle<{ id: string; workspace_id: string }>();
+  if (!doc) return { ok: false, message: "Document introuvable." };
+
+  const { error } = await supabase
+    .from("documents")
+    .update({ allow_download: allow })
+    .eq("id", documentId);
+
+  if (error) {
+    return { ok: false, message: "Mise à jour impossible. Réessayez." };
+  }
+
+  revalidatePath(`/dashboard/workspaces/${doc.workspace_id}`);
+  return { ok: true };
 }
 
 /** Supprime le document et son fichier Storage associé. */

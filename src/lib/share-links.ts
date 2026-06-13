@@ -33,6 +33,40 @@ export async function getPortalData(token: string): Promise<PortalData | null> {
   return data as PortalData;
 }
 
+/** Branding d'un espace pour la page d'accueil de marque (sous-domaine). */
+export interface PortalLanding {
+  organization: {
+    name: string;
+    logo_url: string | null;
+    primary_color: string | null;
+  };
+  workspace: {
+    name: string;
+    client_company: string | null;
+    logo_url: string | null;
+    primary_color: string | null;
+    slug: string | null;
+  };
+  has_active_link: boolean;
+  document_count: number;
+}
+
+/**
+ * Branding d'un espace à partir de son slug (page d'accueil de sous-domaine).
+ * Ne renvoie jamais le jeton du lien : le sous-domaine est un habillage, pas
+ * une autorisation. Renvoie null si le slug est inconnu.
+ */
+export async function getPortalLanding(
+  slug: string
+): Promise<PortalLanding | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_portal_landing", {
+    p_slug: slug,
+  });
+  if (error || !data) return null;
+  return data as PortalLanding;
+}
+
 export interface PortalDecision {
   decision: DecisionType;
   comment: string | null;
