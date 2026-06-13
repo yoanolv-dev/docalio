@@ -1,7 +1,7 @@
 import { ArrowLeft, Building2 } from "lucide-react";
 import { BrowserFrame } from "@/components/shots/browser-frame";
 import { AppShell } from "@/components/shots/app-shell";
-import { CanvasDrive } from "@/components/drive/canvas-drive";
+import { ExplorerDrive } from "@/components/drive/explorer-drive";
 import { Badge } from "@/components/ui/badge";
 import {
   MOCK_DOCUMENTS,
@@ -39,7 +39,7 @@ export default function DriveShot() {
             </div>
           </div>
 
-          <CanvasDrive
+          <ExplorerDrive
             documents={MOCK_DOCUMENTS}
             folders={MOCK_FOLDERS}
             workspaceId="ws-demo"

@@ -10,7 +10,7 @@ import type { AppNotification } from "@/lib/types/database";
 
 /**
  * Barre supérieure unique du dashboard. Pas de sidebar : la navigation passe
- * par la palette de commandes (⌘K), volontairement épurée.
+ * par la palette de commandes (Ctrl K), volontairement épurée.
  */
 export function TopBar({
   orgName,
@@ -53,7 +53,7 @@ export function TopBar({
               <Search className="h-4 w-4" />
               <span className="hidden lg:inline">Rechercher…</span>
               <kbd className="ml-1 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium lg:inline">
-                ⌘K
+                Ctrl K
               </kbd>
             </button>
 

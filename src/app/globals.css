@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Le produit est verrouillé sur le thème clair « nordique ». On redéfinit la
+   variante `dark:` de Tailwind pour qu'elle ne dépende plus de la préférence
+   système (sinon des utilitaires `dark:` isolés s'activeraient sur un OS en
+   mode sombre et casseraient le rendu). Aucune classe `.dark` n'est ajoutée :
+   ces utilitaires restent donc inertes. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* =============================================================================
    Docalio — Design system « Nordique »
    Blanc franc, neutres purs (zinc, jamais slate bleuté), un seul accent :
@@ -11,6 +18,9 @@
    ============================================================================= */
 
 :root {
+  /* Verrouille les contrôles natifs (formulaires, scrollbars) sur le clair. */
+  color-scheme: light;
+
   /* Surfaces — blanc franc, gris neutres très clairs */
   --background: #ffffff;
   --card: #ffffff;
@@ -54,45 +64,6 @@
   --sidebar-accent: #f4f4f5;
 
   --radius: 0.625rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #09090b;           /* zinc-950 */
-    --card: #131316;
-    --card-foreground: #fafafa;
-    --popover: #131316;
-    --popover-foreground: #fafafa;
-
-    --foreground: #fafafa;
-    --muted: #1a1a1d;
-    --muted-foreground: #a1a1aa;     /* zinc-400 */
-
-    --primary: #93a8d8;             /* bleu nuit éclairci, lisible sur fond noir */
-    --primary-hover: #aab9e1;
-    --primary-foreground: #0b1020;
-    --primary-subtle: rgba(147, 168, 216, 0.14);
-
-    --secondary: #1a1a1d;
-    --secondary-foreground: #fafafa;
-    --accent: #1f1f23;
-    --accent-foreground: #fafafa;
-
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --info: #93a8d8;
-
-    --border: #232327;
-    --input: #34343a;
-    --ring: #93a8d8;
-
-    --sidebar: #0c0c0e;
-    --sidebar-foreground: #d4d4d8;
-    --sidebar-border: #1f1f23;
-    --sidebar-accent: #1a1a1d;
-  }
 }
 
 @theme inline {

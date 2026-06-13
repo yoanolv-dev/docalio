@@ -2,7 +2,7 @@ import { Bell, FileText, Search } from "lucide-react";
 
 /**
  * Réplique statique de la coque applicative (barre supérieure) pour les
- * captures produit. Reflète la navigation réelle : pas de sidebar, ⌘K + avatar.
+ * captures produit. Reflète la navigation réelle : pas de sidebar, Ctrl K + avatar.
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -24,7 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Search className="h-4 w-4" />
               Rechercher…
               <kbd className="ml-1 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium">
-                ⌘K
+                Ctrl K
               </kbd>
             </span>
             <span className="relative flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground">

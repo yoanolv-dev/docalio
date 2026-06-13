@@ -33,14 +33,14 @@ export default async function DashboardPage() {
     user?.user_metadata?.full_name?.split(" ")[0] ?? null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* En-tête — sobre, une seule action */}
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm text-muted-foreground">
             {firstName ? `Bonjour ${firstName},` : "Bonjour,"}
           </p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight">
+          <h1 className="mt-0.5 text-2xl font-semibold tracking-tight">
             Vos espaces clients
           </h1>
         </div>

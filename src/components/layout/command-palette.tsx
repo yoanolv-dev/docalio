@@ -25,7 +25,7 @@ interface Command {
 }
 
 /**
- * Palette de commandes (⌘K) — la navigation principale du dashboard.
+ * Palette de commandes (Ctrl K / ⌘K) — la navigation principale du dashboard.
  * Volontairement minimale : tout se fait au clavier, aucun menu permanent.
  */
 export function CommandPalette({

@@ -12,7 +12,11 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Section, SectionHeading } from "@/components/marketing/section";
-import { ProductShot } from "@/components/marketing/product-shot";
+import {
+  DashboardPreview,
+  DrivePreview,
+  PortalPreview,
+} from "@/components/marketing/app-preview";
 import { HeroCanvas } from "@/components/marketing/hero-canvas";
 import { Tilt, Reveal } from "@/components/marketing/scroll-fx";
 import { PricingCards } from "@/components/marketing/pricing-cards";
@@ -29,16 +33,15 @@ export const metadata: Metadata = {
 const FEATURE_SECTIONS = [
   {
     eyebrow: "Votre Drive client",
-    title: "Vos documents, rangés comme sur votre ordinateur",
+    title: "Vos documents, rangés comme dans l'explorateur Windows",
     description:
-      "Dossiers, sous-dossiers, glisser-déposer, copier, renommer, supprimer. Chaque fichier reste privé tant que vous ne le rendez pas visible — d'un seul clic.",
+      "Arborescence de dossiers, glisser-déposer, renommer, dupliquer, supprimer, vue grandes icônes ou détails. Rien à apprendre. Chaque fichier reste privé tant que vous ne le rendez pas visible — d'un seul clic.",
     points: [
-      "Organisation par dossiers, comme un explorateur de fichiers",
+      "Volet d'arborescence, fil d'Ariane et double-clic, comme à la maison",
       "Glissez vos fichiers pour les importer ou les déplacer",
       "« Visible client » en un clic, le reste demeure privé",
     ],
-    shot: "/product/drive.png",
-    alt: "L'espace documentaire Docalio : dossiers, fichiers et contrôle de visibilité.",
+    Preview: DrivePreview,
   },
   {
     eyebrow: "Le portail client",
@@ -50,8 +53,7 @@ const FEATURE_SECTIONS = [
       "Documents rangés par dossier, progression visible",
       "Décisions commentées : validé, à modifier, refusé",
     ],
-    shot: "/product/portal.png",
-    alt: "Le portail client Docalio : progression, dossiers et décisions.",
+    Preview: PortalPreview,
   },
 ];
 
@@ -113,7 +115,7 @@ export default function HomePage() {
             href="/fonctionnalites"
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
           >
-            Nouveau · Drive client spatial
+            Nouveau · Drive client façon explorateur
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
           <h1 className="text-balance mx-auto mt-6 max-w-3xl text-5xl font-semibold tracking-tight sm:text-7xl">
@@ -122,9 +124,9 @@ export default function HomePage() {
             au bon client.
           </h1>
           <p className="text-pretty mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            Un espace privé par client. Organisez vos documents sur un canvas
-            vivant, partagez un lien sécurisé sans compte, recueillez les
-            décisions — au même endroit.
+            Un espace privé par client. Rangez vos documents comme dans
+            l&apos;explorateur de votre ordinateur, partagez un lien sécurisé
+            sans compte, recueillez les décisions — au même endroit.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button size="lg" asChild>
@@ -142,14 +144,10 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Capture produit principale, inclinée en 3D */}
+        {/* Aperçu produit live, incliné en 3D */}
         <div className="mx-auto -mb-8 max-w-6xl px-4 pb-16 [perspective:1600px] sm:px-6">
           <Tilt max={6}>
-            <ProductShot
-              src="/product/dashboard.png"
-              alt="Le tableau de bord Docalio : la liste de vos espaces clients."
-              priority
-            />
+            <DashboardPreview />
           </Tilt>
         </div>
       </section>
@@ -172,38 +170,41 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* Sections produit alternées, captures réelles inclinées */}
-      {FEATURE_SECTIONS.map((s, i) => (
-        <Section key={s.title}>
-          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <Reveal className={i % 2 === 1 ? "lg:order-2" : undefined}>
-              <p className="text-sm font-semibold text-primary">{s.eyebrow}</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-                {s.title}
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-                {s.description}
-              </p>
-              <ul className="mt-6 space-y-2.5">
-                {s.points.map((p) => (
-                  <li key={p} className="flex items-start gap-2.5 text-sm">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
-                    <span>{p}</span>
-                  </li>
-                ))}
-              </ul>
-            </Reveal>
-            <Reveal
-              delay={80}
-              className={cn("[perspective:1600px]", i % 2 === 1 && "lg:order-1")}
-            >
-              <Tilt max={6}>
-                <ProductShot src={s.shot} alt={s.alt} />
-              </Tilt>
-            </Reveal>
-          </div>
-        </Section>
-      ))}
+      {/* Sections produit alternées, aperçus live inclinés */}
+      {FEATURE_SECTIONS.map((s, i) => {
+        const Preview = s.Preview;
+        return (
+          <Section key={s.title}>
+            <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+              <Reveal className={i % 2 === 1 ? "lg:order-2" : undefined}>
+                <p className="text-sm font-semibold text-primary">{s.eyebrow}</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+                  {s.title}
+                </h2>
+                <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                  {s.description}
+                </p>
+                <ul className="mt-6 space-y-2.5">
+                  {s.points.map((p) => (
+                    <li key={p} className="flex items-start gap-2.5 text-sm">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
+              <Reveal
+                delay={80}
+                className={cn("[perspective:1600px]", i % 2 === 1 && "lg:order-1")}
+              >
+                <Tilt max={6}>
+                  <Preview />
+                </Tilt>
+              </Reveal>
+            </div>
+          </Section>
+        );
+      })}
 
       {/* Sécurité */}
       <Section muted>

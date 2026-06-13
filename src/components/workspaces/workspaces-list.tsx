@@ -34,7 +34,7 @@ export function WorkspacesList({
   }, [workspaces, query, status]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -68,11 +68,11 @@ export function WorkspacesList({
             <Link
               key={w.id}
               href={`/dashboard/workspaces/${w.id}`}
-              className="group relative flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 transition-all hover:border-foreground/20 hover:shadow-[0_4px_24px_-12px_rgba(0,0,0,0.18)]"
+              className="group relative flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-foreground/20 hover:shadow-[0_4px_24px_-12px_rgba(0,0,0,0.18)]"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground">
                     {getInitials(w.client_company ?? w.name)}
                   </span>
                   <div className="min-w-0">

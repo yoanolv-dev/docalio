@@ -18,6 +18,11 @@ function daysAgo(n: number): string {
   return new Date(Date.now() - n * 86400000).toISOString();
 }
 
+// Date absolue figée : utilisée là où l'affichage est une date complète
+// (et non un « il y a … »). Une valeur constante garantit un rendu identique
+// au build et à l'hydratation des aperçus live du site (pas de décalage de jour).
+const FIXED_DATE = "2026-06-09T09:00:00.000Z";
+
 function doc(
   id: string,
   title: string,
@@ -97,7 +102,7 @@ function pdoc(
     status: "sent",
     folder_id,
     allow_download: true,
-    created_at: daysAgo(4),
+    created_at: FIXED_DATE,
   };
 }
 
@@ -118,6 +123,6 @@ export const MOCK_WORKSPACES: WorkspaceListItem[] = [
   { id: "w2", organization_id: ORG, name: "Cabinet Lenoir", client_company: "Cabinet Lenoir & Associés", client_email: "j.lenoir@lenoir.fr", client_phone: null, status: "active", internal_note: null, logo_url: null, primary_color: null, created_by: null, created_at: daysAgo(40), updated_at: daysAgo(5), documentCount: 12, visibleCount: 9, hasActiveLink: true, pendingDecisions: 0, lastActivityAt: daysAgo(1) },
   { id: "w3", organization_id: ORG, name: "Atelier Bois&Co", client_company: "Bois & Co", client_email: null, client_phone: null, status: "prospect", internal_note: null, logo_url: null, primary_color: null, created_by: null, created_at: daysAgo(8), updated_at: daysAgo(8), documentCount: 3, visibleCount: 0, hasActiveLink: false, pendingDecisions: 0, lastActivityAt: null },
   { id: "w4", organization_id: ORG, name: "Studio Photo Iris", client_company: "Iris Studio", client_email: "hello@iris.photo", client_phone: null, status: "active", internal_note: null, logo_url: null, primary_color: null, created_by: null, created_at: daysAgo(60), updated_at: daysAgo(10), documentCount: 21, visibleCount: 15, hasActiveLink: true, pendingDecisions: 1, lastActivityAt: daysAgo(3) },
-  { id: "w5", organization_id: ORG, name: "Pâtisserie Solène", client_company: "Solène", client_email: null, client_phone: null, status: "archived", internal_note: null, logo_url: null, primary_color: null, created_by: null, created_at: daysAgo(120), updated_at: daysAgo(90), documentCount: 9, visibleCount: 9, hasActiveLink: false, pendingDecisions: 0, lastActivityAt: daysAgo(80) },
+  { id: "w5", organization_id: ORG, name: "Pâtisserie Solène", client_company: "Solène", client_email: null, client_phone: null, status: "archived", internal_note: null, logo_url: null, primary_color: null, created_by: null, created_at: daysAgo(120), updated_at: daysAgo(90), documentCount: 9, visibleCount: 9, hasActiveLink: false, pendingDecisions: 0, lastActivityAt: null },
   { id: "w6", organization_id: ORG, name: "Restaurant Nord", client_company: "Le Nord", client_email: "resa@lenord.fr", client_phone: null, status: "active", internal_note: null, logo_url: null, primary_color: null, created_by: null, created_at: daysAgo(15), updated_at: daysAgo(1), documentCount: 5, visibleCount: 4, hasActiveLink: true, pendingDecisions: 3, lastActivityAt: daysAgo(0) },
 ];
