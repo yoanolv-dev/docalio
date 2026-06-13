@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Building2, CreditCard, Users } from "lucide-react";
+import { Building2, CreditCard, FolderLock, Users } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,10 +12,12 @@ import { OrganizationSettingsForm } from "@/components/settings/organization-set
 import { PlanUsageCard } from "@/components/settings/plan-usage-card";
 import { PlansOverview } from "@/components/settings/plans-overview";
 import { TeamManager } from "@/components/settings/team-manager";
+import { GroupsManager } from "@/components/settings/groups-manager";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
 import { getOrganizationUsage } from "@/lib/usage";
 import { listOrgMembers, listPendingInvites } from "@/lib/team";
+import { listGroupsWithMembers } from "@/lib/access";
 import { resolvePlan } from "@/lib/plans";
 
 export const metadata: Metadata = {
@@ -25,6 +27,7 @@ export const metadata: Metadata = {
 const SECTION_NAV = [
   { href: "#abonnement", label: "Abonnement", icon: CreditCard },
   { href: "#equipe", label: "Équipe", icon: Users },
+  { href: "#groupes", label: "Groupes & accès", icon: FolderLock },
   { href: "#identite", label: "Identité", icon: Building2 },
 ];
 
@@ -38,12 +41,13 @@ export default async function SettingsPage() {
   if (!membership) redirect("/onboarding");
 
   const canEdit = membership.role === "owner" || membership.role === "admin";
-  const [usage, members, invites] = await Promise.all([
+  const [usage, members, invites, groups] = await Promise.all([
     getOrganizationUsage(membership.organization.id),
     listOrgMembers(membership.organization.id),
     canEdit
       ? listPendingInvites(membership.organization.id)
       : Promise.resolve([]),
+    listGroupsWithMembers(membership.organization.id),
   ]);
   const currentPlan = resolvePlan(membership.organization).id;
 
@@ -100,6 +104,29 @@ export default async function SettingsPage() {
               members={members}
               invites={invites}
               currentUserId={user?.id ?? ""}
+              canManage={canEdit}
+            />
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Groupes & accès interne */}
+      <section id="groupes" className="scroll-mt-16">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <FolderLock className="h-4 w-4 text-primary" />
+              <CardTitle>Groupes &amp; accès</CardTitle>
+            </div>
+            <CardDescription>
+              Créez des groupes d&apos;utilisateurs et autorisez-les, espace par
+              espace, à accéder à vos espaces internes.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <GroupsManager
+              groups={groups}
+              members={members}
               canManage={canEdit}
             />
           </CardContent>

@@ -31,6 +31,7 @@ import {
 } from "@/components/workspaces/workspace-activity";
 import { ExplorerDrive } from "@/components/drive/explorer-drive";
 import { PortalShareCard } from "@/components/workspaces/portal-share-card";
+import { SpaceAccessPanel } from "@/components/workspaces/space-access-panel";
 import {
   archiveWorkspaceAction,
   deleteWorkspaceAction,
@@ -42,6 +43,13 @@ import { getActiveShareLink } from "@/lib/share-links";
 import { getWorkspaceActivity } from "@/lib/activity";
 import { getWorkspaceDecisions } from "@/lib/decisions";
 import { getCurrentMembership } from "@/lib/organizations";
+import {
+  listWorkspaceAccess,
+  listGroupsWithMembers,
+  type WorkspaceAccessEntry,
+  type GroupWithMembers,
+} from "@/lib/access";
+import { listOrgMembers, type OrgMember } from "@/lib/team";
 import { effectiveMaxFileBytes, resolvePlan } from "@/lib/plans";
 import { buildPortalUrl } from "@/lib/portal-url";
 
@@ -98,6 +106,19 @@ export default async function WorkspaceDetailPage({
     ? buildPortalUrl(baseUrl, shareLink.token, workspace.slug)
     : null;
 
+  // Accès interne (espaces internes uniquement) : groupes, membres, grants.
+  let spaceAccess: WorkspaceAccessEntry[] = [];
+  let accessGroups: GroupWithMembers[] = [];
+  let accessMembers: OrgMember[] = [];
+  if (isInternal && membership) {
+    [spaceAccess, accessGroups, accessMembers] = await Promise.all([
+      listWorkspaceAccess(workspace.id),
+      listGroupsWithMembers(membership.organization.id),
+      listOrgMembers(membership.organization.id),
+    ]);
+  }
+  const canManageAccess = membership ? membership.role !== "member" : false;
+
   // Contenu du rail latéral : partagé entre la colonne desktop et le volet
   // repliable mobile (le Drive reste plein écran par défaut sur mobile).
   const rail = (
@@ -115,13 +136,13 @@ export default async function WorkspaceDetailPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-start gap-3 rounded-lg bg-muted/50 p-3">
-              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">
-                La gestion fine des accès par groupe d&apos;utilisateurs
-                (qui voit quel espace) arrive très prochainement.
-              </p>
-            </div>
+            <SpaceAccessPanel
+              workspaceId={workspace.id}
+              access={spaceAccess}
+              groups={accessGroups}
+              members={accessMembers}
+              canManage={canManageAccess}
+            />
           </CardContent>
         </Card>
       ) : (
