@@ -42,6 +42,7 @@ import { getWorkspaceActivity } from "@/lib/activity";
 import { getWorkspaceDecisions } from "@/lib/decisions";
 import { getCurrentMembership } from "@/lib/organizations";
 import { effectiveMaxFileBytes, resolvePlan } from "@/lib/plans";
+import { buildPortalUrl } from "@/lib/portal-url";
 
 export const metadata: Metadata = {
   title: "Espace client",
@@ -90,7 +91,9 @@ export default async function WorkspaceDetailPage({
   const host = headerList.get("host") ?? "localhost:3000";
   const proto = headerList.get("x-forwarded-proto") ?? "http";
   const baseUrl = `${proto}://${host}`;
-  const portalUrl = shareLink ? `${baseUrl}/p/${shareLink.token}` : null;
+  const portalUrl = shareLink
+    ? buildPortalUrl(baseUrl, shareLink.token, workspace.slug)
+    : null;
 
   // Synthèse des décisions sur les documents visibles client (pipeline).
   const visibleDocs = documents.filter((d) => d.is_visible_to_client);
@@ -117,6 +120,7 @@ export default async function WorkspaceDetailPage({
             workspaceId={workspace.id}
             link={shareLink}
             baseUrl={baseUrl}
+            slug={workspace.slug}
           />
         </CardContent>
       </Card>

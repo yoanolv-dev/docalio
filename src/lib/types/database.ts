@@ -92,6 +92,8 @@ export interface Workspace {
   id: string;
   organization_id: string;
   name: string;
+  /** Identifiant d'URL pour le sous-domaine de marque (ex. « margot »). */
+  slug: string | null;
   client_company: string | null;
   client_email: string | null;
   client_phone: string | null;
@@ -145,6 +147,9 @@ export interface PortalData {
   workspace: {
     name: string;
     client_company: string | null;
+    logo_url: string | null;
+    primary_color: string | null;
+    slug: string | null;
   };
   folders: PortalFolder[];
   documents: PortalDocument[];

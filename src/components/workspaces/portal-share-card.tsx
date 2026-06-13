@@ -21,6 +21,7 @@ import {
   type ShareLinkState,
 } from "@/lib/actions/share-links";
 import { formatDate } from "@/lib/utils";
+import { buildPortalUrl } from "@/lib/portal-url";
 import type { ShareLink } from "@/lib/types/database";
 
 function SubmitButton({
@@ -45,14 +46,16 @@ export function PortalShareCard({
   workspaceId,
   link,
   baseUrl,
+  slug,
 }: {
   workspaceId: string;
   link: ShareLink | null;
   baseUrl: string;
+  slug?: string | null;
 }) {
   const [copied, setCopied] = useState(false);
 
-  const url = link ? `${baseUrl}/p/${link.token}` : "";
+  const url = link ? buildPortalUrl(baseUrl, link.token, slug ?? null) : "";
 
   async function copy() {
     if (!url) return;

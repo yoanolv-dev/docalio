@@ -63,7 +63,11 @@ export default async function PortalPage({
 
   const decisions = await getPortalDecisions(token);
   const { organization, workspace, documents, folders } = portal;
-  const accent = organization.primary_color ?? "#1c2a4e";
+  // Branding par client : la couleur et le logo de l'espace priment sur ceux de
+  // l'organisation, pour un portail vraiment personnalisé par client.
+  const accent =
+    workspace.primary_color ?? organization.primary_color ?? "#2563eb";
+  const logoUrl = workspace.logo_url ?? organization.logo_url;
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -76,10 +80,10 @@ export default async function PortalPage({
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
           <div className="flex items-center gap-3">
-            {organization.logo_url ? (
+            {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={organization.logo_url}
+                src={logoUrl}
                 alt={organization.name}
                 className="h-10 w-10 rounded-lg object-cover shadow-sm"
               />

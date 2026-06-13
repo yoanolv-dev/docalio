@@ -20,6 +20,31 @@ function nullable(formData: FormData, key: string): string | null {
   return text(formData, key) || null;
 }
 
+/** Normalise un identifiant d'URL (sous-domaine) : minuscules, a-z0-9-, borné. */
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+}
+
+/** Lit + valide le slug du formulaire. Retourne { slug } ou { error }. */
+function readSlug(formData: FormData): { slug: string | null; error?: string } {
+  const raw = text(formData, "slug");
+  if (!raw) return { slug: null };
+  const slug = slugify(raw);
+  if (slug.length < 2) {
+    return {
+      slug: null,
+      error: "Identifiant d'URL invalide (lettres, chiffres et tirets, 2 min.).",
+    };
+  }
+  return { slug };
+}
+
 /**
  * Vérifie le quota d'espaces clients actifs du plan. Retourne un message
  * d'erreur si la limite est atteinte, ou `null` si l'opération est autorisée.
@@ -72,16 +97,21 @@ export async function createWorkspaceAction(
     if (limitError) return { ok: false, message: limitError };
   }
 
+  const { slug, error: slugError } = readSlug(formData);
+  if (slugError) return { ok: false, message: slugError };
+
   const { data, error } = await supabase
     .from("workspaces")
     .insert({
       organization_id: membership.organization.id,
       created_by: user.id,
       name,
+      slug,
       client_company: nullable(formData, "client_company"),
       client_email: nullable(formData, "client_email"),
       client_phone: nullable(formData, "client_phone"),
       status,
+      logo_url: nullable(formData, "logo_url"),
       primary_color: nullable(formData, "primary_color"),
       internal_note: nullable(formData, "internal_note"),
     })
@@ -89,6 +119,12 @@ export async function createWorkspaceAction(
     .single();
 
   if (error || !data) {
+    if (error?.code === "23505") {
+      return {
+        ok: false,
+        message: "Ce sous-domaine est déjà utilisé. Choisissez-en un autre.",
+      };
+    }
     return { ok: false, message: "Création impossible. Veuillez réessayer." };
   }
 
@@ -141,20 +177,31 @@ export async function updateWorkspaceAction(
     }
   }
 
+  const { slug, error: slugError } = readSlug(formData);
+  if (slugError) return { ok: false, message: slugError };
+
   const { error } = await supabase
     .from("workspaces")
     .update({
       name,
+      slug,
       client_company: nullable(formData, "client_company"),
       client_email: nullable(formData, "client_email"),
       client_phone: nullable(formData, "client_phone"),
       status,
+      logo_url: nullable(formData, "logo_url"),
       primary_color: nullable(formData, "primary_color"),
       internal_note: nullable(formData, "internal_note"),
     })
     .eq("id", id);
 
   if (error) {
+    if (error.code === "23505") {
+      return {
+        ok: false,
+        message: "Ce sous-domaine est déjà utilisé. Choisissez-en un autre.",
+      };
+    }
     return { ok: false, message: "Mise à jour impossible. Veuillez réessayer." };
   }
 

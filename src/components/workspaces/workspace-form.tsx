@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,10 @@ export function WorkspaceForm({
     WorkspaceFormState,
     FormData
   >(action, null);
+
+  const [slug, setSlug] = useState(workspace?.slug ?? "");
+  const portalDomain =
+    process.env.NEXT_PUBLIC_PORTAL_DOMAIN || "docalio.app";
 
   return (
     <form action={formAction} className="space-y-4">
@@ -94,19 +98,53 @@ export function WorkspaceForm({
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="primary_color">Couleur principale (optionnel)</Label>
-        <div className="flex items-center gap-3">
+      {/* Personnalisation de l'espace client (sous-domaine, logo, couleur) */}
+      <div className="space-y-4 rounded-xl border border-border bg-muted/30 p-4">
+        <p className="text-sm font-medium">Personnalisation de l&apos;espace</p>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="slug">Sous-domaine (optionnel)</Label>
           <Input
-            id="primary_color"
-            name="primary_color"
-            type="color"
-            defaultValue={workspace?.primary_color ?? "#4f46e5"}
-            className="h-9 w-14 cursor-pointer p-1"
+            id="slug"
+            name="slug"
+            placeholder="boulangerie-margot"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            autoComplete="off"
           />
-          <span className="text-xs text-muted-foreground">
-            Personnalise l&apos;espace client.
-          </span>
+          <p className="text-xs text-muted-foreground">
+            Adresse du portail :{" "}
+            <span className="font-medium text-foreground">
+              {(slug.trim() || "votre-client").toLowerCase()}.{portalDomain}
+            </span>
+          </p>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="logo_url">Logo (URL, optionnel)</Label>
+          <Input
+            id="logo_url"
+            name="logo_url"
+            type="url"
+            placeholder="https://…/logo.png"
+            defaultValue={workspace?.logo_url ?? ""}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="primary_color">Couleur principale</Label>
+          <div className="flex items-center gap-3">
+            <Input
+              id="primary_color"
+              name="primary_color"
+              type="color"
+              defaultValue={workspace?.primary_color ?? "#2563eb"}
+              className="h-9 w-14 cursor-pointer p-1"
+            />
+            <span className="text-xs text-muted-foreground">
+              Couleur de marque du portail client.
+            </span>
+          </div>
         </div>
       </div>
 
