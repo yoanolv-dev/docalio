@@ -124,7 +124,7 @@ export async function updateOrganizationAction(
     };
   }
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings/organisation");
   revalidatePath("/dashboard");
   return { ok: true, message: "Modifications enregistrées." };
 }

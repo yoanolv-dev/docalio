@@ -3,11 +3,13 @@ import type { Metadata } from "next";
 import {
   ArrowRight,
   ArrowUpRight,
+  Building2,
   CheckCircle2,
   Eye,
   FolderLock,
   Lock,
   ShieldCheck,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,32 +26,44 @@ import { ComparisonTable } from "@/components/marketing/comparison-table";
 import { Faq } from "@/components/marketing/faq";
 
 export const metadata: Metadata = {
-  title: "Docalio — L'espace documentaire client",
+  title: "Docalio — L'espace documentaire sécurisé, interne & externe",
   description:
-    "Un espace privé par client : déposez vos documents comme dans un Drive, partagez un lien sécurisé sans compte, suivez les consultations et recueillez les décisions.",
+    "Un Drive privé pour votre équipe et des partages clients maîtrisés. Organisez vos documents, donnez le bon accès à chaque groupe, partagez à l'externe via un lien sécurisé sans compte — traçable et révocable.",
   alternates: { canonical: "/" },
 };
 
 const FEATURE_SECTIONS = [
   {
-    eyebrow: "Votre Drive client",
+    eyebrow: "Votre Drive d'entreprise",
     title: "Vos documents, rangés comme dans l'explorateur Windows",
     description:
-      "Arborescence de dossiers, glisser-déposer, renommer, dupliquer, supprimer, vue grandes icônes ou détails. Rien à apprendre. Chaque fichier reste privé tant que vous ne le rendez pas visible — d'un seul clic.",
+      "Arborescence de dossiers, glisser-déposer, renommer, dupliquer, vue grandes icônes ou détails. Rien à apprendre — pour votre équipe comme pour vos espaces clients. Chaque fichier reste privé tant que vous ne le partagez pas.",
     points: [
       "Volet d'arborescence, fil d'Ariane et double-clic, comme à la maison",
       "Glissez vos fichiers pour les importer ou les déplacer",
-      "« Visible client » en un clic, le reste demeure privé",
+      "Accès aux dossiers d'entreprise, où que soit votre équipe",
     ],
     Preview: DrivePreview,
   },
   {
-    eyebrow: "Le portail client",
-    title: "Un espace clair, à votre image, sans compte à créer",
+    eyebrow: "Accès maîtrisés",
+    title: "Chaque équipe voit exactement ce qu'elle doit voir",
+    description:
+      "Réunissez vos collaborateurs en groupes, puis autorisez-les espace par espace. Les commerciaux accèdent à la documentation commerciale, les RH à leurs dossiers — et rien d'autre. Modifiable en temps réel.",
+    points: [
+      "Groupes d'utilisateurs gérés par l'administrateur",
+      "Accès par espace, accordé ou révoqué en un clic",
+      "Isolation stricte : personne ne voit ce qui ne le concerne pas",
+    ],
+    Preview: DashboardPreview,
+  },
+  {
+    eyebrow: "Le partage externe",
+    title: "Partagez avec vos clients, sans compte à créer",
     description:
       "Votre client ouvre un lien et comprend immédiatement quoi faire : consulter, télécharger, puis valider ou demander une modification. Vous suivez tout en temps réel.",
     points: [
-      "Aucune inscription : un simple lien sécurisé",
+      "Aucune inscription : un simple lien sécurisé, expirable et révocable",
       "Documents rangés par dossier, progression visible",
       "Décisions commentées : validé, à modifier, refusé",
     ],
@@ -59,19 +73,34 @@ const FEATURE_SECTIONS = [
 
 const VALUES = [
   {
-    icon: FolderLock,
-    title: "Privé par défaut",
-    text: "Stockage privé, liens expirables et révocables, téléchargement contrôlé fichier par fichier.",
+    icon: Building2,
+    title: "Interne & externe",
+    text: "Un Drive privé pour votre équipe et des partages clients maîtrisés, au même endroit.",
+  },
+  {
+    icon: Lock,
+    title: "Le bon accès, à la bonne personne",
+    text: "Groupes d'utilisateurs, accès par espace, isolation stricte entre équipes et organisations.",
   },
   {
     icon: Eye,
     title: "Vous savez où ça en est",
-    text: "Ouvertures, consultations, téléchargements : fini les relances à l'aveugle.",
+    text: "Ouvertures, consultations, décisions côté client : fini les relances à l'aveugle.",
+  },
+];
+
+const DUAL_USE = [
+  {
+    icon: Users,
+    title: "En interne",
+    text: "Centralisez les documents de l'entreprise et donnez à chaque équipe l'accès qui lui revient. Vos commerciaux itinérants retrouvent les bons fichiers, où qu'ils soient.",
+    points: ["Dossiers d'équipe", "Accès par groupe", "Disponible partout"],
   },
   {
-    icon: CheckCircle2,
-    title: "Des décisions, pas des emails",
-    text: "Validation, modification ou refus recueillis directement dans l'espace, avec commentaire.",
+    icon: Building2,
+    title: "Avec vos clients",
+    text: "Partagez un espace privé par client via un lien sécurisé, sans compte. Suivez les consultations et recueillez les décisions, sans relancer par email.",
+    points: ["Lien sans compte", "Suivi des consultations", "Décisions intégrées"],
   },
 ];
 
@@ -79,7 +108,12 @@ const FAQ_ITEMS = [
   {
     question: "En quoi est-ce différent d'un Drive ou de WeTransfer ?",
     answer:
-      "Docalio n'est pas un simple stockage. Chaque client a un espace privé, organisé en dossiers, que vous partagez via un lien — et où votre client consulte, télécharge et décide. Vous suivez tout, sans relancer à l'aveugle.",
+      "Docalio n'est pas un simple stockage. C'est un espace documentaire sécurisé pour votre entreprise : vos équipes y accèdent selon leurs droits, et vous partagez à l'externe via un lien — où votre client consulte, télécharge et décide. Vous suivez tout, sans relancer à l'aveugle.",
+  },
+  {
+    question: "Peut-on l'utiliser uniquement en interne ?",
+    answer:
+      "Oui. Beaucoup d'entreprises utilisent Docalio comme Drive d'équipe sécurisé : vos collaborateurs accèdent aux dossiers selon leur groupe, où qu'ils soient. Le partage externe avec vos clients reste optionnel.",
   },
   {
     question: "Mes clients doivent-ils créer un compte ?",
@@ -120,18 +154,19 @@ export default function HomePage() {
             href="/fonctionnalites"
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
           >
-            Nouveau · Drive client façon explorateur
+            Nouveau · Interne &amp; externe, un seul espace sécurisé
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
           <h1 className="text-balance mx-auto mt-6 max-w-3xl text-5xl font-semibold tracking-tight sm:text-7xl">
             Le bon document,
             <br />
-            <span className="text-primary">au bon client.</span>
+            <span className="text-primary">à la bonne personne.</span>
           </h1>
           <p className="text-pretty mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            Un espace privé par client. Rangez vos documents comme dans
-            l&apos;explorateur de votre ordinateur, partagez un lien sécurisé
-            sans compte, recueillez les décisions — au même endroit.
+            L&apos;espace documentaire sécurisé de votre entreprise. Un Drive
+            privé pour votre équipe, des accès maîtrisés par groupe, et des
+            partages clients via un lien sécurisé — sans compte, traçable,
+            révocable.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button size="lg" asChild>
@@ -170,6 +205,47 @@ export default function HomePage() {
                   {v.text}
                 </p>
               </div>
+            );
+          })}
+        </div>
+      </Section>
+
+      {/* Un outil, deux usages */}
+      <Section>
+        <SectionHeading
+          eyebrow="Un outil, deux usages"
+          title="En interne comme avec vos clients"
+          description="La même brique sécurisée, que vous partagiez entre collègues ou avec l'extérieur."
+        />
+        <div className="mt-10 grid gap-5 md:grid-cols-2">
+          {DUAL_USE.map((u) => {
+            const Icon = u.icon;
+            return (
+              <Reveal
+                key={u.title}
+                className="flex flex-col rounded-2xl border border-border bg-card p-6"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-subtle text-primary">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <h3 className="mt-4 text-lg font-semibold tracking-tight">
+                  {u.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {u.text}
+                </p>
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {u.points.map((p) => (
+                    <li
+                      key={p}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
             );
           })}
         </div>
@@ -294,10 +370,11 @@ export default function HomePage() {
       <Section className="py-16 sm:py-20">
         <div className="rounded-3xl border border-border bg-foreground px-8 py-16 text-center text-background">
           <h2 className="text-balance mx-auto max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            Donnez à vos clients un espace à la hauteur de votre travail
+            Un espace documentaire à la hauteur de votre entreprise
           </h2>
           <p className="mx-auto mt-4 max-w-md text-background/70">
-            Créez votre premier espace client sécurisé en quelques minutes.
+            Créez votre premier espace sécurisé en quelques minutes — en interne
+            ou avec vos clients.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button size="lg" variant="secondary" asChild>

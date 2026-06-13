@@ -45,7 +45,7 @@ export async function inviteMemberAction(
   });
   if (error) return { ok: false, message: "Création de l'invitation impossible." };
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings/equipe");
   return { ok: true, token };
 }
 
@@ -57,7 +57,7 @@ export async function revokeInviteAction(inviteId: string): Promise<TeamResult> 
     .delete()
     .eq("id", inviteId);
   if (error) return { ok: false, message: "Suppression impossible." };
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings/equipe");
   return { ok: true };
 }
 
@@ -72,7 +72,7 @@ export async function setMemberRoleAction(
     p_role: role,
   });
   if (error) return { ok: false, message: error.message || "Action impossible." };
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings/equipe");
   return { ok: true };
 }
 
@@ -83,6 +83,6 @@ export async function removeMemberAction(memberId: string): Promise<TeamResult> 
     p_member_id: memberId,
   });
   if (error) return { ok: false, message: error.message || "Action impossible." };
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings/equipe");
   return { ok: true };
 }

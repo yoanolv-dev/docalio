@@ -50,9 +50,9 @@ export function CommandPalette({
       { id: "spaces", label: "Espaces clients", icon: FolderClosed, keywords: "accueil home dashboard", run: go("/dashboard") },
       { id: "new", label: "Nouvel espace client", hint: "Créer", icon: Plus, keywords: "ajouter créer", run: go("/dashboard/workspaces/new") },
       { id: "notifs", label: "Notifications", icon: Bell, keywords: "activité alertes", run: go("/dashboard/notifications") },
-      { id: "team", label: "Équipe & accès", hint: "Inviter", icon: Users, keywords: "utilisateurs membres invitation rôles collaborateurs", run: go("/dashboard/settings#equipe") },
-      { id: "billing", label: "Abonnement", icon: CreditCard, keywords: "plan facturation paiement usage offre", run: go("/dashboard/settings#abonnement") },
-      { id: "settings", label: "Paramètres", icon: Settings, keywords: "organisation compte identité logo", run: go("/dashboard/settings#identite") },
+      { id: "team", label: "Équipe & accès", hint: "Inviter", icon: Users, keywords: "utilisateurs membres invitation rôles collaborateurs groupes", run: go("/dashboard/settings/equipe") },
+      { id: "billing", label: "Abonnement", icon: CreditCard, keywords: "plan facturation paiement usage offre", run: go("/dashboard/settings/abonnement") },
+      { id: "settings", label: "Paramètres", icon: Settings, keywords: "organisation compte identité logo", run: go("/dashboard/settings/organisation") },
       {
         id: "signout",
         label: "Déconnexion",

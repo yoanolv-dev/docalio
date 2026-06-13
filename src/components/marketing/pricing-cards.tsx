@@ -46,12 +46,18 @@ export function PricingCards({
                 <span className="text-2xl font-semibold tracking-tight">
                   Sur devis
                 </span>
+              ) : plan.priceEur === 0 ? (
+                <span className="text-3xl font-semibold tracking-tight">
+                  Gratuit
+                </span>
               ) : (
                 <>
                   <span className="text-3xl font-semibold tracking-tight">
                     {plan.priceEur} €
                   </span>
-                  <span className="text-sm text-muted-foreground">/mois</span>
+                  <span className="text-sm text-muted-foreground">
+                    /utilisateur/mois
+                  </span>
                 </>
               )}
             </div>

@@ -83,14 +83,14 @@ export function PlanUsageCard({
           limitLabel={formatStorage(limits.storageBytes)}
         />
         <UsageMeter
-          label="Espaces clients actifs"
+          label="Espaces actifs"
           used={usage.activeWorkspaces}
           limit={limits.activeWorkspaces}
           usedLabel={String(usage.activeWorkspaces)}
           limitLabel={formatCount(limits.activeWorkspaces)}
         />
         <UsageMeter
-          label="Utilisateurs"
+          label="Utilisateurs (sièges)"
           used={usage.members}
           limit={limits.users}
           usedLabel={String(usage.members)}
@@ -99,6 +99,7 @@ export function PlanUsageCard({
 
         <p className="text-xs text-muted-foreground">
           Taille maximale par fichier : {formatStorage(limits.maxFileBytes)}.
+          Les destinataires externes (portail client) sont illimités et gratuits.
         </p>
       </CardContent>
     </Card>

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 const REASONS = [
   "Voir Docalio en action sur votre cas",
-  "Profiter de l’offre bêta (Pro à 29 €/mois pendant 6 mois)",
+  "Profiter de l’offre bêta (Pro à 4,50 €/utilisateur/mois pendant 6 mois)",
   "Échanger sur vos exigences de sécurité",
 ];
 

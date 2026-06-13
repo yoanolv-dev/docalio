@@ -25,13 +25,13 @@ import { ConfirmDeleteDialog } from "@/components/shared/confirm-delete-dialog";
 import { CopyButton } from "@/components/shared/copy-button";
 import { WorkspaceStatusBadge } from "@/components/workspaces/workspace-status-badge";
 import { EditWorkspaceDialog } from "@/components/workspaces/edit-workspace-dialog";
-import { WorkspacePipeline } from "@/components/workspaces/workspace-pipeline";
 import {
   WorkspaceEngagementStats,
   WorkspaceActivityTimeline,
 } from "@/components/workspaces/workspace-activity";
 import { ExplorerDrive } from "@/components/drive/explorer-drive";
 import { PortalShareCard } from "@/components/workspaces/portal-share-card";
+import { SpaceAccessPanel } from "@/components/workspaces/space-access-panel";
 import {
   archiveWorkspaceAction,
   deleteWorkspaceAction,
@@ -43,6 +43,13 @@ import { getActiveShareLink } from "@/lib/share-links";
 import { getWorkspaceActivity } from "@/lib/activity";
 import { getWorkspaceDecisions } from "@/lib/decisions";
 import { getCurrentMembership } from "@/lib/organizations";
+import {
+  listWorkspaceAccess,
+  listGroupsWithMembers,
+  type WorkspaceAccessEntry,
+  type GroupWithMembers,
+} from "@/lib/access";
+import { listOrgMembers, type OrgMember } from "@/lib/team";
 import { effectiveMaxFileBytes, resolvePlan } from "@/lib/plans";
 import { buildPortalUrl } from "@/lib/portal-url";
 
@@ -99,10 +106,18 @@ export default async function WorkspaceDetailPage({
     ? buildPortalUrl(baseUrl, shareLink.token, workspace.slug)
     : null;
 
-  // Synthèse des décisions sur les documents visibles client (pipeline).
-  const visibleDocs = documents.filter((d) => d.is_visible_to_client);
-  const decided = visibleDocs.filter((d) => decisions[d.id]);
-  const pendingCount = visibleDocs.length - decided.length;
+  // Accès interne (espaces internes uniquement) : groupes, membres, grants.
+  let spaceAccess: WorkspaceAccessEntry[] = [];
+  let accessGroups: GroupWithMembers[] = [];
+  let accessMembers: OrgMember[] = [];
+  if (isInternal && membership) {
+    [spaceAccess, accessGroups, accessMembers] = await Promise.all([
+      listWorkspaceAccess(workspace.id),
+      listGroupsWithMembers(membership.organization.id),
+      listOrgMembers(membership.organization.id),
+    ]);
+  }
+  const canManageAccess = membership ? membership.role !== "member" : false;
 
   // Contenu du rail latéral : partagé entre la colonne desktop et le volet
   // repliable mobile (le Drive reste plein écran par défaut sur mobile).
@@ -121,13 +136,13 @@ export default async function WorkspaceDetailPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-start gap-3 rounded-lg bg-muted/50 p-3">
-              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">
-                La gestion fine des accès par groupe d&apos;utilisateurs
-                (qui voit quel espace) arrive très prochainement.
-              </p>
-            </div>
+            <SpaceAccessPanel
+              workspaceId={workspace.id}
+              access={spaceAccess}
+              groups={accessGroups}
+              members={accessMembers}
+              canManage={canManageAccess}
+            />
           </CardContent>
         </Card>
       ) : (
@@ -291,22 +306,6 @@ export default async function WorkspaceDetailPage({
           )}
         </div>
       </div>
-
-      {/* Où en est le dossier — bandeau compact (portail client) */}
-      {!isInternal && (
-        <div className="shrink-0 rounded-xl border border-border bg-card px-4 py-2.5">
-          <WorkspacePipeline
-            input={{
-              documentCount: documents.length,
-              visibleCount: visibleDocs.length,
-              hasActiveLink: Boolean(shareLink),
-              opens: activity.totalOpens,
-              decidedCount: decided.length,
-              pendingCount,
-            }}
-          />
-        </div>
-      )}
 
       {/* Corps : Drive plein écran + rail latéral (desktop) */}
       <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_340px]">
