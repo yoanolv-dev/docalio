@@ -25,3 +25,19 @@ export function portalSubdomainPreview(slug: string | null | undefined): string 
   if (domain && slug) return `${slug}.${domain}`;
   return null;
 }
+
+/**
+ * URL de la page d'accueil de marque de l'espace (sans jeton). Avec un domaine
+ * de portail configuré : https://{slug}.{domaine}. Sinon, route par chemin
+ * {baseUrl}/espace/{slug} — fonctionnelle dès aujourd'hui, prête pour le
+ * sous-domaine au lancement. Renvoie null sans slug.
+ */
+export function buildPortalHomeUrl(
+  baseUrl: string,
+  slug: string | null | undefined
+): string | null {
+  if (!slug) return null;
+  const domain = process.env.NEXT_PUBLIC_PORTAL_DOMAIN?.trim();
+  if (domain) return `https://${slug}.${domain}`;
+  return `${baseUrl}/espace/${slug}`;
+}

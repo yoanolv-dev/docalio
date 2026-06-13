@@ -82,12 +82,14 @@ function PortalDocumentCard({
   doc,
   folderName,
   decision,
+  accent,
   onDecision,
 }: {
   token: string;
   doc: PortalDocument;
   folderName: string | null;
   decision: PortalDecision | null;
+  accent: string;
   onDecision: (documentId: string, decision: PortalDecision) => void;
 }) {
   const ext = extensionFromMime(doc.file_type);
@@ -133,7 +135,7 @@ function PortalDocumentCard({
   }
 
   return (
-    <li className="animate-fade-up overflow-hidden rounded-2xl border border-border bg-card">
+    <li className="animate-fade-up group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:border-border/60 hover:shadow-md">
       <div className="p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <FileIcon fileType={doc.file_type} />
@@ -167,7 +169,13 @@ function PortalDocumentCard({
 
         {doc.allow_download && (
           <div className="mt-3.5 flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" onClick={handlePreview} disabled={busy !== null} className="flex-1 sm:flex-none">
+            <Button
+              size="sm"
+              onClick={handlePreview}
+              disabled={busy !== null}
+              style={{ backgroundColor: accent }}
+              className="flex-1 border-transparent text-white shadow-sm transition-opacity hover:opacity-90 sm:flex-none"
+            >
               {busy === "preview" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
               Consulter
             </Button>
@@ -336,7 +344,13 @@ export function PortalDocuments({
       {/* Avancement */}
       <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-semibold">Avancement</p>
+          <p className="flex items-center gap-2 text-sm font-semibold">
+            <span
+              className="inline-block h-2 w-2 rounded-full"
+              style={{ backgroundColor: accent }}
+            />
+            Avancement
+          </p>
           <p className="text-sm text-muted-foreground">
             <span className="font-semibold text-foreground tabular-nums">{done}</span>
             /{total} traité{done > 1 ? "s" : ""}
@@ -363,10 +377,13 @@ export function PortalDocuments({
           <button
             type="button"
             onClick={() => setActiveFolder(null)}
+            style={
+              activeFolder === null ? { backgroundColor: accent } : undefined
+            }
             className={cn(
               "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-medium transition-colors",
               activeFolder === null
-                ? "border-transparent bg-foreground text-background"
+                ? "border-transparent text-white shadow-sm"
                 : "border-border bg-card text-muted-foreground hover:text-foreground"
             )}
           >
@@ -378,10 +395,13 @@ export function PortalDocuments({
               key={f.id}
               type="button"
               onClick={() => setActiveFolder(f.id)}
+              style={
+                activeFolder === f.id ? { backgroundColor: accent } : undefined
+              }
               className={cn(
                 "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-medium transition-colors",
                 activeFolder === f.id
-                  ? "border-transparent bg-foreground text-background"
+                  ? "border-transparent text-white shadow-sm"
                   : "border-border bg-card text-muted-foreground hover:text-foreground"
               )}
             >
@@ -396,7 +416,10 @@ export function PortalDocuments({
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold">À traiter</h2>
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground tabular-nums">
+            <span
+              className="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold text-white tabular-nums shadow-sm"
+              style={{ backgroundColor: accent }}
+            >
               {pending.length}
             </span>
           </div>
@@ -408,6 +431,7 @@ export function PortalDocuments({
                 doc={doc}
                 folderName={doc.folder_id ? folderName.get(doc.folder_id) ?? null : null}
                 decision={decisions[doc.id] ?? null}
+                accent={accent}
                 onDecision={handleDecision}
               />
             ))}
@@ -426,6 +450,7 @@ export function PortalDocuments({
                 doc={doc}
                 folderName={doc.folder_id ? folderName.get(doc.folder_id) ?? null : null}
                 decision={decisions[doc.id] ?? null}
+                accent={accent}
                 onDecision={handleDecision}
               />
             ))}

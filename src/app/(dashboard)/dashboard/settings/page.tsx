@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Users } from "lucide-react";
-import { PageHeader } from "@/components/shared/page-header";
+import { Building2, CreditCard, Users } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -23,6 +22,12 @@ export const metadata: Metadata = {
   title: "Paramètres",
 };
 
+const SECTION_NAV = [
+  { href: "#abonnement", label: "Abonnement", icon: CreditCard },
+  { href: "#equipe", label: "Équipe", icon: Users },
+  { href: "#identite", label: "Identité", icon: Building2 },
+];
+
 export default async function SettingsPage() {
   const supabase = await createClient();
   const {
@@ -43,24 +48,47 @@ export default async function SettingsPage() {
   const currentPlan = resolvePlan(membership.organization).id;
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-8">
-      <PageHeader
-        title="Paramètres de l'organisation"
-        description="Gérez votre équipe, votre abonnement et l'identité de votre organisation."
-      />
+    <div className="mx-auto w-full max-w-3xl space-y-6">
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Paramètres de l&apos;organisation
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Gérez votre abonnement, votre équipe et l&apos;identité de votre
+          organisation.
+        </p>
+      </header>
 
-      <section className="space-y-4">
+      {/* Navigation par section — accès direct aux fonctionnalités clés */}
+      <nav className="sticky top-0 z-20 -mx-1 flex gap-1.5 overflow-x-auto rounded-xl border border-border bg-background/85 px-1 py-1 backdrop-blur">
+        {SECTION_NAV.map((s) => {
+          const Icon = s.icon;
+          return (
+            <a
+              key={s.href}
+              href={s.href}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <Icon className="h-4 w-4" />
+              {s.label}
+            </a>
+          );
+        })}
+      </nav>
+
+      {/* Abonnement & usage */}
+      <section id="abonnement" className="scroll-mt-16 space-y-4">
         <PlanUsageCard organization={membership.organization} usage={usage} />
         <PlansOverview currentPlan={currentPlan} />
       </section>
 
       {/* Équipe — collaboration à plusieurs */}
-      <section className="space-y-4">
+      <section id="equipe" className="scroll-mt-16">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" />
-              <CardTitle>Équipe</CardTitle>
+              <CardTitle>Équipe &amp; accès</CardTitle>
             </div>
             <CardDescription>
               Invitez vos collègues à collaborer sur les espaces clients et
@@ -78,10 +106,17 @@ export default async function SettingsPage() {
         </Card>
       </section>
 
-      <section className="space-y-4">
+      {/* Identité de l'organisation */}
+      <section id="identite" className="scroll-mt-16">
         <Card className="max-w-xl">
           <CardHeader>
-            <CardTitle>Identité</CardTitle>
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-primary" />
+              <CardTitle>Identité</CardTitle>
+            </div>
+            <CardDescription>
+              Nom, logo et couleur — repris sur vos portails clients.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <OrganizationSettingsForm

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { FileText, Search } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { CommandPalette } from "@/components/layout/command-palette";
-import { getInitials } from "@/lib/utils";
+import { AccountMenu } from "@/components/layout/account-menu";
 import type { AppNotification } from "@/lib/types/database";
 
 /**
@@ -59,14 +59,11 @@ export function TopBar({
 
             <NotificationBell unreadCount={unreadCount} recent={recentNotifications} />
 
-            <Link
-              href="/dashboard/settings"
-              aria-label="Paramètres du compte"
-              title={userName ?? userEmail}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background transition-opacity hover:opacity-90"
-            >
-              {getInitials(userName ?? userEmail)}
-            </Link>
+            <AccountMenu
+              userName={userName}
+              userEmail={userEmail}
+              orgName={orgName}
+            />
           </div>
         </div>
       </header>

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { LogoUploader } from "@/components/settings/logo-uploader";
 import { WORKSPACE_STATUS_OPTIONS } from "@/components/workspaces/workspace-status-badge";
 import type { WorkspaceFormState } from "@/lib/actions/workspaces";
 import type { Workspace } from "@/lib/types/database";
@@ -121,13 +122,11 @@ export function WorkspaceForm({
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="logo_url">Logo (URL, optionnel)</Label>
-          <Input
-            id="logo_url"
-            name="logo_url"
-            type="url"
-            placeholder="https://…/logo.png"
-            defaultValue={workspace?.logo_url ?? ""}
+          <Label>Logo de l&apos;espace</Label>
+          <LogoUploader
+            scope={workspace?.id ?? "new"}
+            defaultValue={workspace?.logo_url}
+            hint="Affiché en tête du portail client. PNG, JPG ou WebP — 2 Mo max."
           />
         </div>
 

@@ -68,8 +68,14 @@ export function WorkspacesList({
             <Link
               key={w.id}
               href={`/dashboard/workspaces/${w.id}`}
-              className="group relative flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-foreground/20 hover:shadow-[0_4px_24px_-12px_rgba(0,0,0,0.18)]"
+              className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-[0_8px_28px_-14px_rgba(0,0,0,0.22)]"
             >
+              {/* Liseré de marque du client (apparaît au survol) */}
+              <span
+                aria-hidden
+                className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 transition-transform duration-200 group-hover:scale-x-100"
+                style={{ backgroundColor: w.primary_color ?? "var(--color-primary)" }}
+              />
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
                   <span

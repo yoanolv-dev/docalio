@@ -44,7 +44,7 @@ export default async function DashboardLayout({
         unreadCount={unreadCount}
         recentNotifications={recentNotifications}
       />
-      <main className="min-h-0 w-full flex-1 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
+      <main className="min-h-0 w-full flex-1 scroll-smooth overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
         {children}
       </main>
     </div>

@@ -70,14 +70,26 @@ export default async function PortalPage({
   const logoUrl = workspace.logo_url ?? organization.logo_url;
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div
+      className="relative min-h-screen bg-muted/30"
+      style={{ ["--brand" as string]: accent }}
+    >
       <PortalTracker token={token} />
 
+      {/* Halo de marque (en arrière-plan) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-64"
+        style={{
+          background: `radial-gradient(70% 100% at 50% 0%, color-mix(in oklab, ${accent} 14%, transparent), transparent 72%)`,
+        }}
+      />
+
       {/* Filet de marque */}
-      <div aria-hidden className="h-1" style={{ backgroundColor: accent }} />
+      <div aria-hidden className="h-1.5" style={{ backgroundColor: accent }} />
 
       {/* En-tête de marque */}
-      <header className="border-b border-border bg-card">
+      <header className="relative border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
           <div className="flex items-center gap-3">
             {logoUrl ? (

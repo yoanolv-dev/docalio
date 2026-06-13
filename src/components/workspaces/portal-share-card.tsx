@@ -21,7 +21,7 @@ import {
   type ShareLinkState,
 } from "@/lib/actions/share-links";
 import { formatDate } from "@/lib/utils";
-import { buildPortalUrl } from "@/lib/portal-url";
+import { buildPortalUrl, buildPortalHomeUrl } from "@/lib/portal-url";
 import type { ShareLink } from "@/lib/types/database";
 
 function SubmitButton({
@@ -54,8 +54,17 @@ export function PortalShareCard({
   slug?: string | null;
 }) {
   const [copied, setCopied] = useState(false);
+  const [homeCopied, setHomeCopied] = useState(false);
 
   const url = link ? buildPortalUrl(baseUrl, link.token, slug ?? null) : "";
+  const homeUrl = buildPortalHomeUrl(baseUrl, slug ?? null);
+
+  async function copyHome() {
+    if (!homeUrl) return;
+    await navigator.clipboard.writeText(homeUrl);
+    setHomeCopied(true);
+    setTimeout(() => setHomeCopied(false), 2000);
+  }
 
   async function copy() {
     if (!url) return;
@@ -110,6 +119,37 @@ export function PortalShareCard({
         Partagez ce lien avec votre client : il accède aux documents visibles
         sans créer de compte.
       </p>
+
+      {homeUrl && (
+        <div className="rounded-lg border border-dashed border-border bg-muted/30 p-3">
+          <p className="text-xs font-medium">Page d&apos;accueil de marque</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Une page d&apos;accueil personnalisée où le client saisit son lien.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <Input
+              readOnly
+              value={homeUrl}
+              className="font-mono text-xs"
+              onFocus={(e) => e.currentTarget.select()}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={copyHome}
+              aria-label="Copier l'adresse de la page d'accueil"
+              title="Copier l'adresse de la page d'accueil"
+            >
+              {homeCopied ? (
+                <Check className="h-4 w-4 text-emerald-600" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2">
         <form action={regenerateShareLinkAction}>
