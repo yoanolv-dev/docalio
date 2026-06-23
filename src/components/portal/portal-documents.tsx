@@ -9,6 +9,7 @@ import {
   FolderClosed,
   Layers,
   LoaderCircle,
+  LockKeyhole,
   PartyPopper,
   PencilLine,
   Send,
@@ -167,24 +168,29 @@ function PortalDocumentCard({
           </div>
         </div>
 
-        {doc.allow_download && (
-          <div className="mt-3.5 flex flex-wrap gap-2">
-            <Button
-              size="sm"
-              onClick={handlePreview}
-              disabled={busy !== null}
-              style={{ backgroundColor: accent }}
-              className="flex-1 border-transparent text-white shadow-sm transition-opacity hover:opacity-90 sm:flex-none"
-            >
-              {busy === "preview" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
-              Consulter
-            </Button>
+        <div className="mt-3.5 flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            onClick={handlePreview}
+            disabled={busy !== null}
+            style={{ backgroundColor: accent }}
+            className="flex-1 border-transparent text-white shadow-sm transition-opacity hover:opacity-90 sm:flex-none"
+          >
+            {busy === "preview" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+            Consulter
+          </Button>
+          {doc.allow_download ? (
             <Button size="sm" variant="outline" onClick={handleDownload} disabled={busy !== null} className="flex-1 sm:flex-none">
               {busy === "download" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
               Télécharger
             </Button>
-          </div>
-        )}
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+              <LockKeyhole className="h-3.5 w-3.5" />
+              Consultation seule
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="border-t border-border bg-muted/30 px-4 py-3 sm:px-5">
