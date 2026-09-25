@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { PortalDocuments } from "@/components/portal/portal-documents";
 import { PortalTracker } from "@/components/portal/portal-tracker";
+import { PortalRequests } from "@/components/portal/portal-requests";
+import { getPortalRequests } from "@/lib/requests";
 import { getPortalData, getPortalDecisions } from "@/lib/share-links";
 import { getInitials } from "@/lib/utils";
 
@@ -61,7 +63,10 @@ export default async function PortalPage({
 
   if (!portal) return <PortalInvalid />;
 
-  const decisions = await getPortalDecisions(token);
+  const [decisions, requests] = await Promise.all([
+    getPortalDecisions(token),
+    getPortalRequests(token),
+  ]);
   const { organization, workspace, documents, folders } = portal;
   // Branding par client : la couleur et le logo de l'espace priment sur ceux de
   // l'organisation, pour un portail vraiment personnalisé par client.
@@ -138,12 +143,18 @@ export default async function PortalPage({
             {workspace.client_company
               ? ` pour ${workspace.client_company}`
               : " pour vous"}
-            . Consultez vos documents, téléchargez-les et indiquez votre
-            décision en quelques clics.
+            .{" "}
+            {requests.length > 0
+              ? "Déposez les pièces demandées, consultez vos documents et indiquez votre décision en quelques clics."
+              : "Consultez vos documents, téléchargez-les et indiquez votre décision en quelques clics."}
           </p>
         </div>
 
+        {/* Pièces à fournir (collecte) */}
+        <PortalRequests token={token} requests={requests} accent={accent} />
+
         {/* Documents + progression */}
+        {(documents.length > 0 || requests.length === 0) && (
         <PortalDocuments
           token={token}
           documents={documents}
@@ -151,6 +162,7 @@ export default async function PortalPage({
           initialDecisions={decisions}
           accent={accent}
         />
+        )}
 
         {/* Réassurance */}
         <div className="grid gap-3 sm:grid-cols-3">

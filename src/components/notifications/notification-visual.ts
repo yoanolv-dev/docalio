@@ -5,6 +5,7 @@ import {
   CheckCircle,
   XCircle,
   PencilLine,
+  Inbox,
   type LucideIcon,
 } from "lucide-react";
 import type { AppNotification } from "@/lib/types/database";
@@ -27,6 +28,12 @@ export function notificationVisual(n: AppNotification): NotificationVisual {
       return { Icon: Download, className: "bg-primary-subtle text-primary" };
     case "document_opened":
       return { Icon: FileText, className: SKY };
+    case "request_received":
+      return {
+        Icon: Inbox,
+        className:
+          "bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400",
+      };
     case "decision_received":
       if (n.metadata.decision === "approved") {
         return {

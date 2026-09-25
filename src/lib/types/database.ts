@@ -179,13 +179,16 @@ export interface DocumentDecision {
 export type ActivityEventType =
   | "portal_opened"
   | "document_downloaded"
-  | "document_opened";
+  | "document_opened"
+  | "request_fulfilled";
 
 export interface ActivityEvent {
   id: string;
   event_type: ActivityEventType;
   document_id: string | null;
   document_title: string | null;
+  /** Titre de la pièce demandée (évènement request_fulfilled). */
+  request_title?: string | null;
   visitor_id: string | null;
   created_at: string;
 }
@@ -194,7 +197,8 @@ export type NotificationType =
   | "portal_opened"
   | "document_downloaded"
   | "document_opened"
-  | "decision_received";
+  | "decision_received"
+  | "request_received";
 
 /** Charge utile minimale d'une notification (le wording vit côté code). */
 export interface NotificationMetadata {
@@ -202,6 +206,9 @@ export interface NotificationMetadata {
   document_title?: string | null;
   decision?: DecisionType;
   comment?: string | null;
+  request_id?: string;
+  request_title?: string | null;
+  file_name?: string | null;
 }
 
 /**
@@ -218,4 +225,39 @@ export interface AppNotification {
   created_at: string;
   /** Nom du workspace lié (joint à la lecture). */
   workspace_name?: string | null;
+}
+
+// --- Collecte de pièces client -----------------------------------------------
+
+export type RequestStatus = "pending" | "received" | "validated" | "rejected";
+
+/** Pièce demandée au client (vue dashboard). */
+export interface DocumentRequest {
+  id: string;
+  organization_id: string;
+  workspace_id: string;
+  title: string;
+  description: string | null;
+  due_date: string | null;
+  status: RequestStatus;
+  review_comment: string | null;
+  file_path: string | null;
+  file_name: string | null;
+  file_size: number | null;
+  file_type: string | null;
+  fulfilled_at: string | null;
+  position: number;
+  created_at: string;
+}
+
+/** Pièce demandée telle qu'exposée au portail (jamais le chemin Storage). */
+export interface PortalRequest {
+  id: string;
+  title: string;
+  description: string | null;
+  due_date: string | null;
+  status: RequestStatus;
+  review_comment: string | null;
+  file_name: string | null;
+  fulfilled_at: string | null;
 }

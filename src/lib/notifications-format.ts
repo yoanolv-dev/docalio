@@ -51,6 +51,11 @@ export function describeNotification(n: AppNotification): NotificationDescriptor
         ? { title: base.title, message: `${base.message} « ${comment} »` }
         : base;
     }
+    case "request_received":
+      return {
+        title: "Pièce reçue",
+        message: `${ws} — « ${n.metadata.request_title ?? "une pièce"} » a été déposée${n.metadata.file_name ? ` (${n.metadata.file_name})` : ""}.`,
+      };
   }
 }
 

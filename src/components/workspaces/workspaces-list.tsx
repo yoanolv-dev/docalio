@@ -126,6 +126,11 @@ export function WorkspacesList({
                     Partagé
                   </span>
                 )}
+                {w.openRequests > 0 && (
+                  <span className="inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 font-medium text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">
+                    {w.openRequests} pièce{w.openRequests > 1 ? "s" : ""}
+                  </span>
+                )}
                 {w.pendingDecisions > 0 && (
                   <span className="inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 font-medium text-warning">
                     {w.pendingDecisions} en attente

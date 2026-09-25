@@ -3,6 +3,8 @@
 // Aucune donnée réelle, aucun logo tiers.
 
 import type {
+  DocumentRequest,
+  PortalRequest,
   Document,
   Folder,
   PortalDocument,
@@ -119,10 +121,36 @@ export const MOCK_PORTAL_DECISIONS: Record<string, { decision: "approved" | "rej
 
 // ---- Dashboard (liste d'espaces) ---------------------------------------------
 export const MOCK_WORKSPACES: WorkspaceListItem[] = [
-  { id: "w1", organization_id: ORG, space_type: "external", name: "Boulangerie Margot", slug: "boulangerie-margot", client_company: "Boulangerie Margot", client_email: "contact@margot.fr", client_phone: null, status: "active", internal_note: null, logo_url: null, primary_color: "#d97706", created_by: null, created_at: daysAgo(30), updated_at: daysAgo(2), documentCount: 7, visibleCount: 6, hasActiveLink: true, pendingDecisions: 2, lastActivityAt: daysAgo(0) },
-  { id: "w2", organization_id: ORG, space_type: "external", name: "Cabinet Lenoir", slug: "cabinet-lenoir", client_company: "Cabinet Lenoir & Associés", client_email: "j.lenoir@lenoir.fr", client_phone: null, status: "active", internal_note: null, logo_url: null, primary_color: "#1e3a8a", created_by: null, created_at: daysAgo(40), updated_at: daysAgo(5), documentCount: 12, visibleCount: 9, hasActiveLink: true, pendingDecisions: 0, lastActivityAt: daysAgo(1) },
-  { id: "w3", organization_id: ORG, space_type: "external", name: "Atelier Bois&Co", slug: "atelier-bois-co", client_company: "Bois & Co", client_email: null, client_phone: null, status: "prospect", internal_note: null, logo_url: null, primary_color: "#047857", created_by: null, created_at: daysAgo(8), updated_at: daysAgo(8), documentCount: 3, visibleCount: 0, hasActiveLink: false, pendingDecisions: 0, lastActivityAt: null },
-  { id: "w4", organization_id: ORG, space_type: "external", name: "Studio Photo Iris", slug: "studio-iris", client_company: "Iris Studio", client_email: "hello@iris.photo", client_phone: null, status: "active", internal_note: null, logo_url: null, primary_color: "#7c3aed", created_by: null, created_at: daysAgo(60), updated_at: daysAgo(10), documentCount: 21, visibleCount: 15, hasActiveLink: true, pendingDecisions: 1, lastActivityAt: daysAgo(3) },
-  { id: "w5", organization_id: ORG, space_type: "external", name: "Pâtisserie Solène", slug: "patisserie-solene", client_company: "Solène", client_email: null, client_phone: null, status: "archived", internal_note: null, logo_url: null, primary_color: "#be123c", created_by: null, created_at: daysAgo(120), updated_at: daysAgo(90), documentCount: 9, visibleCount: 9, hasActiveLink: false, pendingDecisions: 0, lastActivityAt: null },
-  { id: "w6", organization_id: ORG, space_type: "external", name: "Restaurant Nord", slug: "restaurant-nord", client_company: "Le Nord", client_email: "resa@lenord.fr", client_phone: null, status: "active", internal_note: null, logo_url: null, primary_color: "#0f766e", created_by: null, created_at: daysAgo(15), updated_at: daysAgo(1), documentCount: 5, visibleCount: 4, hasActiveLink: true, pendingDecisions: 3, lastActivityAt: daysAgo(0) },
+  { id: "w1", organization_id: ORG, space_type: "external", name: "Boulangerie Margot", slug: "boulangerie-margot", client_company: "Boulangerie Margot", client_email: "contact@margot.fr", client_phone: null, status: "active", internal_note: null, logo_url: null, primary_color: "#d97706", created_by: null, created_at: daysAgo(30), updated_at: daysAgo(2), documentCount: 7, visibleCount: 6, hasActiveLink: true, pendingDecisions: 2, openRequests: 2, lastActivityAt: daysAgo(0) },
+  { id: "w2", organization_id: ORG, space_type: "external", name: "Cabinet Lenoir", slug: "cabinet-lenoir", client_company: "Cabinet Lenoir & Associés", client_email: "j.lenoir@lenoir.fr", client_phone: null, status: "active", internal_note: null, logo_url: null, primary_color: "#1e3a8a", created_by: null, created_at: daysAgo(40), updated_at: daysAgo(5), documentCount: 12, visibleCount: 9, hasActiveLink: true, pendingDecisions: 0, openRequests: 4, lastActivityAt: daysAgo(1) },
+  { id: "w3", organization_id: ORG, space_type: "external", name: "Atelier Bois&Co", slug: "atelier-bois-co", client_company: "Bois & Co", client_email: null, client_phone: null, status: "prospect", internal_note: null, logo_url: null, primary_color: "#047857", created_by: null, created_at: daysAgo(8), updated_at: daysAgo(8), documentCount: 3, visibleCount: 0, hasActiveLink: false, pendingDecisions: 0, openRequests: 0, lastActivityAt: null },
+  { id: "w4", organization_id: ORG, space_type: "external", name: "Studio Photo Iris", slug: "studio-iris", client_company: "Iris Studio", client_email: "hello@iris.photo", client_phone: null, status: "active", internal_note: null, logo_url: null, primary_color: "#7c3aed", created_by: null, created_at: daysAgo(60), updated_at: daysAgo(10), documentCount: 21, visibleCount: 15, hasActiveLink: true, pendingDecisions: 1, openRequests: 0, lastActivityAt: daysAgo(3) },
+  { id: "w5", organization_id: ORG, space_type: "external", name: "Pâtisserie Solène", slug: "patisserie-solene", client_company: "Solène", client_email: null, client_phone: null, status: "archived", internal_note: null, logo_url: null, primary_color: "#be123c", created_by: null, created_at: daysAgo(120), updated_at: daysAgo(90), documentCount: 9, visibleCount: 9, hasActiveLink: false, pendingDecisions: 0, openRequests: 0, lastActivityAt: null },
+  { id: "w6", organization_id: ORG, space_type: "external", name: "Restaurant Nord", slug: "restaurant-nord", client_company: "Le Nord", client_email: "resa@lenord.fr", client_phone: null, status: "active", internal_note: null, logo_url: null, primary_color: "#0f766e", created_by: null, created_at: daysAgo(15), updated_at: daysAgo(1), documentCount: 5, visibleCount: 4, hasActiveLink: true, pendingDecisions: 3, openRequests: 1, lastActivityAt: daysAgo(0) },
+];
+
+// ---- Collecte de pièces --------------------------------------------------------
+export const MOCK_PORTAL_REQUESTS: PortalRequest[] = [
+  { id: "r1", title: "Kbis de moins de 3 mois", description: null, due_date: "2026-06-20", status: "validated", review_comment: null, file_name: "kbis-margot.pdf", fulfilled_at: FIXED_DATE },
+  { id: "r2", title: "Photos de la devanture", description: "3 à 5 photos en bonne résolution, de jour.", due_date: "2026-06-20", status: "received", review_comment: null, file_name: "devanture.zip", fulfilled_at: FIXED_DATE },
+  { id: "r3", title: "Textes de la page « À propos »", description: null, due_date: "2026-06-24", status: "pending", review_comment: null, file_name: null, fulfilled_at: null },
+  { id: "r4", title: "Logo en haute définition", description: null, due_date: "2026-06-24", status: "rejected", review_comment: "Fichier trop petit, merci d'envoyer le vectoriel", file_name: "logo.png", fulfilled_at: FIXED_DATE },
+];
+
+function req(id: string, title: string, status: DocumentRequest["status"], extra: Partial<DocumentRequest> = {}): DocumentRequest {
+  return {
+    id, organization_id: ORG, workspace_id: WS, title, description: null,
+    due_date: "2026-06-24", status, review_comment: null,
+    file_path: status === "pending" ? null : `organizations/${ORG}/workspaces/${WS}/requests/${id}/x`,
+    file_name: null, file_size: null, file_type: null,
+    fulfilled_at: status === "pending" ? null : FIXED_DATE,
+    position: 0, created_at: FIXED_DATE, ...extra,
+  };
+}
+
+export const MOCK_REQUESTS: DocumentRequest[] = [
+  req("r1", "Kbis de moins de 3 mois", "validated", { file_name: "kbis-margot.pdf" }),
+  req("r2", "Photos de la devanture", "received", { file_name: "devanture.zip" }),
+  req("r3", "Textes de la page « À propos »", "pending"),
+  req("r4", "Logo en haute définition", "rejected", { file_name: "logo.png" }),
 ];

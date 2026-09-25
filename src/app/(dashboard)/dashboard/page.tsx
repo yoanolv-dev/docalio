@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Building2, FolderClosed, Link2, Plus, Clock } from "lucide-react";
+import { Building2, FolderClosed, Link2, Plus, Clock, Inbox } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
 import { listWorkspacesWithMeta } from "@/lib/workspaces";
@@ -39,6 +39,7 @@ export default async function DashboardPage() {
     (sum, w) => sum + w.pendingDecisions,
     0
   );
+  const openRequests = workspaces.reduce((sum, w) => sum + w.openRequests, 0);
   const overview = [
     {
       icon: Building2,
@@ -58,6 +59,13 @@ export default async function DashboardPage() {
       value: pendingDecisions,
       hint: "documents à valider côté client",
       emphasize: pendingDecisions > 0,
+    },
+    {
+      icon: Inbox,
+      label: "Pièces attendues",
+      value: openRequests,
+      hint: "à recevoir ou à valider",
+      emphasize: openRequests > 0,
     },
   ];
 
@@ -82,7 +90,7 @@ export default async function DashboardPage() {
       </header>
 
       {workspaces.length > 0 && (
-        <div className="grid shrink-0 gap-3 sm:grid-cols-3">
+        <div className="grid shrink-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {overview.map((item) => {
             const Icon = item.icon;
             return (

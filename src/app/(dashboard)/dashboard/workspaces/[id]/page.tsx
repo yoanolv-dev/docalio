@@ -12,6 +12,7 @@ import {
   Share2,
   Users,
   Activity as ActivityIcon,
+  Inbox,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +33,9 @@ import {
 import { ExplorerDrive } from "@/components/drive/explorer-drive";
 import { PortalShareCard } from "@/components/workspaces/portal-share-card";
 import { SpaceAccessPanel } from "@/components/workspaces/space-access-panel";
+import { RequestsPanel } from "@/components/requests/requests-panel";
+import { listWorkspaceRequests } from "@/lib/requests";
+import { getSector } from "@/lib/sectors";
 import {
   archiveWorkspaceAction,
   deleteWorkspaceAction,
@@ -85,6 +89,7 @@ export default async function WorkspaceDetailPage({
     decisions,
     headerList,
     membership,
+    requests,
   ] = await Promise.all([
     listWorkspaceDocuments(workspace.id),
     listWorkspaceFolders(workspace.id),
@@ -93,6 +98,7 @@ export default async function WorkspaceDetailPage({
     getWorkspaceDecisions(workspace.id),
     headers(),
     getCurrentMembership(),
+    listWorkspaceRequests(workspace.id),
   ]);
 
   const maxFileBytes = effectiveMaxFileBytes(
@@ -162,6 +168,30 @@ export default async function WorkspaceDetailPage({
               link={shareLink}
               baseUrl={baseUrl}
               slug={workspace.slug}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Collecte de pièces — le client dépose depuis son portail */}
+      {!isInternal && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Inbox className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base">Pièces demandées</CardTitle>
+            </div>
+            <CardDescription>
+              {shareLink
+                ? "Votre client les dépose depuis son portail, sans compte."
+                : "Activez le portail ci-dessus pour que votre client puisse déposer."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RequestsPanel
+              workspaceId={workspace.id}
+              requests={requests}
+              template={getSector(membership?.organization.sector).requestTemplate}
             />
           </CardContent>
         </Card>

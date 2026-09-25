@@ -20,6 +20,7 @@ type TimelineRow = {
   document_id: string | null;
   visitor_id: string | null;
   created_at: string;
+  metadata: { request_title?: string } | null;
   documents: { title: string } | null;
 };
 
@@ -60,7 +61,7 @@ export async function getWorkspaceActivity(
       .maybeSingle(),
     supabase
       .from("activity_events")
-      .select("id, event_type, document_id, visitor_id, created_at, documents(title)")
+      .select("id, event_type, document_id, visitor_id, created_at, metadata, documents(title)")
       .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(20),
@@ -97,6 +98,7 @@ export async function getWorkspaceActivity(
       event_type: row.event_type,
       document_id: row.document_id,
       document_title: row.documents?.title ?? null,
+      request_title: row.metadata?.request_title ?? null,
       visitor_id: row.visitor_id,
       created_at: row.created_at,
     })),

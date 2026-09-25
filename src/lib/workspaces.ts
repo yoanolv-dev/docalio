@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Workspace } from "@/lib/types/database";
+import { countOpenRequestsByWorkspace } from "@/lib/requests";
 
 /**
  * Liste les workspaces accessibles à l'utilisateur courant.
@@ -32,6 +33,8 @@ export interface WorkspaceListItem extends Workspace {
   hasActiveLink: boolean;
   /** Documents visibles sans décision client. */
   pendingDecisions: number;
+  /** Pièces demandées non encore validées (attendues ou à vérifier). */
+  openRequests: number;
   lastActivityAt: string | null;
 }
 
@@ -43,7 +46,7 @@ export interface WorkspaceListItem extends Workspace {
 export async function listWorkspacesWithMeta(): Promise<WorkspaceListItem[]> {
   const supabase = await createClient();
 
-  const [workspaces, docs, links, decisions, events] = await Promise.all([
+  const [workspaces, docs, links, decisions, events, openRequests] = await Promise.all([
     listWorkspaces(),
     supabase.from("documents").select("id, workspace_id, is_visible_to_client"),
     supabase.from("share_links").select("workspace_id").eq("is_active", true),
@@ -53,6 +56,7 @@ export async function listWorkspacesWithMeta(): Promise<WorkspaceListItem[]> {
       .select("workspace_id, created_at")
       .order("created_at", { ascending: false })
       .limit(400),
+    countOpenRequestsByWorkspace(),
   ]);
 
   const docRows =
@@ -87,6 +91,7 @@ export async function listWorkspacesWithMeta(): Promise<WorkspaceListItem[]> {
       visibleCount: visible.length,
       hasActiveLink: activeLinks.has(w.id),
       pendingDecisions: visible.filter((d) => !decidedDocs.has(d.id)).length,
+      openRequests: openRequests.get(w.id) ?? 0,
       lastActivityAt: lastActivity.get(w.id) ?? null,
     };
   });
