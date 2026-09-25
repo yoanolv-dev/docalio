@@ -650,7 +650,7 @@ export function ExplorerDrive({
             <FolderPlus className="h-4 w-4" />
             <span className="hidden sm:inline">Dossier</span>
           </Button>
-          <Button size="sm" variant="ghost" className="h-8" onClick={() => inputRef.current?.click()}>
+          <Button size="sm" className="ml-1 h-8" onClick={() => inputRef.current?.click()}>
             <Upload className="h-4 w-4" />
             <span className="hidden sm:inline">Importer</span>
           </Button>

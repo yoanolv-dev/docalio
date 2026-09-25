@@ -16,9 +16,12 @@ type StatusFilter = WorkspaceStatus | "all";
 export function WorkspacesList({
   workspaces,
   usageType,
+  compact = false,
 }: {
   workspaces: WorkspaceListItem[];
   usageType?: UsageType | null;
+  /** Aperçu (accueil) : sans barre de recherche ni filtre. */
+  compact?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
@@ -38,7 +41,8 @@ export function WorkspacesList({
   }, [workspaces, query, status]);
 
   return (
-    <div className="flex h-full flex-col gap-4">
+    <div className="flex flex-col gap-4">
+      {!compact && (
       <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -61,18 +65,19 @@ export function WorkspacesList({
           <option value="archived">Archivés</option>
         </Select>
       </div>
+      )}
 
       {filtered.length === 0 ? (
-        <p className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-border px-4 py-12 text-center text-sm text-muted-foreground">
+        <p className="flex items-center justify-center rounded-xl border border-dashed border-border bg-white px-4 py-12 text-center text-sm text-muted-foreground">
           Aucun espace ne correspond à votre recherche.
         </p>
       ) : (
-        <div className="grid min-h-0 flex-1 auto-rows-max gap-3 overflow-y-auto pr-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid auto-rows-max gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((w) => (
             <Link
               key={w.id}
               href={`/dashboard/workspaces/${w.id}`}
-              className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-[0_8px_28px_-14px_rgba(0,0,0,0.22)]"
+              className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-[0_12px_32px_-16px_rgba(15,23,42,0.28)]"
             >
               {/* Liseré de marque du client (apparaît au survol) */}
               <span

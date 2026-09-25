@@ -26,7 +26,7 @@ const LINKS: MenuLink[] = [
     label: "Espaces clients",
     description: "Tous vos dossiers clients",
     icon: FolderClosed,
-    href: "/dashboard",
+    href: "/dashboard/workspaces",
   },
   {
     label: "Équipe & accès",

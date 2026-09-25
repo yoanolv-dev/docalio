@@ -13,6 +13,7 @@ import {
   CornerDownLeft,
   Search,
   type LucideIcon,
+  House,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -47,9 +48,10 @@ export function CommandPalette({
       router.push(href);
     };
     return [
-      { id: "spaces", label: "Espaces clients", icon: FolderClosed, keywords: "accueil home dashboard", run: go("/dashboard") },
+      { id: "home", label: "Accueil — à traiter", icon: House, keywords: "accueil home dashboard tableau de bord", run: go("/dashboard") },
+      { id: "spaces", label: "Espaces clients", icon: FolderClosed, keywords: "dossiers clients liste", run: go("/dashboard/workspaces") },
       { id: "new", label: "Nouvel espace client", hint: "Créer", icon: Plus, keywords: "ajouter créer", run: go("/dashboard/workspaces/new") },
-      { id: "notifs", label: "Notifications", icon: Bell, keywords: "activité alertes", run: go("/dashboard/notifications") },
+      { id: "notifs", label: "Activité & notifications", icon: Bell, keywords: "activité alertes", run: go("/dashboard/notifications") },
       { id: "team", label: "Équipe & accès", hint: "Inviter", icon: Users, keywords: "utilisateurs membres invitation rôles collaborateurs groupes", run: go("/dashboard/settings/equipe") },
       { id: "billing", label: "Abonnement", icon: CreditCard, keywords: "plan facturation paiement usage offre", run: go("/dashboard/settings/abonnement") },
       { id: "settings", label: "Paramètres", icon: Settings, keywords: "organisation compte identité logo", run: go("/dashboard/settings/organisation") },

@@ -57,6 +57,10 @@
   --input: #cbd5e1;                 /* slate-300 */
   --ring: #2563eb;
 
+  /* Canevas de l'application : gris bleuté très clair sous les cartes
+     blanches, pour donner de la profondeur (le site public reste blanc). */
+  --canvas: #f5f7fb;
+
   /* Navigation latérale */
   --sidebar: #f8fafc;               /* slate-50 */
   --sidebar-foreground: #475569;    /* slate-600 */
@@ -71,6 +75,7 @@
   --font-mono: var(--font-geist-mono);
 
   --color-background: var(--background);
+  --color-canvas: var(--canvas);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
