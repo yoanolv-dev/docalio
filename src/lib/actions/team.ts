@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
+import { isLimitReached, resolvePlan } from "@/lib/plans";
+import { getOrganizationUsage } from "@/lib/usage";
 
 export type TeamResult = { ok: boolean; message?: string; token?: string };
 
@@ -33,6 +35,27 @@ export async function inviteMemberAction(
   }
   if (role !== "admin" && role !== "member") {
     return { ok: false, message: "Rôle invalide." };
+  }
+
+  // Limite d'utilisateurs du forfait (membres actuels + invitations en attente).
+  const plan = resolvePlan(membership.organization);
+  if (plan.limits.users !== null) {
+    const [usage, invites] = await Promise.all([
+      getOrganizationUsage(membership.organization.id),
+      supabase
+        .from("organization_invites")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", membership.organization.id)
+        .is("accepted_at", null)
+        .gt("expires_at", new Date().toISOString()),
+    ]);
+    const seats = usage.members + (invites.error ? 0 : invites.count ?? 0);
+    if (isLimitReached(seats, plan.limits.users)) {
+      return {
+        ok: false,
+        message: `Votre forfait ${plan.name} inclut ${plan.limits.users} utilisateur${plan.limits.users > 1 ? "s" : ""}. Passez au forfait supérieur pour agrandir l'équipe.`,
+      };
+    }
   }
 
   const token = randomBytes(24).toString("base64url");

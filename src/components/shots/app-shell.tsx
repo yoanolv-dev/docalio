@@ -1,4 +1,5 @@
-import { Bell, FileText, Search } from "lucide-react";
+import { LogoMark } from "@/components/brand/logo";
+import { Bell, Search } from "lucide-react";
 
 /**
  * Réplique statique de la coque applicative (barre supérieure) pour les
@@ -10,9 +11,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-6">
           <div className="flex shrink-0 items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
-              <FileText className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <LogoMark className="h-7 w-7" />
             <span className="text-sm font-semibold tracking-tight">Docalio</span>
           </div>
           <span className="h-5 w-px bg-border" />

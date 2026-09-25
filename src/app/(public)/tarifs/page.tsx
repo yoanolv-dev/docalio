@@ -10,7 +10,7 @@ import { Faq } from "@/components/marketing/faq";
 export const metadata: Metadata = {
   title: "Tarifs",
   description:
-    "Tarification simple au siège : Solo gratuit, Pro 9 €, Business 18 € par utilisateur et par mois, Enterprise sur devis. Les partages externes sont illimités et gratuits.",
+    "Un forfait par cabinet, pas au siège : Découverte gratuit, Essentiel 29 € HT/mois, Cabinet 79 € HT/mois, 2 mois offerts en annuel. Clients invités illimités et gratuits.",
   alternates: { canonical: "/tarifs" },
 };
 
@@ -18,7 +18,7 @@ const PRICING_FAQ = [
   {
     question: "Y a-t-il un engagement ?",
     answer:
-      "Non. Les offres sont sans engagement. Vous démarrez par un essai gratuit de 14 jours, puis choisissez l’offre adaptée à votre usage.",
+      "Non. Les forfaits mensuels sont sans engagement. Le forfait Découverte est gratuit sans limite de durée, et les forfaits payants s’essaient 14 jours.",
   },
   {
     question: "Comment se passe le démarrage ?",
@@ -28,7 +28,12 @@ const PRICING_FAQ = [
   {
     question: "Que se passe-t-il si j’atteins une limite ?",
     answer:
-      "Docalio vous prévient clairement (stockage, taille de fichier) et vous pouvez passer à une offre supérieure à tout moment. Vos espaces et vos partages externes restent illimités.",
+      "Docalio vous prévient clairement (utilisateurs, espaces actifs, stockage) et vous passez au forfait supérieur en un instant. Vos données ne sont jamais bloquées.",
+  },
+  {
+    question: "Pourquoi un forfait et pas un prix par utilisateur ?",
+    answer:
+      "Parce qu’un cabinet ne devrait pas payer plus cher à chaque embauche. Le forfait couvre votre équipe jusqu’à sa limite, et vos clients ne sont jamais facturés.",
   },
   {
     question: "Puis-je changer d’offre plus tard ?",
@@ -42,8 +47,8 @@ export default function PricingPage() {
     <>
       <PageHero
         eyebrow="Tarifs"
-        title="Au siège. Les partages externes restent gratuits."
-        description="Vous ne payez que pour vos utilisateurs internes. Espaces et partages clients illimités, sans engagement, essai gratuit 14 jours, sans carte bancaire."
+        title="Un forfait par cabinet. Vos clients ne paient jamais."
+        description="Pas de facturation au siège. Gratuit pour démarrer, sans carte bancaire, sans engagement — et deux mois offerts en annuel."
       />
 
       <Section className="pt-12 sm:pt-14">
@@ -54,11 +59,11 @@ export default function PricingPage() {
               <Sparkles className="h-4 w-4" />
             </span>
             <p className="text-sm">
-              <span className="font-semibold">Offre bêta —</span> Pro à{" "}
+              <span className="font-semibold">Offre de lancement —</span>{" "}
               <span className="font-semibold">
-                4,50 €/utilisateur/mois pendant 6 mois
-              </span>
-              , accompagnement à la mise en route offert.
+                -50 % pendant 3 mois
+              </span>{" "}
+              sur Essentiel et Cabinet, et import de vos premiers dossiers offert.
             </p>
           </div>
           <Button size="sm" asChild>
@@ -72,8 +77,9 @@ export default function PricingPage() {
         <PricingCards />
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Prix hors taxes. L’offre Enterprise inclut des limites personnalisées,
-          un accompagnement et des besoins de sécurité avancés.
+          Prix hors taxes, par organisation. L’offre Entreprise inclut des
+          limites personnalisées, un accompagnement et des exigences de
+          sécurité avancées.
         </p>
       </Section>
 

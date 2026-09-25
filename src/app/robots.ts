@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         // Espaces privés et portails clients : jamais indexés.
-        disallow: ["/dashboard", "/onboarding", "/p/", "/auth/", "/reset-password"],
+        disallow: ["/dashboard", "/onboarding", "/p/", "/espace/", "/invite/", "/shots/", "/auth/", "/reset-password"],
       },
     ],
     sitemap: `${SITE.url}/sitemap.xml`,

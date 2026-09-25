@@ -1,5 +1,6 @@
 // Génère les captures produit (PNG retina) à partir des pages /shots/*.
-// Usage : node scripts/shoot.cjs  (un serveur Next doit tourner sur SHOT_BASE)
+// Usage : NODE_PATH=$(npm root -g) node scripts/shoot.cjs
+// (un serveur Next doit tourner sur SHOT_BASE ; Playwright peut être global)
 const { chromium } = require("playwright");
 const fs = require("fs");
 const path = require("path");
@@ -11,15 +12,24 @@ const SHOTS = [
   { name: "dashboard", path: "/shots/dashboard", w: 1440, h: 1000 },
   { name: "drive", path: "/shots/drive", w: 1440, h: 1040 },
   { name: "portal", path: "/shots/portal", w: 1040, h: 1180 },
+  { name: "collecte", path: "/shots/collecte", w: 1380, h: 1000 },
 ];
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({
+    // Chromium complet (et non headless-shell) : embarque les locales, pour
+    // des champs date au format français sur les captures.
+    channel: "chromium",
+    args: ["--lang=fr-FR"],
+    env: { ...process.env, LANG: "fr_FR.UTF-8", LANGUAGE: "fr" },
+  });
   for (const s of SHOTS) {
     const page = await browser.newPage({
       viewport: { width: s.w, height: s.h },
       deviceScaleFactor: 2,
+      locale: "fr-FR",
+      timezoneId: "Europe/Paris",
     });
     await page.goto(BASE + s.path, { waitUntil: "networkidle", timeout: 60000 });
     try {

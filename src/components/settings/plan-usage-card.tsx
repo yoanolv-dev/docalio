@@ -90,7 +90,7 @@ export function PlanUsageCard({
           limitLabel={formatCount(limits.activeWorkspaces)}
         />
         <UsageMeter
-          label="Utilisateurs (sièges)"
+          label="Utilisateurs"
           used={usage.members}
           limit={limits.users}
           usedLabel={String(usage.members)}

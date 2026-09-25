@@ -1,8 +1,9 @@
 "use client";
 
+import { LogoMark } from "@/components/brand/logo";
 import { useState } from "react";
 import Link from "next/link";
-import { FileText, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { AccountMenu } from "@/components/layout/account-menu";
@@ -32,9 +33,7 @@ export function TopBar({
       <header className="z-40 shrink-0 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="flex h-14 w-full items-center gap-3 px-3 sm:px-5">
           <Link href="/dashboard" className="flex shrink-0 items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
-              <FileText className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <LogoMark className="h-7 w-7" />
             <span className="text-sm font-semibold tracking-tight">Docalio</span>
           </Link>
 

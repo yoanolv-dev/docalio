@@ -1,385 +1,528 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import {
   ArrowRight,
-  ArrowUpRight,
-  Building2,
-  CheckCircle2,
-  Eye,
-  FolderLock,
-  Lock,
+  Bell,
+  CircleCheck,
+  EyeOff,
+  FolderTree,
+  Globe2,
+  Inbox,
+  LockKeyhole,
+  Palette,
+  Send,
   ShieldCheck,
-  Users,
+  Sparkles,
+  Timer,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Section, SectionHeading } from "@/components/marketing/section";
-import {
-  DashboardPreview,
-  DrivePreview,
-  PortalPreview,
-} from "@/components/marketing/app-preview";
-import { HeroCanvas } from "@/components/marketing/hero-canvas";
-import { Tilt, Reveal } from "@/components/marketing/scroll-fx";
+import { HeroCanvasLazy } from "@/components/marketing/hero-canvas-lazy";
+import { HeroVisual } from "@/components/marketing/hero-visual";
+import { ProductShowcase } from "@/components/marketing/product-showcase";
+import { RoiCalculator } from "@/components/marketing/roi-calculator";
+import { ComparisonMatrix } from "@/components/marketing/comparison-matrix";
 import { PricingCards } from "@/components/marketing/pricing-cards";
-import { ComparisonTable } from "@/components/marketing/comparison-table";
+import { Reveal } from "@/components/marketing/scroll-fx";
 import { Faq } from "@/components/marketing/faq";
+import { JsonLd, faqJsonLd } from "@/components/seo/json-ld";
+import { SOLUTIONS } from "@/lib/marketing/solutions";
+import { PLANS } from "@/lib/plans";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Docalio — L'espace documentaire sécurisé, interne & externe",
-  description:
-    "Un Drive privé pour votre équipe et des partages clients maîtrisés. Organisez vos documents, donnez le bon accès à chaque groupe, partagez à l'externe via un lien sécurisé sans compte — traçable et révocable.",
+  title: { absolute: "Docalio — Portail client : collecte de pièces et validation de documents" },
+  description: SITE.description,
   alternates: { canonical: "/" },
 };
 
-const FEATURE_SECTIONS = [
+const STEPS = [
   {
-    eyebrow: "Votre Drive d'entreprise",
-    title: "Vos documents, rangés comme dans l'explorateur Windows",
-    description:
-      "Arborescence de dossiers, glisser-déposer, renommer, dupliquer, vue grandes icônes ou détails. Rien à apprendre — pour votre équipe comme pour vos espaces clients. Chaque fichier reste privé tant que vous ne le partagez pas.",
-    points: [
-      "Volet d'arborescence, fil d'Ariane et double-clic, comme à la maison",
-      "Glissez vos fichiers pour les importer ou les déplacer",
-      "Accès aux dossiers d'entreprise, où que soit votre équipe",
-    ],
-    Preview: DrivePreview,
+    icon: Send,
+    title: "Vous demandez",
+    text: "Listez les pièces attendues — ou choisissez les pièces types de votre métier — et partagez vos documents à faire valider.",
   },
   {
-    eyebrow: "Accès maîtrisés",
-    title: "Chaque équipe voit exactement ce qu'elle doit voir",
-    description:
-      "Réunissez vos collaborateurs en groupes, puis autorisez-les espace par espace. Les commerciaux accèdent à la documentation commerciale, les RH à leurs dossiers — et rien d'autre. Modifiable en temps réel.",
-    points: [
-      "Groupes d'utilisateurs gérés par l'administrateur",
-      "Accès par espace, accordé ou révoqué en un clic",
-      "Isolation stricte : personne ne voit ce qui ne le concerne pas",
-    ],
-    Preview: DashboardPreview,
+    icon: Inbox,
+    title: "Votre client dépose et valide",
+    text: "Il ouvre son portail à vos couleurs, dépose ses fichiers depuis son téléphone et approuve vos documents. Sans compte.",
   },
   {
-    eyebrow: "Le partage externe",
-    title: "Partagez avec vos clients, sans compte à créer",
-    description:
-      "Votre client ouvre un lien et comprend immédiatement quoi faire : consulter, télécharger, puis valider ou demander une modification. Vous suivez tout en temps réel.",
-    points: [
-      "Aucune inscription : un simple lien sécurisé, expirable et révocable",
-      "Documents rangés par dossier, progression visible",
-      "Décisions commentées : validé, à modifier, refusé",
-    ],
-    Preview: PortalPreview,
+    icon: Bell,
+    title: "Vous êtes prévenu",
+    text: "Chaque dépôt, ouverture et décision arrive en temps réel. Vous savez exactement qui relancer — et pour quoi.",
   },
 ];
 
-const VALUES = [
+const BENTO = [
   {
-    icon: Building2,
-    title: "Interne & externe",
-    text: "Un Drive privé pour votre équipe et des partages clients maîtrisés, au même endroit.",
+    icon: Inbox,
+    title: "Collecte de pièces",
+    text: "Échéances, retards signalés, pièce refusée avec motif puis redéposée. La fin des « il me manque encore… ».",
+    className: "md:col-span-2",
+    accent: "from-violet-500/15",
   },
   {
-    icon: Lock,
-    title: "Le bon accès, à la bonne personne",
-    text: "Groupes d'utilisateurs, accès par espace, isolation stricte entre équipes et organisations.",
+    icon: CircleCheck,
+    title: "Validation client",
+    text: "Approuver, demander une modification, refuser — avec commentaire.",
+    className: "",
+    accent: "from-emerald-500/15",
   },
   {
-    icon: Eye,
-    title: "Vous savez où ça en est",
-    text: "Ouvertures, consultations, décisions côté client : fini les relances à l'aveugle.",
-  },
-];
-
-const DUAL_USE = [
-  {
-    icon: Users,
-    title: "En interne",
-    text: "Centralisez les documents de l'entreprise et donnez à chaque équipe l'accès qui lui revient. Vos commerciaux itinérants retrouvent les bons fichiers, où qu'ils soient.",
-    points: ["Dossiers d'équipe", "Accès par groupe", "Disponible partout"],
+    icon: Timer,
+    title: "Suivi en temps réel",
+    text: "Ouvertures, consultations, téléchargements et dépôts, horodatés.",
+    className: "",
+    accent: "from-sky-500/15",
   },
   {
-    icon: Building2,
-    title: "Avec vos clients",
-    text: "Partagez un espace privé par client via un lien sécurisé, sans compte. Suivez les consultations et recueillez les décisions, sans relancer par email.",
-    points: ["Lien sans compte", "Suivi des consultations", "Décisions intégrées"],
+    icon: EyeOff,
+    title: "Consultation seule",
+    text: "Faites lire un document sans permettre son téléchargement.",
+    className: "",
+    accent: "from-amber-500/15",
+  },
+  {
+    icon: Palette,
+    title: "À votre marque",
+    text: "Logo et couleurs par client. Vos clients voient votre cabinet, pas un outil.",
+    className: "",
+    accent: "from-pink-500/15",
+  },
+  {
+    icon: FolderTree,
+    title: "Votre espace documentaire",
+    text: "Dossiers, glisser-déposer, espaces internes et droits par groupe pour votre équipe.",
+    className: "md:col-span-2",
+    accent: "from-blue-500/15",
   },
 ];
 
 const FAQ_ITEMS = [
   {
-    question: "En quoi est-ce différent d'un Drive ou de WeTransfer ?",
-    answer:
-      "Docalio n'est pas un simple stockage. C'est un espace documentaire sécurisé pour votre entreprise : vos équipes y accèdent selon leurs droits, et vous partagez à l'externe via un lien — où votre client consulte, télécharge et décide. Vous suivez tout, sans relancer à l'aveugle.",
-  },
-  {
-    question: "Peut-on l'utiliser uniquement en interne ?",
-    answer:
-      "Oui. Beaucoup d'entreprises utilisent Docalio comme Drive d'équipe sécurisé : vos collaborateurs accèdent aux dossiers selon leur groupe, où qu'ils soient. Le partage externe avec vos clients reste optionnel.",
-  },
-  {
     question: "Mes clients doivent-ils créer un compte ?",
     answer:
-      "Non. L'accès se fait par un lien sécurisé unique, sans inscription. Vous gardez le contrôle : le lien est expirable et révocable à tout moment.",
+      "Non. Ils ouvrent un lien sécurisé, propre à leur espace, depuis n'importe quel appareil. Vous pouvez le faire expirer ou le révoquer à tout moment.",
   },
   {
-    question: "Mes documents sont-ils réellement protégés ?",
+    question: "Qu'est-ce qui différencie Docalio d'un Drive, de SharePoint ou de J-Doc ?",
     answer:
-      "Oui. Le stockage est privé par défaut, l'accès aux fichiers passe par des liens signés temporaires, et chaque organisation est isolée des autres au niveau de la base de données.",
+      "Ces outils stockent et échangent des fichiers. Docalio organise la relation documentaire avec le client : ce qu'il doit déposer (avec échéances), ce qu'il doit valider, et où en est chaque dossier — le tout dans un portail à votre marque.",
   },
   {
-    question: "Comment fonctionne l'essai ?",
+    question: "Où sont hébergées mes données ?",
     answer:
-      "Vous démarrez gratuitement pendant 14 jours, sans carte bancaire, avec l'ensemble des fonctionnalités.",
+      "Dans l'Union européenne (Francfort). Les fichiers sont dans un stockage privé et ne sont accessibles qu'au travers de liens signés, valables quelques secondes. Chaque organisation est isolée au niveau de la base de données.",
   },
+  {
+    question: "Combien ça coûte ?",
+    answer: `Le forfait Découverte est gratuit. Essentiel est à ${PLANS.pro.priceEur} € HT/mois pour jusqu'à 3 utilisateurs, Cabinet à ${PLANS.business.priceEur} € HT/mois jusqu'à 10 utilisateurs. Deux mois offerts en annuel, et vos clients ne paient jamais.`,
+  },
+  {
+    question: "Combien de temps pour démarrer ?",
+    answer:
+      "Environ cinq minutes : créez votre compte, votre premier espace client, cliquez sur les pièces types de votre métier et envoyez le lien.",
+  },
+  {
+    question: "Est-ce une solution de signature électronique ?",
+    answer:
+      "Non. Docalio enregistre des validations tracées (approuvé, à modifier, refusé). Pour une signature à valeur probante, utilisez un prestataire de signature qualifié.",
+  },
+];
+
+const METIERS = [
+  "Experts-comptables",
+  "Avocats",
+  "Notaires",
+  "Agences web",
+  "Studios créatifs",
+  "Agences immobilières",
+  "Consultants",
+  "Architectes",
+  "Artisans du bâtiment",
+  "Courtiers",
+  "Freelances",
+  "Gestionnaires de patrimoine",
 ];
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero — scène WebGL + titre éditorial */}
-      <section className="relative isolate overflow-hidden">
-        <div className="absolute inset-0 -z-20">
-          <HeroCanvas />
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "Docalio",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            url: SITE.url,
+            description: SITE.description,
+            offers: [PLANS.starter, PLANS.pro, PLANS.business].map((p) => ({
+              "@type": "Offer",
+              name: p.name,
+              price: String(p.priceEur ?? 0),
+              priceCurrency: "EUR",
+            })),
+          },
+          faqJsonLd(FAQ_ITEMS),
+        ]}
+      />
+
+      {/* ------------------------------------------------------------ Hero */}
+      <section className="relative isolate -mt-16 overflow-hidden pt-16">
+        <div className="absolute inset-0 -z-20 opacity-45 [mask-image:linear-gradient(to_bottom,black,transparent_70%)]">
+          <HeroCanvasLazy />
         </div>
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-background/40 via-background/80 to-background" />
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 bg-gradient-to-b from-background/50 via-background/75 to-background"
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[720px] bg-[radial-gradient(55%_55%_at_50%_0%,rgba(37,99,235,0.20),transparent_72%)]"
         />
-        {/* Halo bleu doux — signature « blanc & bleu » */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[620px] bg-[radial-gradient(60%_55%_at_50%_0%,rgba(37,99,235,0.16),transparent_72%)]"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(60%_50%_at_50%_20%,black,transparent)]"
         />
-        <div className="mx-auto max-w-5xl px-4 pb-10 pt-28 text-center sm:px-6 sm:pt-36">
+
+        <div className="mx-auto max-w-5xl px-4 pb-14 pt-20 text-center sm:px-6 sm:pt-28">
           <Link
-            href="/fonctionnalites"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
+            href="/fonctionnalites#collecte"
+            className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-border bg-card/80 py-1 pl-1 pr-3 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur transition-colors hover:text-foreground"
           >
-            Nouveau · Interne &amp; externe, un seul espace sécurisé
-            <ArrowUpRight className="h-3.5 w-3.5" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-primary-foreground">
+              <Sparkles className="h-3 w-3" />
+              Nouveau
+            </span>
+            Collecte de pièces avec échéances et relance ciblée
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
-          <h1 className="text-balance mx-auto mt-6 max-w-3xl text-5xl font-semibold tracking-tight sm:text-7xl">
-            Le bon document,
-            <br />
-            <span className="text-primary">à la bonne personne.</span>
+
+          <h1 className="text-balance mx-auto mt-7 max-w-4xl text-[2.6rem] font-semibold leading-[1.05] tracking-tight sm:text-7xl">
+            Vos clients déposent leurs pièces.{" "}
+            <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500 bg-clip-text text-transparent">
+              Sans que vous ayez à relancer.
+            </span>
           </h1>
-          <p className="text-pretty mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            L&apos;espace documentaire sécurisé de votre entreprise. Un Drive
-            privé pour votre équipe, des accès maîtrisés par groupe, et des
-            partages clients via un lien sécurisé — sans compte, traçable,
-            révocable.
+          <p className="text-pretty mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+            Docalio est le portail client des cabinets et agences : vous
+            demandez les documents, votre client les dépose sans compte,
+            valide les vôtres — et vous suivez chaque dossier en temps réel.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button size="lg" asChild>
+            <Button size="lg" className="h-12 rounded-full px-7 text-base shadow-[0_12px_30px_-10px_rgba(37,99,235,0.7)]" asChild>
               <Link href="/register">
-                Commencer gratuitement
+                Créer mon portail gratuitement
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="bg-card/70 backdrop-blur" asChild>
-              <Link href="/contact">Demander une démo</Link>
+            <Button size="lg" variant="outline" className="h-12 rounded-full bg-card/70 px-7 text-base backdrop-blur" asChild>
+              <Link href="#produit">Voir le produit</Link>
             </Button>
           </div>
-          <p className="mt-5 text-xs text-muted-foreground">
-            14 jours d&apos;essai · Sans carte bancaire
-          </p>
+          <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+            {["Gratuit pour démarrer", "Sans carte bancaire", "Données hébergées dans l'UE", "Clients invités gratuits"].map((t) => (
+              <li key={t} className="inline-flex items-center gap-1.5">
+                <CircleCheck className="h-3.5 w-3.5 text-primary" />
+                {t}
+              </li>
+            ))}
+          </ul>
         </div>
 
-        {/* Aperçu produit live, incliné en 3D */}
-        <div className="mx-auto -mb-8 max-w-6xl px-4 pb-16 [perspective:1600px] sm:px-6">
-          <Tilt max={6}>
-            <DashboardPreview />
-          </Tilt>
+        <div className="px-4 pb-20 sm:px-6">
+          <HeroVisual />
         </div>
       </section>
 
-      {/* Valeurs */}
-      <Section muted className="py-14 sm:py-16">
-        <div className="grid gap-8 sm:grid-cols-3">
-          {VALUES.map((v) => {
-            const Icon = v.icon;
-            return (
-              <div key={v.title}>
-                <Icon className="h-5 w-5 text-foreground" />
-                <p className="mt-3 font-medium">{v.title}</p>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  {v.text}
-                </p>
+      {/* ---------------------------------------------------- Bandeau métiers */}
+      <section aria-label="Métiers" className="border-y border-border bg-muted/30 py-5">
+        <p className="mb-3 text-center text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          Pensé pour les métiers qui vivent de documents clients
+        </p>
+        <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+          <ul className="animate-marquee flex w-max gap-10 whitespace-nowrap">
+            {[...METIERS, ...METIERS].map((m, i) => (
+              <li key={i} aria-hidden={i >= METIERS.length} className="text-lg font-semibold tracking-tight text-foreground/35">
+                {m}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------ Le problème */}
+      <Section>
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          <Reveal>
+            <p className="text-sm font-semibold text-primary">Le vrai coût des documents clients</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+              Ce n&apos;est pas le travail qui vous ralentit. C&apos;est d&apos;attendre les pièces.
+            </h2>
+            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+              Un relevé qui manque, un devis jamais ouvert, un « OK » perdu dans
+              un fil d&apos;e-mails… Chaque dossier incomplet, c&apos;est une
+              relance, une recherche, un retard. Multipliez par vos clients.
+            </p>
+            <ul className="mt-7 space-y-3">
+              {[
+                "Pièces éparpillées entre e-mails, messageries et clés USB",
+                "Aucune visibilité : « l'a-t-il seulement ouvert ? »",
+                "Données sensibles envoyées en pièce jointe, sans contrôle",
+              ].map((p) => (
+                <li key={p} className="flex items-start gap-3 text-sm">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+          <Reveal delay={100} className="relative">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-[0_40px_90px_-40px_rgba(15,23,42,0.6)]">
+              <Image
+                src="/images/relation-client.jpg"
+                alt="Une conseillère échange avec sa cliente autour d'un ordinateur"
+                fill
+                sizes="(min-width: 1024px) 560px, 100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 to-transparent" />
+            </div>
+            <div className="absolute -bottom-6 left-6 right-6 rounded-2xl border border-border bg-card/95 p-4 shadow-xl backdrop-blur sm:left-auto sm:w-72">
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <Inbox className="h-4 w-4 text-violet-600" />
+                3 pièces reçues ce matin
+              </p>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+                <div className="h-full w-4/5 rounded-full bg-primary" />
               </div>
+              <p className="mt-1.5 text-xs text-muted-foreground">Dossier complet à 80 % — sans une seule relance.</p>
+            </div>
+          </Reveal>
+        </div>
+      </Section>
+
+      {/* --------------------------------------------------- Comment ça marche */}
+      <Section muted>
+        <SectionHeading
+          eyebrow="Comment ça marche"
+          title="Trois étapes. Zéro compte à créer pour vos clients."
+        />
+        <div className="relative mt-14 grid gap-6 md:grid-cols-3">
+          <div aria-hidden className="absolute left-[16%] right-[16%] top-7 hidden h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent md:block" />
+          {STEPS.map((s, i) => {
+            const Icon = s.icon;
+            return (
+              <Reveal key={s.title} delay={i * 90} className="relative text-center">
+                <div>
+                  <span className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-card text-primary shadow-md ring-1 ring-border">
+                    <Icon className="h-6 w-6" />
+                    <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                      {i + 1}
+                    </span>
+                  </span>
+                  <h3 className="mt-5 text-lg font-semibold">{s.title}</h3>
+                  <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">{s.text}</p>
+                </div>
+              </Reveal>
             );
           })}
         </div>
       </Section>
 
-      {/* Un outil, deux usages */}
+      {/* ------------------------------------------------------- Le produit */}
+      <Section id="produit">
+        <SectionHeading
+          eyebrow="Le produit"
+          title="Tout le dossier client, sur une seule page."
+          description="Des vraies captures du produit — pas des maquettes."
+        />
+        <div className="mt-12">
+          <ProductShowcase />
+        </div>
+      </Section>
+
+      {/* ----------------------------------------------------------- Bento */}
+      <Section muted>
+        <SectionHeading
+          eyebrow="Fonctionnalités"
+          title="Tout ce qu'il faut. Rien qui complique."
+          description="Pensé pour être compris en dix secondes par votre client, et adopté en cinq minutes par votre équipe."
+        />
+        <div className="mt-12 grid gap-4 md:grid-cols-4">
+          {BENTO.map((b, i) => {
+            const Icon = b.icon;
+            return (
+              <Reveal
+                key={b.title}
+                delay={i * 60}
+                className={`group relative overflow-hidden rounded-3xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-xl ${b.className}`}
+              >
+                <div aria-hidden className={`absolute inset-0 bg-gradient-to-br ${b.accent} to-transparent opacity-60 transition-opacity group-hover:opacity-100`} />
+                <div className="relative">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-card shadow-sm ring-1 ring-border">
+                    <Icon className="h-5 w-5 text-foreground" />
+                  </span>
+                  <h3 className="mt-5 text-lg font-semibold tracking-tight">{b.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{b.text}</p>
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
+      </Section>
+
+      {/* --------------------------------------------------------- Métiers */}
       <Section>
         <SectionHeading
-          eyebrow="Un outil, deux usages"
-          title="En interne comme avec vos clients"
-          description="La même brique sécurisée, que vous partagiez entre collègues ou avec l'extérieur."
+          eyebrow="Par métier"
+          title="Des pièces types prêtes pour votre activité"
+          description="Choisissez votre métier à l'inscription : les listes de pièces et les modèles de dossiers sont déjà là."
         />
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
-          {DUAL_USE.map((u) => {
-            const Icon = u.icon;
-            return (
-              <Reveal
-                key={u.title}
-                className="flex flex-col rounded-2xl border border-border bg-card p-6"
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {SOLUTIONS.map((s, i) => (
+            <Reveal key={s.slug} delay={i * 50}>
+              <Link
+                href={`/solutions/${s.slug}`}
+                className="group relative block aspect-[4/3] overflow-hidden rounded-3xl"
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-subtle text-primary">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <h3 className="mt-4 text-lg font-semibold tracking-tight">
-                  {u.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {u.text}
-                </p>
-                <ul className="mt-4 flex flex-wrap gap-2">
-                  {u.points.map((p) => (
-                    <li
-                      key={p}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground"
-                    >
-                      <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              </Reveal>
-            );
-          })}
+                <Image
+                  src={s.image}
+                  alt={s.imageAlt}
+                  fill
+                  sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+                  <p className="text-lg font-semibold">{s.name}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-white/75">{s.requestExamples.slice(0, 3).join(" · ")}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-white/90 transition-transform group-hover:translate-x-1">
+                    Découvrir <ArrowRight className="h-4 w-4" />
+                  </span>
+                </div>
+              </Link>
+            </Reveal>
+          ))}
         </div>
       </Section>
 
-      {/* Sections produit alternées, aperçus live inclinés */}
-      {FEATURE_SECTIONS.map((s, i) => {
-        const Preview = s.Preview;
-        return (
-          <Section key={s.title}>
-            <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-              <Reveal className={i % 2 === 1 ? "lg:order-2" : undefined}>
-                <p className="text-sm font-semibold text-primary">{s.eyebrow}</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-                  {s.title}
-                </h2>
-                <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-                  {s.description}
-                </p>
-                <ul className="mt-6 space-y-2.5">
-                  {s.points.map((p) => (
-                    <li key={p} className="flex items-start gap-2.5 text-sm">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
-                      <span>{p}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Reveal>
-              <Reveal
-                delay={80}
-                className={cn("[perspective:1600px]", i % 2 === 1 && "lg:order-1")}
-              >
-                <Tilt max={6}>
-                  <Preview />
-                </Tilt>
-              </Reveal>
-            </div>
-          </Section>
-        );
-      })}
+      {/* ------------------------------------------------------------ ROI */}
+      <Section muted id="calculateur">
+        <SectionHeading
+          eyebrow="Calculez votre gain"
+          title="Combien vous coûtent vraiment les relances ?"
+          description="Ajustez selon votre cabinet. Toutes les hypothèses sont les vôtres."
+        />
+        <div className="mt-12">
+          <RoiCalculator />
+        </div>
+      </Section>
 
-      {/* Sécurité */}
-      <Section muted>
-        <div className="grid items-center gap-10 lg:grid-cols-2">
+      {/* ------------------------------------------------------ Comparatif */}
+      <Section>
+        <SectionHeading
+          eyebrow="Pourquoi Docalio"
+          title="Les autres stockent vos fichiers. Docalio fait avancer vos dossiers."
+          description="SharePoint, J-Doc, Google Drive ou l'e-mail sont d'excellents outils — pour autre chose que la relation documentaire avec vos clients."
+        />
+        <div className="mt-12">
+          <ComparisonMatrix />
+        </div>
+      </Section>
+
+      {/* -------------------------------------------------------- Sécurité */}
+      <section className="relative isolate overflow-hidden bg-[#0b1224] text-white">
+        <Image
+          src="/images/signature.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          className="-z-10 object-cover opacity-20"
+        />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-[#0b1224] via-[#0b1224]/90 to-[#0b1224]/60" />
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2">
           <div>
-            <SectionHeading
-              align="left"
-              eyebrow="Sécurité & confidentialité"
-              title="La confiance, intégrée à l'architecture"
-              description="Vos documents sont sensibles. Docalio est pensé pour les protéger par défaut, pas en option."
-            />
-            <Button className="mt-6" variant="outline" asChild>
+            <p className="text-sm font-semibold text-blue-300">Sécurité & confidentialité</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+              Conçu pour des documents qui ne doivent jamais fuiter.
+            </h2>
+            <p className="mt-4 text-lg leading-relaxed text-slate-300">
+              La protection n&apos;est pas une option : elle est dans l&apos;architecture.
+            </p>
+            <Button className="mt-8 rounded-full" variant="secondary" asChild>
               <Link href="/securite">
-                Notre approche sécurité
-                <ArrowRight className="h-4 w-4" />
+                Notre approche sécurité <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>
-          <ul className="space-y-3">
+          <ul className="grid gap-3 sm:grid-cols-2">
             {[
-              { icon: FolderLock, text: "Stockage privé — aucun fichier public" },
-              { icon: Lock, text: "Accès par liens signés temporaires" },
-              { icon: ShieldCheck, text: "Isolation stricte entre organisations" },
-              { icon: Eye, text: "Suivi respectueux de la vie privée (RGPD-friendly)" },
-            ].map((item) => {
-              const Icon = item.icon;
+              { icon: Globe2, t: "Hébergé dans l'UE", d: "Base de données et fichiers à Francfort." },
+              { icon: LockKeyhole, t: "Stockage 100 % privé", d: "Aucun fichier public, accès par liens signés de quelques secondes." },
+              { icon: ShieldCheck, t: "Isolation stricte", d: "Chaque organisation et chaque espace sont cloisonnés en base." },
+              { icon: EyeOff, t: "Suivi respectueux", d: "Aucune adresse IP stockée, aucun traceur publicitaire." },
+            ].map((x) => {
+              const Icon = x.icon;
               return (
-                <li
-                  key={item.text}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-4"
-                >
-                  <Icon className="h-4 w-4 shrink-0 text-foreground" />
-                  <span className="text-sm font-medium">{item.text}</span>
+                <li key={x.t} className="rounded-2xl bg-white/5 p-5 ring-1 ring-white/10 backdrop-blur">
+                  <Icon className="h-5 w-5 text-blue-300" />
+                  <p className="mt-3 font-semibold">{x.t}</p>
+                  <p className="mt-1 text-sm text-slate-400">{x.d}</p>
                 </li>
               );
             })}
           </ul>
         </div>
-      </Section>
+      </section>
 
-      {/* Comparaison */}
-      <Section>
-        <SectionHeading
-          eyebrow="Pourquoi Docalio"
-          title="Plus clair qu'un email. Plus actionnable qu'un Drive."
-          description="Là où les outils génériques s'arrêtent au transfert, Docalio gère l'expérience client de bout en bout."
-        />
-        <div className="mt-10">
-          <ComparisonTable />
-        </div>
-      </Section>
-
-      {/* Tarifs */}
-      <Section muted>
+      {/* ---------------------------------------------------------- Tarifs */}
+      <Section id="tarifs">
         <SectionHeading
           eyebrow="Tarifs"
-          title="Un tarif simple, qui grandit avec vous"
-          description="Sans engagement. Démarrez gratuitement, choisissez votre offre ensuite."
+          title="Un forfait par cabinet. Vos clients ne paient jamais."
+          description="Pas de facturation au siège qui explose à chaque embauche. Gratuit pour démarrer, sans engagement."
         />
         <div className="mt-12">
           <PricingCards plans={["starter", "pro", "business"]} />
         </div>
-        <div className="mt-8 text-center">
-          <Button variant="outline" asChild>
-            <Link href="/tarifs">
-              Voir le détail des offres
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          Plus de 10 utilisateurs ou des besoins de conformité spécifiques ?{" "}
+          <Link href="/contact" className="font-medium text-primary hover:underline">
+            Parlons de l&apos;offre Entreprise
+          </Link>
+        </p>
       </Section>
 
-      {/* FAQ */}
-      <Section>
-        <SectionHeading eyebrow="FAQ" title="Questions fréquentes" />
+      {/* ------------------------------------------------------------- FAQ */}
+      <Section muted>
+        <SectionHeading eyebrow="FAQ" title="Vos questions, nos réponses" />
         <div className="mt-10">
           <Faq items={FAQ_ITEMS} />
         </div>
       </Section>
 
-      {/* CTA final */}
-      <Section className="py-16 sm:py-20">
-        <div className="rounded-3xl border border-border bg-foreground px-8 py-16 text-center text-background">
-          <h2 className="text-balance mx-auto max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            Un espace documentaire à la hauteur de votre entreprise
+      {/* ------------------------------------------------------- CTA final */}
+      <Section className="py-20">
+        <div className="relative isolate overflow-hidden rounded-[2rem] px-6 py-20 text-center text-white sm:px-16">
+          <Image src="/images/succes.jpg" alt="" fill sizes="(min-width: 1152px) 1104px, 100vw" className="-z-10 object-cover" />
+          <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-700/95 via-blue-800/90 to-slate-950/90" />
+          <h2 className="text-balance mx-auto max-w-2xl text-3xl font-semibold tracking-tight sm:text-5xl">
+            Votre prochain dossier complet, sans une seule relance.
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-background/70">
-            Créez votre premier espace sécurisé en quelques minutes — en interne
-            ou avec vos clients.
+          <p className="mx-auto mt-5 max-w-lg text-lg text-blue-100">
+            Créez votre portail, cliquez sur les pièces types de votre métier, envoyez le lien. C&apos;est tout.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button size="lg" variant="secondary" asChild>
-              <Link href="/register">Commencer gratuitement</Link>
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button size="lg" variant="secondary" className="h-12 rounded-full px-7 text-base" asChild>
+              <Link href="/register">
+                Commencer gratuitement <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
+            <Link href="/contact" className="text-sm font-medium text-white/90 underline-offset-4 hover:underline">
+              ou demander une démo de 20 minutes
+            </Link>
           </div>
         </div>
       </Section>
