@@ -13,7 +13,6 @@ import {
   CornerDownLeft,
   Search,
   type LucideIcon,
-  House,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -48,9 +47,8 @@ export function CommandPalette({
       router.push(href);
     };
     return [
-      { id: "home", label: "Accueil — à traiter", icon: House, keywords: "accueil home dashboard tableau de bord", run: go("/dashboard") },
-      { id: "spaces", label: "Espaces clients", icon: FolderClosed, keywords: "dossiers clients liste", run: go("/dashboard/workspaces") },
-      { id: "new", label: "Nouvel espace client", hint: "Créer", icon: Plus, keywords: "ajouter créer", run: go("/dashboard/workspaces/new") },
+      { id: "spaces", label: "Espaces clients", icon: FolderClosed, keywords: "accueil dossiers clients liste à traiter", run: go("/dashboard") },
+      { id: "new", label: "Nouvel espace client", hint: "Créer", icon: Plus, keywords: "ajouter créer", run: go("/dashboard?nouveau=1") },
       { id: "notifs", label: "Activité & notifications", icon: Bell, keywords: "activité alertes", run: go("/dashboard/notifications") },
       { id: "team", label: "Équipe & accès", hint: "Inviter", icon: Users, keywords: "utilisateurs membres invitation rôles collaborateurs groupes", run: go("/dashboard/settings/equipe") },
       { id: "billing", label: "Abonnement", icon: CreditCard, keywords: "plan facturation paiement usage offre", run: go("/dashboard/settings/abonnement") },

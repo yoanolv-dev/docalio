@@ -30,18 +30,31 @@ export async function getPortalRequests(token: string): Promise<PortalRequest[]>
   return data as PortalRequest[];
 }
 
-/** Compte par espace des pièces encore attendues côté client (pending/rejected). */
-export async function countOpenRequestsByWorkspace(): Promise<Map<string, number>> {
+export interface RequestStats {
+  total: number;
+  /** Validées par le cabinet. */
+  validated: number;
+  /** Déposées par le client, à vérifier. */
+  toReview: number;
+  /** Encore attendues du client (en attente ou refusées). */
+  waiting: number;
+}
+
+/** Statistiques de pièces par espace (une seule requête, agrégée ici). */
+export async function getRequestStatsByWorkspace(): Promise<Map<string, RequestStats>> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("document_requests")
-    .select("workspace_id, status")
-    .in("status", ["pending", "rejected", "received"]);
-  const out = new Map<string, number>();
+    .select("workspace_id, status");
+  const out = new Map<string, RequestStats>();
   if (error || !data) return out;
   for (const r of data as { workspace_id: string; status: string }[]) {
-    // « received » = à valider côté cabinet ; les deux comptent comme ouvertes.
-    out.set(r.workspace_id, (out.get(r.workspace_id) ?? 0) + 1);
+    const s = out.get(r.workspace_id) ?? { total: 0, validated: 0, toReview: 0, waiting: 0 };
+    s.total++;
+    if (r.status === "validated") s.validated++;
+    else if (r.status === "received") s.toReview++;
+    else s.waiting++;
+    out.set(r.workspace_id, s);
   }
   return out;
 }

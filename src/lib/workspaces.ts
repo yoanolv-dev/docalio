@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Workspace } from "@/lib/types/database";
-import { countOpenRequestsByWorkspace } from "@/lib/requests";
+import { getRequestStatsByWorkspace, type RequestStats } from "@/lib/requests";
 
 /**
  * Liste les workspaces accessibles à l'utilisateur courant.
@@ -35,6 +35,8 @@ export interface WorkspaceListItem extends Workspace {
   pendingDecisions: number;
   /** Pièces demandées non encore validées (attendues ou à vérifier). */
   openRequests: number;
+  /** Détail des pièces demandées (progression). */
+  requests: RequestStats;
   lastActivityAt: string | null;
 }
 
@@ -46,7 +48,7 @@ export interface WorkspaceListItem extends Workspace {
 export async function listWorkspacesWithMeta(): Promise<WorkspaceListItem[]> {
   const supabase = await createClient();
 
-  const [workspaces, docs, links, decisions, events, openRequests] = await Promise.all([
+  const [workspaces, docs, links, decisions, events, requestStats] = await Promise.all([
     listWorkspaces(),
     supabase.from("documents").select("id, workspace_id, is_visible_to_client"),
     supabase.from("share_links").select("workspace_id").eq("is_active", true),
@@ -56,7 +58,7 @@ export async function listWorkspacesWithMeta(): Promise<WorkspaceListItem[]> {
       .select("workspace_id, created_at")
       .order("created_at", { ascending: false })
       .limit(400),
-    countOpenRequestsByWorkspace(),
+    getRequestStatsByWorkspace(),
   ]);
 
   const docRows =
@@ -91,7 +93,8 @@ export async function listWorkspacesWithMeta(): Promise<WorkspaceListItem[]> {
       visibleCount: visible.length,
       hasActiveLink: activeLinks.has(w.id),
       pendingDecisions: visible.filter((d) => !decidedDocs.has(d.id)).length,
-      openRequests: openRequests.get(w.id) ?? 0,
+      openRequests: (requestStats.get(w.id)?.waiting ?? 0) + (requestStats.get(w.id)?.toReview ?? 0),
+      requests: requestStats.get(w.id) ?? { total: 0, validated: 0, toReview: 0, waiting: 0 },
       lastActivityAt: lastActivity.get(w.id) ?? null,
     };
   });

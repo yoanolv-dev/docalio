@@ -34,10 +34,10 @@ export default function CollecteShot() {
             <section className="rounded-xl border border-border bg-card p-5">
               <p className="flex items-center gap-2 text-base font-semibold">
                 <Inbox className="h-4 w-4 text-primary" />
-                Pièces demandées
+                À recevoir
               </p>
               <p className="mb-4 mt-1 text-sm text-muted-foreground">
-                Votre client les dépose depuis son portail, sans compte.
+                Ce que votre client doit vous envoyer.
               </p>
               <RequestsPanel
                 workspaceId="demo"

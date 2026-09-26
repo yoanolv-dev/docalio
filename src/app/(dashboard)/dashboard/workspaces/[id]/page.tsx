@@ -27,9 +27,9 @@ export default async function WorkspaceDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ nouveau?: string }>;
 }) {
-  const [{ id }, { tab }] = await Promise.all([params, searchParams]);
+  const [{ id }, { nouveau }] = await Promise.all([params, searchParams]);
   const workspace = await getWorkspace(id);
   if (!workspace) notFound();
 
@@ -71,7 +71,7 @@ export default async function WorkspaceDetailPage({
       requests={requests}
       org={membership?.organization}
       baseUrl={`${proto}://${host}`}
-      tab={tab}
+      justCreated={nouveau === "1"}
       spaceAccess={spaceAccess}
       accessGroups={accessGroups}
       accessMembers={accessMembers}

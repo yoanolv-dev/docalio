@@ -323,3 +323,92 @@ export async function deleteWorkspaceAction(formData: FormData): Promise<void> {
   revalidatePath("/dashboard");
   redirect("/dashboard/workspaces");
 }
+
+export type QuickCreateResult =
+  | { ok: true; id: string }
+  | { ok: false; message: string };
+
+/**
+ * Création express : un espace prêt à l'emploi en une seule action.
+ * Crée l'espace (actif), son lien client sans expiration (plus d'étape
+ * « activer le portail ») et les pièces demandées choisies. Le lien et les
+ * pièces sont best-effort : un échec n'annule pas l'espace, l'utilisateur peut
+ * les ajouter ensuite depuis la page.
+ */
+export async function quickCreateWorkspaceAction(input: {
+  name: string;
+  clientEmail?: string;
+  pieces?: string[];
+}): Promise<QuickCreateResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const membership = await getCurrentMembership();
+  if (!membership) redirect("/onboarding");
+  const org = membership.organization;
+
+  const name = String(input.name ?? "").trim().slice(0, 120);
+  if (!name) return { ok: false, message: "Indiquez le nom du client." };
+
+  const email = String(input.clientEmail ?? "").trim().slice(0, 200);
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, message: "Adresse e-mail invalide." };
+  }
+
+  const limitError = await activeWorkspaceLimitError(org, org.id);
+  if (limitError) return { ok: false, message: limitError };
+
+  // Usage purement interne : un espace d'équipe, sans lien ni pièces.
+  const internal = org.usage_type === "internal";
+
+  const { data, error } = await supabase
+    .from("workspaces")
+    .insert({
+      organization_id: org.id,
+      created_by: user.id,
+      name,
+      space_type: internal ? "internal" : "external",
+      client_company: internal ? null : name,
+      client_email: internal ? null : email || null,
+      status: "active",
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    return { ok: false, message: "Création impossible. Veuillez réessayer." };
+  }
+
+  if (!internal) {
+    const { randomBytes } = await import("node:crypto");
+    await supabase.from("share_links").insert({
+      organization_id: org.id,
+      workspace_id: data.id,
+      token: randomBytes(24).toString("base64url"),
+      expires_at: null,
+      created_by: user.id,
+    });
+
+    const pieces = (input.pieces ?? [])
+      .map((p) => String(p).trim().slice(0, 160))
+      .filter(Boolean)
+      .slice(0, 30);
+    if (pieces.length > 0) {
+      await supabase.from("document_requests").insert(
+        pieces.map((title, i) => ({
+          organization_id: org.id,
+          workspace_id: data.id,
+          title,
+          position: i,
+          created_by: user.id,
+        }))
+      );
+    }
+  }
+
+  revalidatePath("/dashboard");
+  return { ok: true, id: data.id };
+}

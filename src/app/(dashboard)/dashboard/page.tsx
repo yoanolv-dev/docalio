@@ -1,36 +1,39 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
 import { listWorkspacesWithMeta } from "@/lib/workspaces";
 import { getActionItems } from "@/lib/action-items";
-import { getRecentNotifications } from "@/lib/notifications";
-import { HomeView } from "@/components/home/home-view";
+import { SpacesView } from "@/components/spaces/spaces-view";
+import { getSector, vocabularyFor } from "@/lib/sectors";
 
-export const metadata: Metadata = { title: "Accueil" };
+export const metadata: Metadata = { title: "Espaces" };
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ nouveau?: string }>;
+}) {
+  const { nouveau } = await searchParams;
   const membership = await getCurrentMembership();
   if (!membership) redirect("/onboarding");
 
-  const [workspaces, actions, recent] = await Promise.all([
+  const org = membership.organization;
+  const [workspaces, actions] = await Promise.all([
     listWorkspacesWithMeta(),
-    getActionItems(10),
-    getRecentNotifications(6),
+    getActionItems(8),
   ]);
+  const sector = getSector(org.sector);
 
   return (
-    <HomeView
-      firstName={user?.user_metadata?.full_name?.split(" ")[0] ?? null}
-      usageType={membership.organization.usage_type}
+    <SpacesView
       workspaces={workspaces}
       actions={actions}
-      recent={recent}
+      vocab={vocabularyFor(org.usage_type)}
+      template={sector.requestTemplate}
+      nameExample={sector.nameExample}
+      internal={org.usage_type === "internal"}
+      canCreateInternal={org.usage_type === "mixed"}
+      openCreate={nouveau === "1"}
     />
   );
 }

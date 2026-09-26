@@ -2,8 +2,8 @@
 // vraies vues de l'app, alimentées par des données de démo. Sert à la revue
 // visuelle et aux captures. Non indexé, non lié.
 import { TopBar } from "@/components/layout/top-bar";
-import { AppSidebar, type SidebarProps } from "@/components/layout/app-sidebar";
-import { HomeView } from "@/components/home/home-view";
+import { SpacesView } from "@/components/spaces/spaces-view";
+import { vocabularyFor } from "@/lib/sectors";
 import { WorkspaceView } from "@/components/workspaces/workspace-view";
 import {
   MOCK_DOCUMENTS,
@@ -24,10 +24,7 @@ const ORG = {
   plan: "pro", usage_type: "external", sector: "agence",
 } as unknown as Organization;
 
-const SIDEBAR: SidebarProps = {
-  orgName: ORG.name, orgLogoUrl: null, orgColor: "#1c2a4e", planName: "Essentiel", upgradeTo: "Cabinet",
-  unreadCount: 3, newSpaceLabel: "Nouvel espace client", spacesLabel: "Espaces clients",
-};
+
 
 const NOTIFS: AppNotification[] = [
   { id: "n1", organization_id: "o", workspace_id: "w1", type: "request_received", metadata: { request_title: "Photos de la devanture", file_name: "devanture.zip" }, read_at: null, created_at: ago(4), workspace_name: "Boulangerie Margot" },
@@ -51,16 +48,34 @@ export default async function AppPreview({
   const { view = "home", tab, w = "1440" } = await searchParams;
   const ws = MOCK_WORKSPACES[0];
 
+  const vocab = vocabularyFor("external");
+  const TEMPLATE = ["Brief signé", "Logo et charte graphique", "Contenus textes", "Accès aux comptes"];
+
   return (
-    <div className="flex h-[920px] overflow-hidden border bg-canvas" style={{ width: Number(w) }}>
-      <aside className="hidden w-[248px] shrink-0 border-r border-border/80 bg-[var(--sidebar)] lg:block">
-        <AppSidebar {...SIDEBAR} />
-      </aside>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar userName="Hélène Roy" userEmail="helene@studio.fr" unreadCount={3} recentNotifications={NOTIFS} sidebar={SIDEBAR} />
-        <main className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-          {view === "home" ? (
-            <HomeView firstName="Hélène" usageType="external" workspaces={MOCK_WORKSPACES} actions={ACTIONS} recent={NOTIFS} />
+    <div className="flex h-[920px] flex-col overflow-hidden border bg-canvas" style={{ width: Number(w) }}>
+      <TopBar
+        orgName={ORG.name}
+        orgLogoUrl={null}
+        orgColor="#1c2a4e"
+        spacesLabel="Espaces clients"
+        userName="Hélène Roy"
+        userEmail="helene@studio.fr"
+        unreadCount={3}
+        recentNotifications={NOTIFS}
+      />
+      <main className="min-h-0 flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+          {view === "home" || view === "empty" ? (
+            <SpacesView
+              workspaces={view === "empty" ? [] : MOCK_WORKSPACES}
+              actions={view === "empty" ? [] : ACTIONS}
+              vocab={vocab}
+              template={TEMPLATE}
+              nameExample="Projet site web"
+              internal={false}
+              canCreateInternal={false}
+              openCreate={tab === "create"}
+            />
           ) : (
             <WorkspaceView
               workspace={ws}
@@ -76,11 +91,11 @@ export default async function AppPreview({
               requests={MOCK_REQUESTS}
               org={ORG}
               baseUrl="https://docalio.app"
-              tab={tab}
+              justCreated={tab === "created"}
             />
           )}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

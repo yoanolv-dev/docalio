@@ -14,7 +14,7 @@ const TABS = [
     text: "Votre client voit ce qu'il doit déposer, consulter et valider. Rien de plus, rien de moins.",
     src: "/product/portal.png",
     w: 1720,
-    h: 3776,
+    h: 3408,
   },
   {
     id: "collecte",
@@ -24,7 +24,7 @@ const TABS = [
     text: "Chaque pièce a une échéance et un statut. Les retards sautent aux yeux, l'activité du client s'affiche en direct.",
     src: "/product/collecte.png",
     w: 2360,
-    h: 2000,
+    h: 1800,
   },
   {
     id: "espaces",

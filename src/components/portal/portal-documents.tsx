@@ -122,6 +122,16 @@ function PortalDocumentCard({
     setComment(decision?.comment ?? "");
     setEditing(true);
   }
+  // Valider = un clic, sans formulaire. Les autres décisions ouvrent un commentaire.
+  async function approve() {
+    setSubmitting(true);
+    setError(null);
+    const r = await submitDecisionAction(token, doc.id, "approved", "", getVisitorId());
+    setSubmitting(false);
+    if (r.ok) onDecision(doc.id, { decision: r.decision, comment: r.comment });
+    else setError(r.message);
+  }
+
   async function submit() {
     if (!pending) return;
     setSubmitting(true);
@@ -166,34 +176,39 @@ function PortalDocumentCard({
               </p>
             )}
           </div>
-        </div>
-
-        <div className="mt-3.5 flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            onClick={handlePreview}
-            disabled={busy !== null}
-            style={{ backgroundColor: accent }}
-            className="flex-1 border-transparent text-white shadow-sm transition-opacity hover:opacity-90 sm:flex-none"
-          >
-            {busy === "preview" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
-            Consulter
-          </Button>
-          {doc.allow_download ? (
-            <Button size="sm" variant="outline" onClick={handleDownload} disabled={busy !== null} className="flex-1 sm:flex-none">
-              {busy === "download" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-              Télécharger
+          <div className="flex shrink-0 items-center gap-1.5">
+            <Button
+              size="sm"
+              onClick={handlePreview}
+              disabled={busy !== null}
+              style={{ backgroundColor: accent }}
+              className="border-transparent text-white shadow-sm transition-opacity hover:opacity-90"
+            >
+              {busy === "preview" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+              Ouvrir
             </Button>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <LockKeyhole className="h-3.5 w-3.5" />
-              Consultation seule
-            </span>
-          )}
+            {doc.allow_download ? (
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={handleDownload}
+                disabled={busy !== null}
+                className="h-9 w-9"
+                aria-label={`Télécharger ${doc.title}`}
+                title="Télécharger"
+              >
+                {busy === "download" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              </Button>
+            ) : (
+              <span className="flex h-9 w-9 items-center justify-center text-muted-foreground" title="Consultation seule">
+                <LockKeyhole className="h-4 w-4" />
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="border-t border-border bg-muted/30 px-4 py-3 sm:px-5">
+      <div className="border-t border-border bg-muted/20 px-4 py-3 sm:px-5">
         {decision && !editing ? (
           <div className={cn("flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-2.5", DECIDED_TONE[decision.decision])}>
             <div className="flex min-w-0 items-start gap-2">
@@ -241,16 +256,26 @@ function PortalDocumentCard({
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-xs font-medium text-muted-foreground">Votre décision :</span>
-            {DECISION_OPTIONS.map((o) => {
-              const Icon = o.icon;
-              return (
-                <Button key={o.value} size="sm" variant="outline" onClick={() => startDecision(o.value)}>
-                  <Icon className="h-4 w-4" />
-                  {o.label}
-                </Button>
-              );
-            })}
+            <Button
+              size="sm"
+              onClick={approve}
+              disabled={submitting}
+              className="bg-emerald-600 text-white hover:bg-emerald-700"
+            >
+              {submitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <CircleCheck className="h-4 w-4" />}
+              Valider
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => startDecision("changes_requested")} disabled={submitting}>
+              <PencilLine className="h-4 w-4" />
+              Demander une modification
+            </Button>
+            <button
+              type="button"
+              onClick={() => startDecision("rejected")}
+              className="ml-auto text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Refuser
+            </button>
           </div>
         )}
         {error && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>}

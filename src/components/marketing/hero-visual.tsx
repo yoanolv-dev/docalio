@@ -46,7 +46,7 @@ export function HeroVisual() {
             src="/product/collecte.png"
             alt="Docalio : pièces demandées à un client et activité en temps réel"
             width={2360}
-            height={2000}
+            height={1800}
             priority
             sizes="(min-width: 1024px) 1024px, 100vw"
             className="h-auto w-full"

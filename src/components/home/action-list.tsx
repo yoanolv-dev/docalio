@@ -34,7 +34,7 @@ export function ActionList({ items }: { items: ActionItem[] }) {
         return (
           <li key={item.id}>
             <Link
-              href={`/dashboard/workspaces/${item.workspaceId}${item.kind.startsWith("request") ? "?tab=pieces" : "?tab=documents"}`}
+              href={`/dashboard/workspaces/${item.workspaceId}`}
               className="group flex items-center gap-3.5 px-5 py-3.5 transition-colors hover:bg-canvas/70"
             >
               <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", m.tone)}>

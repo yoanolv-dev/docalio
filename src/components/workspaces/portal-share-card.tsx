@@ -52,6 +52,7 @@ export function PortalShareCard({
   clientEmail,
   clientName,
   orgName,
+  advancedOnly = false,
 }: {
   workspaceId: string;
   link: ShareLink | null;
@@ -61,6 +62,8 @@ export function PortalShareCard({
   clientEmail?: string | null;
   clientName?: string | null;
   orgName?: string | null;
+  /** Uniquement les options avancées (fenêtre Paramètres). */
+  advancedOnly?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   const [homeCopied, setHomeCopied] = useState(false);
@@ -84,6 +87,55 @@ export function PortalShareCard({
 
   if (!link) {
     return <CreateLinkForm workspaceId={workspaceId} />;
+  }
+
+  const advanced = (
+        <div className={advancedOnly ? "space-y-4" : "space-y-4 border-t border-border p-3.5"}>
+          {homeUrl && (
+            <div>
+              <p className="text-sm font-medium">Page d&apos;accueil à vos couleurs</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Une adresse facile à retenir, où votre client saisit son lien d&apos;accès.
+              </p>
+              <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-canvas/60 px-2.5 py-1.5">
+                <span className="min-w-0 flex-1 truncate text-sm">{homeUrl.replace(/^https?:\/\//, "")}</span>
+                <Button type="button" variant="ghost" size="sm" onClick={copyHome} className="h-7 shrink-0">
+                  {homeCopied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <form action={regenerateShareLinkAction}>
+              <input type="hidden" name="workspace_id" value={workspaceId} />
+              <Button type="submit" variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4" />
+                Générer un nouveau lien
+              </Button>
+            </form>
+            <form action={deactivateShareLinkAction}>
+              <input type="hidden" name="workspace_id" value={workspaceId} />
+              <Button type="submit" variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+                <Power className="h-4 w-4" />
+                Désactiver le portail
+              </Button>
+            </form>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Un nouveau lien rend l&apos;ancien inutilisable immédiatement.
+          </p>
+        </div>
+  );
+
+  if (advancedOnly) {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          {link.expires_at ? `Expire le ${formatDate(link.expires_at)}.` : "Sans date d'expiration."}
+        </p>
+        {advanced}
+      </div>
+    );
   }
 
   const subject = `Votre espace documentaire${orgName ? ` — ${orgName}` : ""}`;
@@ -147,41 +199,7 @@ export function PortalShareCard({
           Options avancées
           <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
         </summary>
-        <div className="space-y-4 border-t border-border p-3.5">
-          {homeUrl && (
-            <div>
-              <p className="text-sm font-medium">Page d&apos;accueil à vos couleurs</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Une adresse facile à retenir, où votre client saisit son lien d&apos;accès.
-              </p>
-              <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-canvas/60 px-2.5 py-1.5">
-                <span className="min-w-0 flex-1 truncate text-sm">{homeUrl.replace(/^https?:\/\//, "")}</span>
-                <Button type="button" variant="ghost" size="sm" onClick={copyHome} className="h-7 shrink-0">
-                  {homeCopied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-          )}
-          <div className="flex flex-wrap gap-2">
-            <form action={regenerateShareLinkAction}>
-              <input type="hidden" name="workspace_id" value={workspaceId} />
-              <Button type="submit" variant="outline" size="sm">
-                <RefreshCw className="h-4 w-4" />
-                Générer un nouveau lien
-              </Button>
-            </form>
-            <form action={deactivateShareLinkAction}>
-              <input type="hidden" name="workspace_id" value={workspaceId} />
-              <Button type="submit" variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
-                <Power className="h-4 w-4" />
-                Désactiver le portail
-              </Button>
-            </form>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Un nouveau lien rend l&apos;ancien inutilisable immédiatement.
-          </p>
-        </div>
+        {advanced}
       </details>
     </div>
   );

@@ -1,90 +1,111 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Menu, Search, X } from "lucide-react";
+import { Search } from "lucide-react";
 import { LogoMark } from "@/components/brand/logo";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { AccountMenu } from "@/components/layout/account-menu";
-import { AppSidebar, type SidebarProps } from "@/components/layout/app-sidebar";
+import { cn, getInitials } from "@/lib/utils";
 import type { AppNotification } from "@/lib/types/database";
 
-/**
- * Barre supérieure du dashboard : recherche globale (Ctrl K), activité et
- * compte. La navigation vit dans le menu latéral (tiroir sur mobile).
- */
-export function TopBar({
-  userName,
-  userEmail,
-  unreadCount,
-  recentNotifications,
-  sidebar,
-}: {
+export interface TopBarProps {
+  orgName: string;
+  orgLogoUrl: string | null;
+  orgColor: string | null;
+  spacesLabel: string;
   userName: string | null;
   userEmail: string;
   unreadCount: number;
   recentNotifications: AppNotification[];
-  sidebar: SidebarProps;
-}) {
+}
+
+/**
+ * Barre unique de l'application : deux destinations (Espaces, Réglages), la
+ * recherche (Ctrl K), l'activité et le compte. Rien d'autre à apprendre.
+ */
+export function TopBar({
+  orgName,
+  orgLogoUrl,
+  orgColor,
+  spacesLabel,
+  userName,
+  userEmail,
+  unreadCount,
+  recentNotifications,
+}: TopBarProps) {
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const pathname = usePathname();
-  const [lastPath, setLastPath] = useState(pathname);
-  if (lastPath !== pathname) {
-    setLastPath(pathname);
-    setDrawerOpen(false);
-  }
+
+  const nav = [
+    {
+      href: "/dashboard",
+      label: spacesLabel,
+      active: pathname === "/dashboard" || pathname.startsWith("/dashboard/workspaces"),
+    },
+    {
+      href: "/dashboard/settings/organisation",
+      label: "Réglages",
+      active: pathname.startsWith("/dashboard/settings"),
+    },
+  ];
 
   return (
     <>
-      <header className="z-40 shrink-0 border-b border-border/80 bg-white/80 backdrop-blur-md">
-        <div className="flex h-14 w-full items-center gap-2 px-3 sm:px-5">
-          {/* Mobile : tiroir de navigation */}
-          <DialogPrimitive.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <DialogPrimitive.Trigger asChild>
-              <button
-                type="button"
-                aria-label="Ouvrir la navigation"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
+      <header className="sticky top-0 z-40 shrink-0 border-b border-border/70 bg-white/85 backdrop-blur-xl">
+        <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-3 px-4 sm:px-6">
+          <Link href="/dashboard" className="flex min-w-0 shrink-0 items-center gap-2.5" aria-label="Accueil">
+            {orgLogoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={orgLogoUrl} alt="" className="h-7 w-7 rounded-lg object-cover ring-1 ring-black/5" />
+            ) : orgColor ? (
+              <span
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-semibold text-white"
+                style={{ backgroundColor: orgColor }}
               >
-                <Menu className="h-5 w-5" />
-              </button>
-            </DialogPrimitive.Trigger>
-            <DialogPrimitive.Portal>
-              <DialogPrimitive.Overlay className="animate-overlay-in fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px] lg:hidden" />
-              <DialogPrimitive.Content className="fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] border-r border-border bg-[var(--sidebar)] shadow-2xl outline-none lg:hidden">
-                <DialogPrimitive.Title className="sr-only">Navigation</DialogPrimitive.Title>
-                <DialogPrimitive.Close
-                  aria-label="Fermer la navigation"
-                  className="absolute right-3 top-3.5 flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-                >
-                  <X className="h-4 w-4" />
-                </DialogPrimitive.Close>
-                <AppSidebar {...sidebar} onNavigate={() => setDrawerOpen(false)} />
-              </DialogPrimitive.Content>
-            </DialogPrimitive.Portal>
-          </DialogPrimitive.Root>
-          <LogoMark className="h-7 w-7 lg:hidden" />
+                {getInitials(orgName)}
+              </span>
+            ) : (
+              <LogoMark className="h-7 w-7" />
+            )}
+            <span className="hidden max-w-[180px] truncate text-sm font-semibold sm:block">{orgName}</span>
+          </Link>
 
-          {/* Recherche globale */}
-          <button
-            type="button"
-            onClick={() => setPaletteOpen(true)}
-            className="group ml-1 flex h-9 min-w-0 flex-1 items-center gap-2.5 rounded-lg border border-border bg-canvas/70 px-3 text-sm text-muted-foreground transition-colors hover:border-ring/40 hover:bg-white hover:text-foreground sm:max-w-md lg:ml-0"
-            aria-label="Rechercher et naviguer"
-          >
-            <Search className="h-4 w-4 shrink-0" />
-            <span className="truncate">Rechercher un espace, une action…</span>
-            <kbd className="ml-auto hidden rounded-md border border-border bg-white px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
-              Ctrl K
-            </kbd>
-          </button>
+          <nav aria-label="Navigation principale" className="ml-2 flex items-center gap-0.5 sm:ml-4">
+            {nav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={item.active ? "page" : undefined}
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                  item.active
+                    ? "bg-canvas text-foreground ring-1 ring-border/80"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="ml-auto flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              aria-label="Rechercher (Ctrl K)"
+              title="Rechercher (Ctrl K)"
+              className="flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm text-muted-foreground transition-colors hover:bg-canvas hover:text-foreground"
+            >
+              <Search className="h-[18px] w-[18px]" />
+              <kbd className="hidden rounded border border-border bg-white px-1.5 py-0.5 text-[10px] font-medium md:inline">
+                Ctrl K
+              </kbd>
+            </button>
             <NotificationBell unreadCount={unreadCount} recent={recentNotifications} />
-            <AccountMenu userName={userName} userEmail={userEmail} orgName={sidebar.orgName} />
+            <AccountMenu userName={userName} userEmail={userEmail} orgName={orgName} />
           </div>
         </div>
       </header>

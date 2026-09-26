@@ -69,10 +69,10 @@ export function RequestsPanel({
   const [error, setError] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState<string | null>(null);
   const [rejectComment, setRejectComment] = useState("");
+  const [showDue, setShowDue] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const [pending, start] = useTransition();
 
-  const done = requests.filter((r) => r.status === "validated").length;
-  const toReview = requests.filter((r) => r.status === "received").length;
   const existing = new Set(requests.map((r) => r.title.toLowerCase()));
   const templateLeft = template.filter((t) => !existing.has(t.toLowerCase()));
 
@@ -93,6 +93,7 @@ export function RequestsPanel({
       if (r.ok) {
         setTitle("");
         setDue("");
+        setShowDue(false);
       }
       return r;
     });
@@ -104,31 +105,51 @@ export function RequestsPanel({
     else setError(r.message);
   }
 
+  // Les pièces types s'affichent d'office pour un espace vide ; ensuite, sur demande.
+  const templatesVisible = templateLeft.length > 0 && (requests.length === 0 || showTemplates);
+
   const addForm = (
-    <form onSubmit={add} className="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <Input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Quelle pièce demander ? Ex. Relevés bancaires de mars"
-        className="h-10 flex-1 text-sm"
-        maxLength={160}
-        aria-label="Pièce à demander"
-      />
-      <label className="flex h-10 items-center gap-2 rounded-lg border border-border bg-white px-2.5 text-xs text-muted-foreground">
-        <CalendarClock className="h-3.5 w-3.5 shrink-0" />
-        <span className="sr-only">Échéance (optionnelle)</span>
-        <input
-          type="date"
-          value={due}
-          onChange={(e) => setDue(e.target.value)}
-          className="bg-transparent text-xs text-foreground outline-none"
-          title="Échéance (optionnelle)"
+    <form onSubmit={add} className="space-y-2">
+      <div className="flex gap-2">
+        <Input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Ajouter une pièce à demander…"
+          className="h-10 flex-1 text-sm"
+          maxLength={160}
+          aria-label="Pièce à demander"
         />
-      </label>
-      <Button type="submit" className="h-10 shrink-0" disabled={pending || !title.trim()}>
-        {pending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-        Demander
-      </Button>
+        <Button type="submit" className="h-10 shrink-0" disabled={pending || !title.trim()}>
+          {pending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+          <span className="sr-only sm:not-sr-only">Demander</span>
+        </Button>
+      </div>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+        {showDue ? (
+          <label className="inline-flex items-center gap-1.5 text-muted-foreground">
+            <CalendarClock className="h-3.5 w-3.5" />
+            Avant le
+            <input
+              type="date"
+              value={due}
+              onChange={(e) => setDue(e.target.value)}
+              className="rounded-md border border-border bg-white px-1.5 py-0.5 text-xs text-foreground"
+              autoFocus
+            />
+          </label>
+        ) : (
+          <button type="button" onClick={() => setShowDue(true)} className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground">
+            <CalendarClock className="h-3.5 w-3.5" />
+            Ajouter une échéance
+          </button>
+        )}
+        {templateLeft.length > 0 && requests.length > 0 && (
+          <button type="button" onClick={() => setShowTemplates((v) => !v)} className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground">
+            <Sparkles className="h-3.5 w-3.5" />
+            {showTemplates ? "Masquer les pièces types" : "Pièces types"}
+          </button>
+        )}
+      </div>
     </form>
   );
 
@@ -136,12 +157,8 @@ export function RequestsPanel({
     <div className="space-y-4">
       {addForm}
 
-      {templateLeft.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            Pièces types :
-          </span>
+      {templatesVisible && (
+        <div className="flex flex-wrap items-center gap-1.5 rounded-xl bg-canvas/60 p-2.5">
           {templateLeft.map((t) => (
             <button
               key={t}
@@ -182,18 +199,6 @@ export function RequestsPanel({
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-border">
-          <div className="flex items-center gap-3 border-b border-border bg-canvas/60 px-4 py-2.5">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-500"
-                style={{ width: `${Math.round((done / requests.length) * 100)}%` }}
-              />
-            </div>
-            <span className="shrink-0 text-xs text-muted-foreground">
-              <span className="font-semibold text-foreground tabular-nums">{done}</span>/{requests.length} validée{done > 1 ? "s" : ""}
-              {toReview > 0 && <span className="ml-2 font-medium text-violet-700">· {toReview} à valider</span>}
-            </span>
-          </div>
           <ul className="divide-y divide-border">
             {requests.map((r) => {
               const status = REQUEST_STATUS[r.status];
@@ -239,7 +244,7 @@ export function RequestsPanel({
                           <Download className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-muted-foreground opacity-60 hover:text-destructive group-hover:opacity-100" disabled={pending}
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100" disabled={pending}
                         aria-label={`Supprimer la demande ${r.title}`} title="Supprimer la demande"
                         onClick={() => run(() => deleteRequestAction(r.id))}>
                         <Trash2 className="h-4 w-4" />
