@@ -3,7 +3,6 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import {
   ArrowRight,
-  Bell,
   CircleCheck,
   EyeOff,
   FolderTree,
@@ -11,7 +10,6 @@ import {
   Inbox,
   LockKeyhole,
   Palette,
-  Send,
   ShieldCheck,
   Sparkles,
   Timer,
@@ -21,6 +19,7 @@ import { Section, SectionHeading } from "@/components/marketing/section";
 import { HeroCanvasLazy } from "@/components/marketing/hero-canvas-lazy";
 import { HeroVisual } from "@/components/marketing/hero-visual";
 import { ProductShowcase } from "@/components/marketing/product-showcase";
+import { ProductFilm } from "@/components/marketing/product-film";
 import { RoiCalculator } from "@/components/marketing/roi-calculator";
 import { ComparisonMatrix } from "@/components/marketing/comparison-matrix";
 import { PricingCards } from "@/components/marketing/pricing-cards";
@@ -37,23 +36,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-const STEPS = [
-  {
-    icon: Send,
-    title: "Vous demandez",
-    text: "Listez les pièces attendues — ou choisissez les pièces types de votre métier — et partagez vos documents à faire valider.",
-  },
-  {
-    icon: Inbox,
-    title: "Votre client dépose et valide",
-    text: "Il ouvre son portail à vos couleurs, dépose ses fichiers depuis son téléphone et approuve vos documents. Sans compte.",
-  },
-  {
-    icon: Bell,
-    title: "Vous êtes prévenu",
-    text: "Chaque dépôt, ouverture et décision arrive en temps réel. Vous savez exactement qui relancer — et pour quoi.",
-  },
-];
 
 const BENTO = [
   {
@@ -303,31 +285,15 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* --------------------------------------------------- Comment ça marche */}
-      <Section muted>
+      {/* ----------------------------------------------- Film : comment ça marche */}
+      <Section muted id="comment-ca-marche">
         <SectionHeading
           eyebrow="Comment ça marche"
-          title="Trois étapes. Zéro compte à créer pour vos clients."
+          title="Tout le parcours, en 25 secondes."
+          description="Le cabinet à gauche, son client à droite. Aucun compte, aucune relance."
         />
-        <div className="relative mt-14 grid gap-6 md:grid-cols-3">
-          <div aria-hidden className="absolute left-[16%] right-[16%] top-7 hidden h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent md:block" />
-          {STEPS.map((s, i) => {
-            const Icon = s.icon;
-            return (
-              <Reveal key={s.title} delay={i * 90} className="relative text-center">
-                <div>
-                  <span className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-card text-primary shadow-md ring-1 ring-border">
-                    <Icon className="h-6 w-6" />
-                    <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                      {i + 1}
-                    </span>
-                  </span>
-                  <h3 className="mt-5 text-lg font-semibold">{s.title}</h3>
-                  <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">{s.text}</p>
-                </div>
-              </Reveal>
-            );
-          })}
+        <div className="mt-12">
+          <ProductFilm />
         </div>
       </Section>
 
