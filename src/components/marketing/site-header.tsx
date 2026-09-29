@@ -59,7 +59,7 @@ export function SiteHeader() {
       )}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
-        <Link href="/" aria-label="Docalio — accueil" className="rounded-md focus-visible:outline-2 focus-visible:outline-offset-4">
+        <Link href="/" aria-label="Docalio : accueil" className="rounded-md focus-visible:outline-2 focus-visible:outline-offset-4">
           <Logo />
         </Link>
 

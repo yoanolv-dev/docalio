@@ -59,7 +59,7 @@ export function WorkspaceForm({
       )}
       <input type="hidden" name="space_type" value={spaceType} />
 
-      {/* Type d'espace — uniquement si l'organisation mêle interne & externe */}
+      {/* Type d'espace, uniquement si l'organisation mêle interne & externe */}
       {showTypeChoice && (
         <div className="space-y-1.5">
           <Label>Type d&apos;espace</Label>
@@ -175,7 +175,7 @@ export function WorkspaceForm({
               <LogoUploader
                 scope={workspace?.id ?? "new"}
                 defaultValue={workspace?.logo_url}
-                hint="Affiché en tête du portail client. PNG, JPG ou WebP — 2 Mo max."
+                hint="Affiché en tête du portail client. PNG, JPG ou WebP : 2 Mo max."
               />
             </div>
 
@@ -216,7 +216,7 @@ export function WorkspaceForm({
         />
       </div>
 
-      {/* Modèle de dossiers — à la création uniquement */}
+      {/* Modèle de dossiers, à la création uniquement */}
       {isNew && sectorDef.folderTemplate.length > 0 && (
         <div className="rounded-xl border border-border bg-muted/30 p-4">
           <label className="flex cursor-pointer items-start gap-2.5">

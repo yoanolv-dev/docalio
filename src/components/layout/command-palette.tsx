@@ -27,7 +27,7 @@ interface Command {
 }
 
 /**
- * Palette de commandes (Ctrl K / ⌘K) — la navigation principale du dashboard.
+ * Palette de commandes (Ctrl K / ⌘K), la navigation principale du dashboard.
  * Volontairement minimale : tout se fait au clavier, aucun menu permanent.
  */
 export function CommandPalette({
@@ -90,7 +90,7 @@ export function CommandPalette({
   }, [open, onOpenChange]);
 
   // Réinitialise la saisie à l'ouverture, et la sélection quand la requête
-  // change — ajustement pendant le rendu (cf. « you might not need an effect »).
+  // change, ajustement pendant le rendu (cf. « you might not need an effect »).
   const [prevOpen, setPrevOpen] = useState(open);
   if (prevOpen !== open) {
     setPrevOpen(open);

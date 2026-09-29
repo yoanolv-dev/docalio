@@ -43,7 +43,7 @@ export interface WorkspaceListItem extends Workspace {
 /**
  * Liste les workspaces avec leurs métadonnées d'engagement (documents,
  * lien actif, décisions en attente, dernière activité). Quatre requêtes
- * RLS-scopées agrégées côté serveur — pas de N+1.
+ * RLS-scopées agrégées côté serveur, pas de N+1.
  */
 export async function listWorkspacesWithMeta(): Promise<WorkspaceListItem[]> {
   const supabase = await createClient();

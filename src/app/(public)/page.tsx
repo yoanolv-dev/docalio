@@ -31,7 +31,7 @@ import { PLANS } from "@/lib/plans";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: { absolute: "Docalio — Portail client : collecte de pièces et validation de documents" },
+  title: { absolute: "Docalio : Portail client : collecte de pièces et validation de documents" },
   description: SITE.description,
   alternates: { canonical: "/" },
 };
@@ -48,7 +48,7 @@ const BENTO = [
   {
     icon: CircleCheck,
     title: "Validation client",
-    text: "Approuver, demander une modification, refuser — avec commentaire.",
+    text: "Approuver, demander une modification, refuser, avec commentaire.",
     className: "",
     accent: "from-emerald-500/15",
   },
@@ -91,7 +91,7 @@ const FAQ_ITEMS = [
   {
     question: "Qu'est-ce qui différencie Docalio d'un Drive, de SharePoint ou de J-Doc ?",
     answer:
-      "Ces outils stockent et échangent des fichiers. Docalio organise la relation documentaire avec le client : ce qu'il doit déposer (avec échéances), ce qu'il doit valider, et où en est chaque dossier — le tout dans un portail à votre marque.",
+      "Ces outils stockent et échangent des fichiers. Docalio organise la relation documentaire avec le client : ce qu'il doit déposer (avec échéances), ce qu'il doit valider, et où en est chaque dossier, le tout dans un portail à votre marque.",
   },
   {
     question: "Où sont hébergées mes données ?",
@@ -190,7 +190,7 @@ export default function HomePage() {
           <p className="text-pretty mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
             Docalio est le portail client des cabinets et agences : vous
             demandez les documents, votre client les dépose sans compte,
-            valide les vôtres — et vous suivez chaque dossier en temps réel.
+            valide les vôtres, et vous suivez chaque dossier en temps réel.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button size="lg" className="h-12 rounded-full px-7 text-base shadow-[0_12px_30px_-10px_rgba(37,99,235,0.7)]" asChild>
@@ -279,7 +279,7 @@ export default function HomePage() {
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
                 <div className="h-full w-4/5 rounded-full bg-primary" />
               </div>
-              <p className="mt-1.5 text-xs text-muted-foreground">Dossier complet à 80 % — sans une seule relance.</p>
+              <p className="mt-1.5 text-xs text-muted-foreground">Dossier complet à 80 %, sans une seule relance.</p>
             </div>
           </Reveal>
         </div>
@@ -302,7 +302,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="Le produit"
           title="Tout le dossier client, sur une seule page."
-          description="Des vraies captures du produit — pas des maquettes."
+          description="Des vraies captures du produit, pas des maquettes."
         />
         <div className="mt-12">
           <ProductShowcase />
@@ -391,7 +391,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="Pourquoi Docalio"
           title="Les autres stockent vos fichiers. Docalio fait avancer vos dossiers."
-          description="SharePoint, J-Doc, Google Drive ou l'e-mail sont d'excellents outils — pour autre chose que la relation documentaire avec vos clients."
+          description="SharePoint, J-Doc, Google Drive ou l'e-mail sont d'excellents outils, pour autre chose que la relation documentaire avec vos clients."
         />
         <div className="mt-12">
           <ComparisonMatrix />

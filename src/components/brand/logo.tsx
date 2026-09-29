@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Monogramme Docalio : un document au coin plié dont la courbe dessine un « D »,
- * avec une coche — le document qui arrive, et qui est validé.
+ * avec une coche, le document qui arrive, et qui est validé.
  */
 export function LogoMark({ className }: { className?: string }) {
   return (

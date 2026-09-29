@@ -268,7 +268,7 @@ export async function updateWorkspaceAction(
   return { ok: true, message: "Modifications enregistrées." };
 }
 
-/** Archive (status = archived) — appelée depuis un <form action>. */
+/** Archive (status = archived), appelée depuis un <form action>. */
 export async function archiveWorkspaceAction(formData: FormData): Promise<void> {
   const supabase = await createClient();
   const {
@@ -287,7 +287,7 @@ export async function archiveWorkspaceAction(formData: FormData): Promise<void> 
 }
 
 /**
- * Suppression définitive — appelée depuis un <form action>.
+ * Suppression définitive, appelée depuis un <form action>.
  * Les documents sont supprimés en cascade (FK) ; on nettoie aussi les
  * fichiers Storage du workspace pour ne pas laisser d'orphelins.
  */

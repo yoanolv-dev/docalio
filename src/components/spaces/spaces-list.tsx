@@ -110,7 +110,7 @@ export function SpacesList({
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[15px] font-medium">{w.name}</span>
                     <span className="block truncate text-sm text-muted-foreground">
-                      {w.client_email ?? (w.space_type === "internal" ? "Espace interne" : w.client_company ?? "—")}
+                      {w.client_email ?? (w.space_type === "internal" ? "Espace interne" : w.client_company ?? "-")}
                     </span>
                   </span>
 

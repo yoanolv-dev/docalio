@@ -8,7 +8,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* =============================================================================
-   Docalio — Design system « Blanc & Bleu »
+   Docalio : Design system « Blanc & Bleu »
    Blanc franc, neutres bleutés (échelle slate), un seul accent : bleu clair
    et net (blue-600). Beaucoup d'air, hairlines plutôt qu'ombres lourdes.
    Objectif : un SaaS lumineux, propre, immédiatement lisible.
@@ -21,23 +21,23 @@
   /* Verrouille les contrôles natifs (formulaires, scrollbars) sur le clair. */
   color-scheme: light;
 
-  /* Surfaces — blanc, gris bleutés très clairs (échelle slate) */
+  /* Surfaces, blanc, gris bleutés très clairs (échelle slate) */
   --background: #ffffff;
   --card: #ffffff;
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
 
-  /* Texte — encre slate (bleu-gris profond), jamais noir pur */
+  /* Texte, encre slate (bleu-gris profond), jamais noir pur */
   --foreground: #0f172a;            /* slate-900 */
   --muted: #f1f5f9;                 /* slate-100 */
   --muted-foreground: #64748b;      /* slate-500 */
 
-  /* Marque — bleu franc, clair et net */
+  /* Marque, bleu franc, clair et net */
   --primary: #2563eb;               /* blue-600 */
   --primary-hover: #1d4ed8;         /* blue-700 */
   --primary-foreground: #ffffff;
-  --primary-subtle: #eff6ff;        /* blue-50 — voile bleu */
+  --primary-subtle: #eff6ff;        /* blue-50, voile bleu */
 
   /* Neutres interactifs (survols teintés bleu, raccord avec la marque) */
   --secondary: #f1f5f9;
@@ -134,7 +134,7 @@ body {
   letter-spacing: -0.011em;
 }
 
-/* Titres : resserrés, tranchants — signature éditoriale. */
+/* Titres : resserrés, tranchants, signature éditoriale. */
 h1, h2, h3 {
   letter-spacing: -0.03em;
 }

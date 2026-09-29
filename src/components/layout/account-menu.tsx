@@ -50,7 +50,7 @@ const LINKS: MenuLink[] = [
 
 /**
  * Menu de compte du dashboard. Rend visibles et accessibles d'un clic les
- * fonctionnalités auparavant cachées (équipe, abonnement, paramètres) — en
+ * fonctionnalités auparavant cachées (équipe, abonnement, paramètres), en
  * complément de la palette ⌘K.
  */
 export function AccountMenu({

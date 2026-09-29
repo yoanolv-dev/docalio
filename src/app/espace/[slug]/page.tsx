@@ -142,7 +142,7 @@ export default async function PortalHomePage({
 
         <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
           <FileText className="h-3.5 w-3.5" />
-          Propulsé par Docalio — l&apos;espace documentaire client
+          Propulsé par Docalio : l&apos;espace documentaire client
         </p>
       </main>
     </div>

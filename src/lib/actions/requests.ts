@@ -136,7 +136,7 @@ export async function deleteRequestAction(
   return { ok: true };
 }
 
-/** URL signée (60 s) pour récupérer une pièce déposée — membres uniquement. */
+/** URL signée (60 s) pour récupérer une pièce déposée, membres uniquement. */
 export async function getRequestFileUrl(
   requestId: string
 ): Promise<{ ok: true; url: string } | { ok: false; message: string }> {

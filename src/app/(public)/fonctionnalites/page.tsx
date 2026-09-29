@@ -209,7 +209,7 @@ export default function FeaturesPage() {
         </Section>
       ))}
 
-      {/* Sécurité — renvoi */}
+      {/* Sécurité, renvoi */}
       <Section muted={GROUPS.length % 2 === 1}>
         <div className="flex flex-col items-center gap-4 rounded-2xl border border-border bg-card p-8 text-center">
           <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-subtle">

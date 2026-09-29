@@ -27,7 +27,7 @@ export interface Organization {
   slug: string;
   logo_url: string | null;
   primary_color: string | null;
-  /** Secteur d'activité (cf. src/lib/sectors.ts) — personnalisation. */
+  /** Secteur d'activité (cf. src/lib/sectors.ts), personnalisation. */
   sector: string | null;
   /** Usage principal : interne, externe (clients) ou les deux. */
   usage_type: UsageType;

@@ -102,7 +102,7 @@ export function ProductShowcase() {
               <Image
                 key={t.id}
                 src={t.src}
-                alt={`Capture d'écran Docalio — ${t.label}`}
+                alt={`Capture d'écran Docalio : ${t.label}`}
                 width={t.w}
                 height={t.h}
                 sizes="(min-width: 1024px) 720px, 100vw"

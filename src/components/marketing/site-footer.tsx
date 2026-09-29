@@ -70,7 +70,7 @@ export function SiteFooter() {
 
         <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
           <div>
-            <Link href="/" aria-label="Docalio — accueil">
+            <Link href="/" aria-label="Docalio : accueil">
               <Logo inverted />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">

@@ -127,7 +127,7 @@ export function LogoUploader({
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            {hint ?? "PNG, JPG ou WebP — 2 Mo maximum."}
+            {hint ?? "PNG, JPG ou WebP : 2 Mo maximum."}
           </p>
         </div>
       </div>

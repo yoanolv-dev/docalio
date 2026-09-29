@@ -30,7 +30,7 @@ export default async function OrganisationSettingsPage() {
             <CardTitle>Identité</CardTitle>
           </div>
           <CardDescription>
-            Nom, logo et couleur — repris sur vos portails clients.
+            Nom, logo et couleur, repris sur vos portails clients.
           </CardDescription>
         </CardHeader>
         <CardContent>

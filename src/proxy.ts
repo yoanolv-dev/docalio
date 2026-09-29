@@ -6,7 +6,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * (NEXT_PUBLIC_PORTAL_DOMAIN, ex. « docalio.app »), la racine d'un sous-domaine
  * client (boulangerie-margot.docalio.app/) affiche la page d'accueil de marque.
  * Tant que la variable n'est pas définie (avant le lancement v1), cette logique
- * est totalement inerte — rien à configurer côté infra aujourd'hui.
+ * est totalement inerte, rien à configurer côté infra aujourd'hui.
  * Les liens /p/{token} passent inchangés : le jeton reste l'unique secret.
  */
 function portalSubdomainRewrite(request: NextRequest): NextResponse | null {

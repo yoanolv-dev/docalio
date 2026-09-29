@@ -1,5 +1,5 @@
 // =============================================================================
-// Docalio — Définitions des plans (forfait par cabinet), quotas & limites
+// Docalio : Définitions des plans (forfait par cabinet), quotas & limites
 //
 // Source de vérité des plans côté code. La colonne `plan` de `organizations`
 // référence un de ces identifiants ; les limites/prix vivent ici.
@@ -100,7 +100,7 @@ export const PLANS: Record<OrganizationPlan, PlanDefinition> = {
     highlights: [
       "Jusqu'à 3 utilisateurs",
       "Espaces clients illimités",
-      "Clients invités illimités — gratuits",
+      "Clients invités illimités, gratuits",
       "Portail à vos couleurs & votre logo",
       "Pièces types par métier en un clic",
       "50 Go de stockage",

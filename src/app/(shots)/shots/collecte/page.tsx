@@ -48,7 +48,7 @@ export default function CollecteShot() {
             <section className="rounded-xl border border-border bg-card p-5">
               <p className="mb-4 flex items-center gap-2 text-base font-semibold">
                 <Activity className="h-4 w-4 text-primary" />
-                Activité client — en direct
+                Activité client, en direct
               </p>
               <WorkspaceActivityTimeline timeline={TIMELINE} />
             </section>

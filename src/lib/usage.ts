@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 
 /**
  * Usage courant d'une organisation, calculé côté base via la RPC
- * `get_organization_usage` (SECURITY DEFINER, agrégats serveur — pas de
+ * `get_organization_usage` (SECURITY DEFINER, agrégats serveur, pas de
  * remontée de lignes). Voir migration `20260611500000_org_usage.sql`.
  */
 export interface OrganizationUsage {

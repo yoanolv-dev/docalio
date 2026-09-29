@@ -71,7 +71,7 @@ export async function createOrganizationAction(
   }
 
   // Profil de personnalisation (secteur + usage). Le créateur est owner :
-  // la RLS l'autorise à mettre à jour son organisation. Best-effort —
+  // la RLS l'autorise à mettre à jour son organisation. Best-effort -
   // l'onboarding réussit même si cette mise à jour échoue.
   const orgId = (org as { id?: string } | null)?.id;
   if (orgId) {

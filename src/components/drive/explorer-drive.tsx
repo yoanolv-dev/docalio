@@ -78,7 +78,7 @@ import { cn, formatDate } from "@/lib/utils";
 import type { Document, DocumentDecision, Folder as FolderType } from "@/lib/types/database";
 
 // ---------------------------------------------------------------------------
-// Drive « Explorateur de fichiers » — paradigme familier (Windows) : volet
+// Drive « Explorateur de fichiers », paradigme familier (Windows) : volet
 // d'arborescence à gauche, barre d'adresse (fil d'Ariane), vue Grandes icônes
 // ou Détails, double-clic pour ouvrir, clic droit, glisser-déposer, sélection
 // multiple. Aucune disposition spatiale : dense, rapide, sans courbe
@@ -109,7 +109,7 @@ interface UploadItem {
   name: string;
   status: "uploading" | "done" | "error";
   message?: string;
-  /** Dossier de destination — pour afficher une tuile fantôme au bon endroit. */
+  /** Dossier de destination, pour afficher une tuile fantôme au bon endroit. */
   folderId: string | null;
 }
 
@@ -1223,7 +1223,7 @@ function FileTile({
           onToggleVisible();
         }}
         onPointerDown={(e) => e.stopPropagation()}
-        title={visible ? "Visible client — cliquer pour passer en privé" : "Privé — cliquer pour partager"}
+        title={visible ? "Visible client, cliquer pour passer en privé" : "Privé, cliquer pour partager"}
         className={cn(
           "absolute bottom-1 right-1 inline-flex h-6 w-6 items-center justify-center rounded-full border transition active:scale-95",
           visible ? "border-primary/30 bg-primary-subtle text-primary" : "border-border bg-card text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100"
@@ -1236,7 +1236,7 @@ function FileTile({
 }
 
 // =============================================================================
-// Tuiles / lignes fantômes (upload en cours) — feedback instantané
+// Tuiles / lignes fantômes (upload en cours), feedback instantané
 // =============================================================================
 function GhostTile({ name }: { name: string }) {
   return (
@@ -1448,7 +1448,7 @@ function FileRow({
             e.stopPropagation();
             onToggleVisible();
           }}
-          title={visible ? "Visible client — cliquer pour passer en privé" : "Privé — cliquer pour partager"}
+          title={visible ? "Visible client, cliquer pour passer en privé" : "Privé, cliquer pour partager"}
           className={cn(
             "inline-flex h-6 w-6 items-center justify-center rounded-full border transition active:scale-95",
             visible ? "border-primary/30 bg-primary-subtle text-primary" : "border-border text-muted-foreground hover:text-foreground"

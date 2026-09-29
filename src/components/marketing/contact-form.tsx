@@ -21,7 +21,7 @@ export function ContactForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const subject = `Demande de démo Docalio — ${company || name || "Prospect"}`;
+    const subject = `Demande de démo Docalio : ${company || name || "Prospect"}`;
     const body = [
       `Nom : ${name}`,
       `Email : ${email}`,

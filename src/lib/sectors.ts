@@ -1,5 +1,5 @@
 // =============================================================================
-// Docalio — Secteurs & vocabulaire adaptatif
+// Docalio : Secteurs & vocabulaire adaptatif
 //
 // Le profil de l'organisation (secteur + usage) personnalise l'app :
 //  - le VOCABULAIRE (« espace client » vs « espace ») dépend de l'usage,

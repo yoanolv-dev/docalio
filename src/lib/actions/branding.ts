@@ -7,7 +7,7 @@ import { getCurrentMembership } from "@/lib/organizations";
 const BRAND_BUCKET = "brand";
 const MAX_LOGO_BYTES = 2 * 1024 * 1024; // 2 Mo
 
-// Logos uniquement : images matricielles sûres (pas de SVG — risque XSS).
+// Logos uniquement : images matricielles sûres (pas de SVG, risque XSS).
 const ALLOWED: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
@@ -22,7 +22,7 @@ export type LogoUploadResult =
  * Téléverse un logo (org ou espace client) dans le bucket public `brand` et
  * renvoie son URL publique stable. Le bucket `documents` (fichiers clients)
  * n'est jamais touché : il reste privé. L'écriture est cadrée par RLS au
- * dossier de l'organisation du membre — aucune écriture inter-organisation.
+ * dossier de l'organisation du membre, aucune écriture inter-organisation.
  *
  * `scope` (org | new | workspace_id) sert uniquement à nommer le fichier.
  * `previous_url` (optionnel) : ancien logo de notre bucket → nettoyé en
@@ -76,7 +76,7 @@ export async function uploadBrandLogoAction(
   }
 
   // Nettoyage meilleur effort de l'ancien logo (s'il vient de notre bucket et
-  // de cette organisation — jamais d'autres fichiers).
+  // de cette organisation, jamais d'autres fichiers).
   const previous = String(formData.get("previous_url") ?? "").trim();
   if (previous && previous !== url) {
     const marker = `/${BRAND_BUCKET}/organizations/${orgId}/`;

@@ -1,6 +1,6 @@
 import type { AppNotification } from "@/lib/types/database";
 
-// Helpers PURS de présentation des notifications — sans import serveur, donc
+// Helpers PURS de présentation des notifications, sans import serveur, donc
 // utilisables aussi bien côté serveur que dans des composants client (cloche).
 // Le wording vit ici : changer un libellé ne touche jamais la base.
 
@@ -18,33 +18,33 @@ export function describeNotification(n: AppNotification): NotificationDescriptor
     case "portal_opened":
       return {
         title: "Portail ouvert",
-        message: `${ws} — votre client a ouvert le portail.`,
+        message: `${ws}, votre client a ouvert le portail.`,
       };
     case "document_downloaded":
       return {
         title: "Document téléchargé",
-        message: `${ws} — « ${doc} » a été téléchargé.`,
+        message: `${ws}, « ${doc} » a été téléchargé.`,
       };
     case "document_opened":
       return {
         title: "Document consulté",
-        message: `${ws} — « ${doc} » a été prévisualisé.`,
+        message: `${ws}, « ${doc} » a été prévisualisé.`,
       };
     case "decision_received": {
       const base =
         n.metadata.decision === "approved"
           ? {
               title: "Document approuvé",
-              message: `${ws} — « ${doc} » a été approuvé.`,
+              message: `${ws}, « ${doc} » a été approuvé.`,
             }
           : n.metadata.decision === "rejected"
             ? {
                 title: "Document refusé",
-                message: `${ws} — « ${doc} » a été refusé.`,
+                message: `${ws}, « ${doc} » a été refusé.`,
               }
             : {
                 title: "Modification demandée",
-                message: `${ws} — modification demandée sur « ${doc} ».`,
+                message: `${ws}, modification demandée sur « ${doc} ».`,
               };
       const comment = n.metadata.comment?.trim();
       return comment
@@ -54,7 +54,7 @@ export function describeNotification(n: AppNotification): NotificationDescriptor
     case "request_received":
       return {
         title: "Pièce reçue",
-        message: `${ws} — « ${n.metadata.request_title ?? "une pièce"} » a été déposée${n.metadata.file_name ? ` (${n.metadata.file_name})` : ""}.`,
+        message: `${ws}, « ${n.metadata.request_title ?? "une pièce"} » a été déposée${n.metadata.file_name ? ` (${n.metadata.file_name})` : ""}.`,
       };
   }
 }

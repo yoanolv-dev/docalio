@@ -30,7 +30,7 @@ export const SOLUTIONS: Solution[] = [
     eyebrow: "Pour les cabinets d'expertise comptable",
     title: "Fini la chasse aux pièces en fin de mois.",
     subtitle:
-      "Vos clients déposent relevés, factures et justificatifs dans leur portail, sans créer de compte. Vous savez en un coup d'œil ce qui manque — et qui relancer.",
+      "Vos clients déposent relevés, factures et justificatifs dans leur portail, sans créer de compte. Vous savez en un coup d'œil ce qui manque, et qui relancer.",
     image: "/images/comptabilite.jpg",
     imageAlt: "Justificatifs comptables, calculatrice et formulaires fiscaux sur un bureau",
     pains: [
@@ -43,7 +43,7 @@ export const SOLUTIONS: Solution[] = [
       "Une liste de pièces par client, prête en un clic",
       "Échéances visibles et retards signalés automatiquement",
       "Bilans et liasses validés en ligne, avec commentaire",
-      "Historique complet : qui a déposé, ouvert, validé — et quand",
+      "Historique complet : qui a déposé, ouvert, validé, et quand",
     ],
     faq: [
       { question: "Mes clients doivent-ils installer une application ?", answer: "Non. Ils reçoivent un lien sécurisé et déposent leurs pièces depuis leur navigateur, sur ordinateur comme sur mobile, sans créer de compte." },
@@ -90,7 +90,7 @@ export const SOLUTIONS: Solution[] = [
     eyebrow: "Pour les agences, studios et créatifs",
     title: "Des validations client en heures, pas en semaines.",
     subtitle:
-      "Vos clients déposent leurs contenus, consultent vos maquettes et valident — ou demandent une modification commentée. Le projet avance, sans fil d'e-mails.",
+      "Vos clients déposent leurs contenus, consultent vos maquettes et valident, ou demandent une modification commentée. Le projet avance, sans fil d'e-mails.",
     image: "/images/agence.jpg",
     imageAlt: "Équipe d'agence réunie autour d'une présentation",
     pains: [

@@ -50,7 +50,7 @@ export const COMPARISONS: Comparison[] = [
       "SharePoint est taillé pour l'intranet. Pour vos clients, Docalio offre un portail sans compte invité, la collecte de pièces et la validation en ligne, prêt en 5 minutes.",
     title: "SharePoint gère votre intranet. Docalio gère vos clients.",
     intro:
-      "SharePoint est un excellent outil de collaboration interne. Mais ouvrir SharePoint à des clients, c'est gérer des comptes invités, des héritages de permissions et une interface pensée pour vos équipes — pas pour eux.",
+      "SharePoint est un excellent outil de collaboration interne. Mais ouvrir SharePoint à des clients, c'est gérer des comptes invités, des héritages de permissions et une interface pensée pour vos équipes, pas pour eux.",
     strengths: [
       "Intégration profonde à Microsoft 365, Teams et Office",
       "Coédition de documents en temps réel",
@@ -144,7 +144,7 @@ export const COMPARISONS: Comparison[] = [
       "Un dossier Google Drive partagé n'est pas un portail client. Docalio ajoute la collecte de pièces sans compte Google, la validation et le suivi d'activité.",
     title: "Un dossier partagé n'est pas un portail client.",
     intro:
-      "Google Drive est idéal pour travailler en équipe. Côté client, un dossier partagé laisse le client seul face à une liste de fichiers — sans savoir quoi faire, ni vous ce qu'il a fait.",
+      "Google Drive est idéal pour travailler en équipe. Côté client, un dossier partagé laisse le client seul face à une liste de fichiers, sans savoir quoi faire, ni vous ce qu'il a fait.",
     strengths: ["Coédition en temps réel", "Intégration à Google Workspace", "Grand espace de stockage"],
     whyDocalio: [
       { title: "Dépôt sans compte Google", text: "Vos clients déposent leurs pièces sans se connecter à quoi que ce soit." },

@@ -17,7 +17,7 @@ import { PageHero } from "@/components/marketing/page-hero";
 import { FeatureCard } from "@/components/marketing/feature-card";
 
 export const metadata: Metadata = {
-  title: "Sécurité — Trust Center",
+  title: "Sécurité : Trust Center",
   description:
     "Stockage privé, liens signés, isolation multi-tenant et suivi respectueux de la vie privée. Découvrez comment Docalio protège vos documents clients.",
   alternates: { canonical: "/securite" },
@@ -80,7 +80,7 @@ export default function SecurityPage() {
       <PageHero
         eyebrow="Trust Center"
         title="La confiance, intégrée à l’architecture"
-        description="Vos documents sont sensibles. Docalio est conçu pour les protéger par défaut — pas en option."
+        description="Vos documents sont sensibles. Docalio est conçu pour les protéger par défaut, pas en option."
       >
         <Button size="lg" asChild>
           <Link href="/register">

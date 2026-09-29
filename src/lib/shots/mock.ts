@@ -64,10 +64,10 @@ export const MOCK_FOLDERS: Folder[] = [
 
 export const MOCK_DOCUMENTS: Document[] = [
   doc("d1", "Proposition commerciale", "pdf", 2_400_000, { folder_id: null, pos_x: 40, pos_y: 196 }),
-  doc("d2", "Charte graphique — v3", "pdf", 8_900_000, { folder_id: "f-creation" }),
-  doc("d3", "Logo — variantes", "png", 1_200_000, { folder_id: "f-creation", allow_download: false }),
+  doc("d2", "Charte graphique, v3", "pdf", 8_900_000, { folder_id: "f-creation" }),
+  doc("d3", "Logo, variantes", "png", 1_200_000, { folder_id: "f-creation", allow_download: false }),
   doc("d4", "Contrat de prestation", "docx", 540_000, { folder_id: "f-contrats" }),
-  doc("d5", "Avenant — délais", "docx", 320_000, { folder_id: "f-contrats", is_visible_to_client: false }),
+  doc("d5", "Avenant, délais", "docx", 320_000, { folder_id: "f-contrats", is_visible_to_client: false }),
   doc("d6", "Facture 2026-014", "pdf", 180_000, { folder_id: "f-factures" }),
   doc("d7", "Devis signé", "pdf", 410_000, { folder_id: null, pos_x: 268, pos_y: 196 }),
 ];
@@ -110,7 +110,7 @@ function pdoc(
 
 export const MOCK_PORTAL_DOCUMENTS: PortalDocument[] = [
   pdoc("d1", "Proposition commerciale", null, 2_400_000, "Le détail de notre accompagnement sur les 3 prochains mois."),
-  pdoc("d2", "Charte graphique — v3", "f-creation", 8_900_000),
+  pdoc("d2", "Charte graphique, v3", "f-creation", 8_900_000),
   pdoc("d4", "Contrat de prestation", "f-contrats", 540_000),
   pdoc("d6", "Facture 2026-014", "f-factures", 180_000),
 ];

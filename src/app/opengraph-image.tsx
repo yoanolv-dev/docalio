@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Docalio — le portail client qui récupère vos pièces et fait valider vos documents";
+export const alt = "Docalio : le portail client qui récupère vos pièces et fait valider vos documents";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 
 /**
  * Saisie du lien d'accès sur la page d'accueil de marque. Le client colle le
- * lien sécurisé (ou le code) qui lui a été communiqué — le jeton reste le seul
+ * lien sécurisé (ou le code) qui lui a été communiqué, le jeton reste le seul
  * secret. On extrait le jeton puis on ouvre /p/{token} (qui valide réellement).
  */
 function extractToken(raw: string): string | null {

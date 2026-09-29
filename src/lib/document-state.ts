@@ -11,7 +11,7 @@ import {
 import type { DecisionType } from "@/lib/types/database";
 
 // =============================================================================
-// État de partage d'un document — DÉRIVÉ, jamais saisi à la main.
+// État de partage d'un document : DÉRIVÉ, jamais saisi à la main.
 //
 // L'ancien statut manuel (draft/sent/viewed/...) demandait à l'utilisateur de
 // maintenir lui-même une information que le produit connaît déjà. Ici, l'état

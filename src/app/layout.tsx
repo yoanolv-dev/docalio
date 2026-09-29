@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: "Docalio — Portail client : collecte de pièces et validation de documents",
+    default: "Docalio : Portail client : collecte de pièces et validation de documents",
     template: "%s | Docalio",
   },
   description: SITE.description,
@@ -38,13 +38,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
     siteName: "Docalio",
-    title: "Docalio — Vos clients déposent leurs pièces. Sans relance.",
+    title: "Docalio : Vos clients déposent leurs pièces. Sans relance.",
     description: SITE.description,
     url: SITE.url,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Docalio — Vos clients déposent leurs pièces. Sans relance.",
+    title: "Docalio : Vos clients déposent leurs pièces. Sans relance.",
     description: SITE.description,
   },
   robots: { index: true, follow: true },

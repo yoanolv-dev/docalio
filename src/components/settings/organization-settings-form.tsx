@@ -58,7 +58,7 @@ export function OrganizationSettingsForm({
           scope="org"
           defaultValue={organization.logo_url}
           disabled={!canEdit}
-          hint="Affiché sur vos portails clients. PNG, JPG ou WebP — 2 Mo max."
+          hint="Affiché sur vos portails clients. PNG, JPG ou WebP : 2 Mo max."
         />
       </div>
 

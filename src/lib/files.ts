@@ -71,7 +71,7 @@ export function extensionFromMime(mime: string | null | undefined): string {
 
 /** Taille lisible : 1.4 Go, 1.2 Mo, 540 Ko... (sans « .0 » superflu). */
 export function formatBytes(bytes: number | null): string {
-  if (bytes === null || Number.isNaN(bytes)) return "—";
+  if (bytes === null || Number.isNaN(bytes)) return "-";
   if (bytes < 1024) return `${bytes} o`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
   if (bytes < 1024 * 1024 * 1024) {

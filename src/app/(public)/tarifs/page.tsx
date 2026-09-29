@@ -48,7 +48,7 @@ export default function PricingPage() {
       <PageHero
         eyebrow="Tarifs"
         title="Un forfait par cabinet. Vos clients ne paient jamais."
-        description="Pas de facturation au siège. Gratuit pour démarrer, sans carte bancaire, sans engagement — et deux mois offerts en annuel."
+        description="Pas de facturation au siège. Gratuit pour démarrer, sans carte bancaire, sans engagement, et deux mois offerts en annuel."
       />
 
       <Section className="pt-12 sm:pt-14">
@@ -59,7 +59,7 @@ export default function PricingPage() {
               <Sparkles className="h-4 w-4" />
             </span>
             <p className="text-sm">
-              <span className="font-semibold">Offre de lancement —</span>{" "}
+              <span className="font-semibold">Offre de lancement -</span>{" "}
               <span className="font-semibold">
                 -50 % pendant 3 mois
               </span>{" "}

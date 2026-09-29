@@ -79,13 +79,13 @@ function RequestRow({
           )}
           {request.status === "rejected" && (
             <span className="font-medium text-amber-700 dark:text-amber-400">
-              À redéposer{request.review_comment ? ` — ${request.review_comment}` : ""}
+              À redéposer{request.review_comment ? ` : ${request.review_comment}` : ""}
             </span>
           )}
           {request.status === "received" && (
             <span className="inline-flex items-center gap-1">
               <Hourglass className="h-3 w-3" />
-              Reçu{request.file_name ? ` · ${request.file_name}` : ""} — en cours de vérification
+              Reçu{request.file_name ? ` · ${request.file_name}` : ""}, en cours de vérification
             </span>
           )}
           {request.status === "validated" && (

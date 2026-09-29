@@ -8,9 +8,9 @@ export interface WorkspaceActivity {
   lastOpenAt: string | null;
   lastDownloadAt: string | null;
   timeline: ActivityEvent[];
-  /** Documents consultés (aperçu) par le client — pour dériver leur état. */
+  /** Documents consultés (aperçu) par le client, pour dériver leur état. */
   viewedDocumentIds: string[];
-  /** Documents téléchargés par le client — pour dériver leur état. */
+  /** Documents téléchargés par le client, pour dériver leur état. */
   downloadedDocumentIds: string[];
 }
 

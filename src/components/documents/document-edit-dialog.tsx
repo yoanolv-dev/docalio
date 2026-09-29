@@ -48,7 +48,7 @@ export function DocumentEditDialog({
         <DialogHeader>
           <DialogTitle>Renommer le document</DialogTitle>
           <DialogDescription>
-            Le fichier reste inchangé — seules les informations affichées sont
+            Le fichier reste inchangé, seules les informations affichées sont
             modifiées.
           </DialogDescription>
         </DialogHeader>

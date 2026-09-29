@@ -20,7 +20,7 @@ export const LEGAL = {
   siren: process.env.NEXT_PUBLIC_LEGAL_SIREN ?? null,
   director: process.env.NEXT_PUBLIC_LEGAL_DIRECTOR ?? null,
   appHost: process.env.NEXT_PUBLIC_LEGAL_APP_HOST ?? null,
-  dataHost: "Supabase — base de données et fichiers hébergés dans l'Union européenne (région Francfort, Allemagne)",
+  dataHost: "Supabase, base de données et fichiers hébergés dans l'Union européenne (région Francfort, Allemagne)",
 } as const;
 
 export interface NavLink {

@@ -87,7 +87,7 @@ export function SpaceAccessPanel({
                   <UserIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 )}
                 <span className="truncate">
-                  {a.group ? a.group.name : a.user ? nameOf(a.user) : "—"}
+                  {a.group ? a.group.name : a.user ? nameOf(a.user) : "-"}
                 </span>
               </span>
               {canManage && (

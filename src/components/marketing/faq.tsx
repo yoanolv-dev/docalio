@@ -3,7 +3,7 @@ export interface FaqItem {
   answer: string;
 }
 
-/** FAQ accessible et native (<details>) — pas de JS, ouvre/ferme au clic. */
+/** FAQ accessible et native (<details>), pas de JS, ouvre/ferme au clic. */
 export function Faq({ items }: { items: FaqItem[] }) {
   return (
     <div className="mx-auto max-w-3xl divide-y divide-border rounded-xl border border-border bg-card">

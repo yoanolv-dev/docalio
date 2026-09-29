@@ -38,7 +38,7 @@ const CHAPTERS = [
   { at: 7, end: 11, title: "Envoyez-lui le lien", sub: "Un e-mail pré-rédigé, en un clic. Aucun compte à créer." },
   { at: 11, end: 17, title: "Il dépose ses pièces", sub: "Depuis son téléphone, par simple glisser-déposer." },
   { at: 17, end: 22, title: "Vous validez, il est prévenu", sub: "Notification, validation, progression : tout est tracé." },
-  { at: 22, end: DURATION, title: "Sans une seule relance", sub: "Docalio — le portail client des cabinets et agences." },
+  { at: 22, end: DURATION, title: "Sans une seule relance", sub: "Docalio : le portail client des cabinets et agences." },
 ];
 
 // --- Outils d'animation -------------------------------------------------------
@@ -373,7 +373,7 @@ export function ProductFilm() {
                   <Mail className="h-3 w-3" /> Mail · maintenant
                 </p>
                 <p className="mt-1 text-[12px] font-semibold text-slate-900">Studio Roy</p>
-                <p className="text-[11px] leading-snug text-slate-600">Votre espace documentaire — déposez vos pièces ici.</p>
+                <p className="text-[11px] leading-snug text-slate-600">Votre espace documentaire, déposez vos pièces ici.</p>
               </div>
               {/* Portail client */}
               <div className="absolute inset-0 bg-[#f6f8fc]" style={{ opacity: portal, transform: `translateY(${(1 - portal) * 24}px)` }}>

@@ -138,11 +138,11 @@ export function PortalShareCard({
     );
   }
 
-  const subject = `Votre espace documentaire${orgName ? ` — ${orgName}` : ""}`;
+  const subject = `Votre espace documentaire${orgName ? ` : ${orgName}` : ""}`;
   const body = [
     `Bonjour${clientName ? ` ${clientName}` : ""},`,
     "",
-    "Voici le lien de votre espace sécurisé. Vous pourrez y déposer les pièces demandées, consulter vos documents et nous faire part de vos validations — sans créer de compte :",
+    "Voici le lien de votre espace sécurisé. Vous pourrez y déposer les pièces demandées, consulter vos documents et nous faire part de vos validations, sans créer de compte :",
     "",
     url,
     "",

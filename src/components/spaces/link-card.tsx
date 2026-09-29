@@ -72,7 +72,7 @@ export function LinkCard({
     );
   }
 
-  const subject = `Votre espace documentaire${orgName ? ` — ${orgName}` : ""}`;
+  const subject = `Votre espace documentaire${orgName ? ` : ${orgName}` : ""}`;
   const body = [
     `Bonjour${clientName ? ` ${clientName}` : ""},`,
     "",
