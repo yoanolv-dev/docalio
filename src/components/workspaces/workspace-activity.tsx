@@ -1,4 +1,4 @@
-import { Eye, Download, FileText, Clock, Activity } from "lucide-react";
+import { Eye, Download, FileText, Clock, Activity, Inbox } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatRelativeTime } from "@/lib/utils";
 import type { ActivityEvent } from "@/lib/types/database";
@@ -64,6 +64,7 @@ const EVENT_META: Record<
   portal_opened: { icon: Eye, tone: "bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400" },
   document_downloaded: { icon: Download, tone: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400" },
   document_opened: { icon: FileText, tone: "bg-muted text-muted-foreground" },
+  request_fulfilled: { icon: Inbox, tone: "bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400" },
 };
 
 function eventLabel(event: ActivityEvent): string {
@@ -78,6 +79,10 @@ function eventLabel(event: ActivityEvent): string {
       return event.document_title
         ? `Document ouvert : ${event.document_title}`
         : "Document ouvert";
+    case "request_fulfilled":
+      return event.request_title
+        ? `Pièce déposée : ${event.request_title}`
+        : "Pièce déposée par le client";
     default:
       return "Activité";
   }
@@ -93,7 +98,7 @@ export function WorkspaceActivityTimeline({
       <EmptyState
         icon={Activity}
         title="Aucune activité pour l'instant"
-        description="Dès que votre client ouvrira le portail ou téléchargera un document, l'activité apparaîtra ici."
+        description="Ouvertures, consultations, téléchargements et pièces déposées par votre client apparaîtront ici en temps réel."
       />
     );
   }

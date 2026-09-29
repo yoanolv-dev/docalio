@@ -12,7 +12,7 @@ import {
 import { listNotifications } from "@/lib/notifications";
 
 export const metadata: Metadata = {
-  title: "Notifications",
+  title: "Activité",
 };
 
 export default async function NotificationsPage() {
@@ -22,8 +22,8 @@ export default async function NotificationsPage() {
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
       <PageHeader
-        title="Notifications"
-        description="L'activité de vos clients : ouvertures, téléchargements et décisions."
+        title="Activité"
+        description="Tout ce que font vos clients : ouvertures, pièces déposées, téléchargements et décisions."
         actions={
           hasUnread ? (
             <form action={markAllNotificationsReadAction}>

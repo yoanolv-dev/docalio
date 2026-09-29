@@ -4,10 +4,11 @@ import {
   Link2,
   LockKeyhole,
   ShieldCheck,
-  UserCheck,
 } from "lucide-react";
 import { PortalDocuments } from "@/components/portal/portal-documents";
 import { PortalTracker } from "@/components/portal/portal-tracker";
+import { PortalRequests } from "@/components/portal/portal-requests";
+import { getPortalRequests } from "@/lib/requests";
 import { getPortalData, getPortalDecisions } from "@/lib/share-links";
 import { getInitials } from "@/lib/utils";
 
@@ -33,23 +34,6 @@ function PortalInvalid() {
   );
 }
 
-const REASSURANCE = [
-  {
-    icon: UserCheck,
-    title: "Sans compte",
-    text: "Aucune inscription, aucun mot de passe à retenir.",
-  },
-  {
-    icon: LockKeyhole,
-    title: "Accès privé",
-    text: "Ce lien vous est destiné — les fichiers ne sont pas publics.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Transferts sécurisés",
-    text: "Chaque consultation passe par un lien chiffré temporaire.",
-  },
-];
 
 export default async function PortalPage({
   params,
@@ -61,7 +45,10 @@ export default async function PortalPage({
 
   if (!portal) return <PortalInvalid />;
 
-  const decisions = await getPortalDecisions(token);
+  const [decisions, requests] = await Promise.all([
+    getPortalDecisions(token),
+    getPortalRequests(token),
+  ]);
   const { organization, workspace, documents, folders } = portal;
   // Branding par client : la couleur et le logo de l'espace priment sur ceux de
   // l'organisation, pour un portail vraiment personnalisé par client.
@@ -138,12 +125,18 @@ export default async function PortalPage({
             {workspace.client_company
               ? ` pour ${workspace.client_company}`
               : " pour vous"}
-            . Consultez vos documents, téléchargez-les et indiquez votre
-            décision en quelques clics.
+            .{" "}
+            {requests.length > 0
+              ? "Déposez les pièces demandées, consultez vos documents et indiquez votre décision en quelques clics."
+              : "Consultez vos documents, téléchargez-les et indiquez votre décision en quelques clics."}
           </p>
         </div>
 
+        {/* Pièces à fournir (collecte) */}
+        <PortalRequests token={token} requests={requests} accent={accent} />
+
         {/* Documents + progression */}
+        {(documents.length > 0 || requests.length === 0) && (
         <PortalDocuments
           token={token}
           documents={documents}
@@ -151,31 +144,18 @@ export default async function PortalPage({
           initialDecisions={decisions}
           accent={accent}
         />
+        )}
 
-        {/* Réassurance */}
-        <div className="grid gap-3 sm:grid-cols-3">
-          {REASSURANCE.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.title}
-                className="rounded-xl border border-border bg-card p-4"
-              >
-                <Icon className="h-4 w-4 text-muted-foreground" />
-                <p className="mt-2 text-xs font-semibold">{item.title}</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  {item.text}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Signature */}
-        <div className="flex items-center justify-center gap-1.5 border-t border-border pt-6 text-xs text-muted-foreground">
-          <FileText className="h-3.5 w-3.5" />
-          Propulsé par Docalio — l&apos;espace documentaire client
-        </div>
+        {/* Réassurance + signature, en une ligne */}
+        <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-t border-border pt-6 text-xs text-muted-foreground">
+          <LockKeyhole className="h-3.5 w-3.5" />
+          Espace privé et sécurisé · aucun compte nécessaire
+          <span aria-hidden>·</span>
+          <span className="inline-flex items-center gap-1">
+            <FileText className="h-3.5 w-3.5" />
+            Propulsé par Docalio
+          </span>
+        </p>
       </main>
     </div>
   );

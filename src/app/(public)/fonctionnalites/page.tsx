@@ -16,6 +16,10 @@ import {
   Gauge,
   ShieldCheck,
   ArrowRight,
+  Inbox,
+  CalendarClock,
+  RotateCcw,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Section, SectionHeading } from "@/components/marketing/section";
@@ -25,11 +29,47 @@ import { FeatureCard } from "@/components/marketing/feature-card";
 export const metadata: Metadata = {
   title: "Fonctionnalités",
   description:
-    "Espaces clients, portail sécurisé, suivi, décisions, notifications et relances : tout ce que Docalio offre pour partager et faire valider vos documents.",
+    "Collecte de pièces avec échéances, portail client sans compte, validation des documents, suivi en temps réel et notifications : toutes les fonctionnalités de Docalio.",
   alternates: { canonical: "/fonctionnalites" },
 };
 
-const GROUPS = [
+const GROUPS: {
+  id?: string;
+  eyebrow: string;
+  title: string;
+  items: { icon: typeof Users; title: string; description: string }[];
+}[] = [
+  {
+    id: "collecte",
+    eyebrow: "Collecte de pièces",
+    title: "Vos clients vous envoient ce qu'il faut, quand il faut",
+    items: [
+      {
+        icon: Inbox,
+        title: "Liste de pièces à fournir",
+        description:
+          "Listez les documents attendus. Votre client les dépose depuis son portail, sans compte.",
+      },
+      {
+        icon: Sparkles,
+        title: "Pièces types par métier",
+        description:
+          "Relevés, factures, pièce d'identité… Les listes de votre activité en un clic.",
+      },
+      {
+        icon: CalendarClock,
+        title: "Échéances & retards",
+        description:
+          "Chaque pièce a une date limite ; les retards sont signalés automatiquement.",
+      },
+      {
+        icon: RotateCcw,
+        title: "Validation ou refus motivé",
+        description:
+          "Refusez une pièce illisible avec un motif : le client la redépose, vous êtes notifié.",
+      },
+    ],
+  },
   {
     eyebrow: "Organisation & documents",
     title: "Vos documents, structurés et maîtrisés",
@@ -48,13 +88,14 @@ const GROUPS = [
       },
       {
         icon: EyeOff,
-        title: "Visibilité & téléchargement contrôlés",
+        title: "Consultation seule",
         description:
-          "Choisissez, document par document, ce qui est visible et téléchargeable.",
+          "Document par document : visible ou non, téléchargeable ou en lecture seule.",
       },
     ],
   },
   {
+    id: "portail",
     eyebrow: "Portail & expérience client",
     title: "Une expérience client qui inspire confiance",
     items: [
@@ -116,7 +157,7 @@ const GROUPS = [
         icon: Bell,
         title: "Notifications internes",
         description:
-          "Soyez alerté dès qu’un portail est ouvert, un fichier téléchargé ou une décision reçue.",
+          "Soyez alerté dès qu’un portail est ouvert, une pièce déposée ou une décision reçue.",
       },
       {
         icon: Send,
@@ -139,8 +180,8 @@ export default function FeaturesPage() {
     <>
       <PageHero
         eyebrow="Fonctionnalités"
-        title="Tout pour partager, suivre et faire décider"
-        description="Docalio couvre le cycle complet : du dépôt d’un document à la décision de votre client, avec sécurité et clarté."
+        title="Collecter, partager, faire valider. Au même endroit."
+        description="Docalio couvre tout le cycle documentaire avec vos clients : les pièces qu’ils vous doivent, les documents que vous leur envoyez, et leurs décisions."
       >
         <Button size="lg" asChild>
           <Link href="/register">
@@ -154,7 +195,7 @@ export default function FeaturesPage() {
       </PageHero>
 
       {GROUPS.map((group, i) => (
-        <Section key={group.eyebrow} muted={i % 2 === 1}>
+        <Section key={group.eyebrow} id={group.id} muted={i % 2 === 1}>
           <SectionHeading
             align="left"
             eyebrow={group.eyebrow}

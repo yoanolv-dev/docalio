@@ -1,5 +1,5 @@
 // =============================================================================
-// Docalio — Sprint 9 — Définitions des plans, quotas & limites (sans Stripe)
+// Docalio — Définitions des plans (forfait par cabinet), quotas & limites
 //
 // Source de vérité des plans côté code. La colonne `plan` de `organizations`
 // référence un de ces identifiants ; les limites/prix vivent ici.
@@ -31,15 +31,17 @@ export interface PlanLimits {
 export interface PlanDefinition {
   id: OrganizationPlan;
   /**
-   * Prix mensuel PAR UTILISATEUR (siège) en euros. `0` = gratuit,
-   * `null` = sur devis. Les destinataires externes (portail client) ne sont
-   * jamais facturés : seuls les sièges internes comptent.
+   * Prix mensuel HT PAR ORGANISATION (forfait cabinet, pas au siège).
+   * `0` = gratuit, `null` = sur devis. Les clients invités sur le portail ne
+   * sont jamais facturés.
    */
   priceEur: number | null;
+  /** Équivalent mensuel en facturation annuelle (2 mois offerts). */
+  priceYearlyEur: number | null;
   name: string;
   tagline: string;
   limits: PlanLimits;
-  /** Personnalisation du portail (logo/couleurs) mise en avant à partir de Pro. */
+  /** Portail à vos couleurs, sans mention « Propulsé par Docalio ». */
   branding: boolean;
   prioritySupport: boolean;
   /** Points clés affichés dans la grille des plans. */
@@ -53,79 +55,87 @@ export interface PlanDefinition {
  */
 export const BUCKET_MAX_FILE_BYTES = 1 * GB;
 
+// Forfaits par cabinet : un prix lisible, qui ne pénalise pas l'embauche d'un
+// collaborateur, et une montée en gamme naturelle (utilisateurs, marque, volume).
+// Les identifiants restent ceux déjà stockés en base (aucune migration).
 export const PLANS: Record<OrganizationPlan, PlanDefinition> = {
   starter: {
     id: "starter",
-    name: "Solo",
+    name: "Découverte",
     priceEur: 0,
-    tagline: "Pour démarrer, en solo ou à deux.",
+    priceYearlyEur: 0,
+    tagline: "Pour tester avec vos premiers clients.",
     limits: {
-      storageBytes: 5 * GB,
-      activeWorkspaces: null,
-      users: 2,
-      maxFileBytes: 100 * MB,
+      storageBytes: 2 * GB,
+      activeWorkspaces: 3,
+      users: 1,
+      maxFileBytes: 20 * MB,
       historyDays: 30,
     },
     branding: false,
     prioritySupport: false,
     highlights: [
-      "Jusqu'à 2 utilisateurs",
-      "Espaces internes & clients illimités",
-      "Partages externes illimités — gratuits",
-      "5 Go de stockage",
-      "Fichiers jusqu'à 100 Mo",
+      "1 utilisateur",
+      "3 espaces clients actifs",
+      "Collecte de pièces & décisions client",
+      "Suivi des ouvertures en temps réel",
+      "2 Go de stockage",
     ],
   },
   pro: {
     id: "pro",
-    name: "Pro",
-    priceEur: 9,
-    tagline: "Pour les équipes qui collaborent au quotidien.",
+    name: "Essentiel",
+    priceEur: 29,
+    priceYearlyEur: 24,
+    tagline: "Pour l'indépendant ou le petit cabinet.",
     limits: {
-      storageBytes: 100 * GB,
+      storageBytes: 50 * GB,
       activeWorkspaces: null,
-      users: null,
-      maxFileBytes: 1 * GB,
-      historyDays: 180,
+      users: 3,
+      maxFileBytes: 200 * MB,
+      historyDays: 365,
     },
     branding: true,
     prioritySupport: false,
     highlights: [
-      "Utilisateurs illimités (au siège)",
-      "Espaces internes & clients illimités",
-      "Partages externes illimités — gratuits",
-      "Groupes & accès par espace",
-      "100 Go de stockage · fichiers 1 Go",
-      "Branding du portail client",
+      "Jusqu'à 3 utilisateurs",
+      "Espaces clients illimités",
+      "Clients invités illimités — gratuits",
+      "Portail à vos couleurs & votre logo",
+      "Pièces types par métier en un clic",
+      "50 Go de stockage",
     ],
   },
   business: {
     id: "business",
-    name: "Business",
-    priceEur: 18,
-    tagline: "Pour les organisations qui montent en charge.",
+    name: "Cabinet",
+    priceEur: 79,
+    priceYearlyEur: 66,
+    tagline: "Pour les équipes de 4 à 10 personnes.",
     limits: {
-      storageBytes: 500 * GB,
+      storageBytes: 250 * GB,
       activeWorkspaces: null,
-      users: null,
+      users: 10,
       maxFileBytes: 1 * GB,
-      historyDays: 365,
+      historyDays: null,
     },
     branding: true,
     prioritySupport: true,
     highlights: [
-      "Tout le plan Pro",
-      "500 Go de stockage",
-      "Historique 12 mois",
-      "Contrôle d'accès avancé par groupe",
-      "Support prioritaire",
+      "Tout Essentiel, jusqu'à 10 utilisateurs",
+      "Groupes & droits d'accès par espace",
+      "Espaces internes (Drive d'équipe)",
+      "Adresse de portail à votre nom",
+      "Historique d'activité illimité",
+      "250 Go · support prioritaire",
     ],
   },
   enterprise: {
     id: "enterprise",
-    name: "Enterprise",
+    name: "Entreprise",
     priceEur: null,
-    tagline: "Sécurité, conformité et accompagnement dédié.",
+    priceYearlyEur: null,
+    tagline: "Volumes, conformité et accompagnement dédié.",
     limits: {
       storageBytes: null,
       activeWorkspaces: null,
@@ -136,10 +146,10 @@ export const PLANS: Record<OrganizationPlan, PlanDefinition> = {
     branding: true,
     prioritySupport: true,
     highlights: [
-      "Stockage sur mesure",
-      "Utilisateurs illimités",
-      "SSO, exigences de conformité",
-      "Support dédié & SLA",
+      "Utilisateurs & stockage sur mesure",
+      "SSO, DPA & exigences de conformité",
+      "Import de votre existant",
+      "Interlocuteur dédié & SLA",
     ],
   },
 };
@@ -210,12 +220,9 @@ export function formatCount(limit: number | null): string {
   return limit === null ? "Illimité" : String(limit);
 }
 
-/**
- * Prix lisible. Tarification au siège : "Gratuit", "9 €/utilisateur/mois",
- * ou "Sur devis".
- */
+/** Prix lisible (forfait) : "Gratuit", "29 € HT/mois" ou "Sur devis". */
 export function formatPlanPrice(plan: PlanDefinition): string {
   if (plan.priceEur === null) return "Sur devis";
   if (plan.priceEur === 0) return "Gratuit";
-  return `${plan.priceEur} €/utilisateur/mois`;
+  return `${plan.priceEur} € HT/mois`;
 }

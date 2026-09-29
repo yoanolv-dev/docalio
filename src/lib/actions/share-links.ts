@@ -177,8 +177,10 @@ export async function getPortalDownloadUrl(
 
 /**
  * Génère une URL signée (60 s) pour PRÉVISUALISER un document dans le portail
- * (rendu inline, sans forcer le téléchargement). Réutilise le chemin sécurisé
- * (document visible + téléchargeable). Enregistre l'évènement document_opened.
+ * (rendu inline, sans forcer le téléchargement). Le chemin est résolu via une
+ * RPC dédiée qui n'exige QUE la visibilité client (pas allow_download) : un
+ * document peut donc être consultable sans être téléchargeable (consultation
+ * seule). Enregistre l'évènement document_opened.
  */
 export async function getPortalPreviewUrl(
   token: string,
@@ -187,7 +189,7 @@ export async function getPortalPreviewUrl(
 ): Promise<PortalDownloadResult> {
   const supabase = await createClient();
 
-  const { data: path } = await supabase.rpc("get_portal_document_path", {
+  const { data: path } = await supabase.rpc("get_portal_preview_path", {
     p_token: token,
     p_document_id: documentId,
   });

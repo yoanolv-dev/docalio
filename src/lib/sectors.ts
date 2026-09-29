@@ -16,6 +16,8 @@ export interface SectorDef {
   folderTemplate: string[];
   /** Exemple de nom d'espace (placeholder du champ). */
   nameExample: string;
+  /** Pièces types à demander au client (collecte en un clic). */
+  requestTemplate: string[];
 }
 
 /** Secteurs proposés à l'onboarding (ordre d'affichage). */
@@ -25,42 +27,49 @@ export const SECTORS: SectorDef[] = [
     label: "Cabinet comptable",
     folderTemplate: ["Bilans", "Liasses fiscales", "TVA", "Paie", "Juridique"],
     nameExample: "SARL Martin",
+    requestTemplate: ["Relevés bancaires du mois", "Factures d'achat", "Factures de vente", "Justificatifs de frais", "Bulletins de salaire"],
   },
   {
     id: "juridique",
     label: "Avocat / Notaire",
     folderTemplate: ["Contrats", "Procédures", "Pièces", "Correspondance"],
     nameExample: "Dossier Dupont",
+    requestTemplate: ["Pièce d'identité", "Justificatif de domicile", "Contrat signé", "Pièces justificatives du dossier"],
   },
   {
     id: "agence",
     label: "Agence / Studio créatif",
     folderTemplate: ["Brief", "Création", "Validations", "Livrables", "Factures"],
     nameExample: "Projet site web",
+    requestTemplate: ["Brief signé", "Logo et charte graphique", "Contenus textes", "Accès aux comptes", "Bon de commande signé"],
   },
   {
     id: "conseil",
     label: "Conseil / Freelance",
     folderTemplate: ["Propositions", "Livrables", "Comptes-rendus", "Factures"],
     nameExample: "Mission Acme",
+    requestTemplate: ["Bon de commande signé", "Données d'entrée de la mission", "Organigramme", "Documents de référence"],
   },
   {
     id: "btp",
     label: "Bâtiment / Artisan",
     folderTemplate: ["Devis", "Plans", "Chantier", "Factures"],
     nameExample: "Chantier Rue des Lilas",
+    requestTemplate: ["Devis signé", "Plans du bien", "Attestation d'assurance", "Acompte (justificatif de virement)"],
   },
   {
     id: "immobilier",
     label: "Immobilier",
     folderTemplate: ["Mandats", "Diagnostics", "Compromis", "Photos"],
     nameExample: "Appartement Centre-ville",
+    requestTemplate: ["Pièce d'identité", "Justificatif de domicile", "3 derniers bulletins de salaire", "Avis d'imposition", "Titre de propriété"],
   },
   {
     id: "sante",
     label: "Santé / Paramédical",
     folderTemplate: ["Dossiers", "Comptes-rendus", "Administratif"],
     nameExample: "Dossier patient",
+    requestTemplate: ["Carte vitale / attestation", "Ordonnance", "Compte-rendu médical", "Mutuelle"],
   },
   {
     id: "interne",
@@ -73,12 +82,14 @@ export const SECTORS: SectorDef[] = [
       "RH",
     ],
     nameExample: "Documentation commerciale",
+    requestTemplate: ["Document à valider", "Rapport mensuel"],
   },
   {
     id: "autre",
     label: "Autre",
     folderTemplate: ["Documents", "Échanges"],
     nameExample: "Mon espace",
+    requestTemplate: ["Pièce d'identité", "Document demandé"],
   },
 ];
 

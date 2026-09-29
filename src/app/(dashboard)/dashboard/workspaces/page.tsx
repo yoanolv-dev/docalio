@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 
-// La liste des espaces vit désormais sur l'accueil du dashboard.
-// On conserve la route pour les anciens liens et on redirige.
+// La liste des espaces est la page d'accueil de l'application.
 export default function WorkspacesPage() {
   redirect("/dashboard");
 }

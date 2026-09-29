@@ -3,15 +3,17 @@
 import { useActionState, useState } from "react";
 import {
   Check,
+  ChevronDown,
   Copy,
+  ExternalLink,
   Link2,
   LoaderCircle,
+  Mail,
   RefreshCw,
   Power,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import {
@@ -47,11 +49,21 @@ export function PortalShareCard({
   link,
   baseUrl,
   slug,
+  clientEmail,
+  clientName,
+  orgName,
+  advancedOnly = false,
 }: {
   workspaceId: string;
   link: ShareLink | null;
   baseUrl: string;
   slug?: string | null;
+  /** Pré-remplit l'e-mail d'envoi du lien. */
+  clientEmail?: string | null;
+  clientName?: string | null;
+  orgName?: string | null;
+  /** Uniquement les options avancées (fenêtre Paramètres). */
+  advancedOnly?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   const [homeCopied, setHomeCopied] = useState(false);
@@ -77,101 +89,118 @@ export function PortalShareCard({
     return <CreateLinkForm workspaceId={workspaceId} />;
   }
 
+  const advanced = (
+        <div className={advancedOnly ? "space-y-4" : "space-y-4 border-t border-border p-3.5"}>
+          {homeUrl && (
+            <div>
+              <p className="text-sm font-medium">Page d&apos;accueil à vos couleurs</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Une adresse facile à retenir, où votre client saisit son lien d&apos;accès.
+              </p>
+              <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-canvas/60 px-2.5 py-1.5">
+                <span className="min-w-0 flex-1 truncate text-sm">{homeUrl.replace(/^https?:\/\//, "")}</span>
+                <Button type="button" variant="ghost" size="sm" onClick={copyHome} className="h-7 shrink-0">
+                  {homeCopied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <form action={regenerateShareLinkAction}>
+              <input type="hidden" name="workspace_id" value={workspaceId} />
+              <Button type="submit" variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4" />
+                Générer un nouveau lien
+              </Button>
+            </form>
+            <form action={deactivateShareLinkAction}>
+              <input type="hidden" name="workspace_id" value={workspaceId} />
+              <Button type="submit" variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+                <Power className="h-4 w-4" />
+                Désactiver le portail
+              </Button>
+            </form>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Un nouveau lien rend l&apos;ancien inutilisable immédiatement.
+          </p>
+        </div>
+  );
+
+  if (advancedOnly) {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          {link.expires_at ? `Expire le ${formatDate(link.expires_at)}.` : "Sans date d'expiration."}
+        </p>
+        {advanced}
+      </div>
+    );
+  }
+
+  const subject = `Votre espace documentaire${orgName ? ` — ${orgName}` : ""}`;
+  const body = [
+    `Bonjour${clientName ? ` ${clientName}` : ""},`,
+    "",
+    "Voici le lien de votre espace sécurisé. Vous pourrez y déposer les pièces demandées, consulter vos documents et nous faire part de vos validations — sans créer de compte :",
+    "",
+    url,
+    "",
+    "Bien cordialement,",
+    orgName ?? "",
+  ].join("\n");
+  const mailto = `mailto:${clientEmail ?? ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <Badge variant="success" dot>
-          Lien actif
+          Portail actif
         </Badge>
-        {link.expires_at ? (
-          <span className="text-xs text-muted-foreground">
-            Expire le {formatDate(link.expires_at)}
-          </span>
-        ) : (
-          <span className="text-xs text-muted-foreground">Sans expiration</span>
-        )}
+        <span className="text-xs text-muted-foreground">
+          {link.expires_at ? `Expire le ${formatDate(link.expires_at)}` : "Sans date d'expiration"}
+        </span>
       </div>
 
-      <div className="flex gap-2">
-        <Input
-          readOnly
-          value={url || "…"}
-          className="font-mono text-xs"
-          onFocus={(e) => e.currentTarget.select()}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          onClick={copy}
-          aria-label="Copier le lien"
-          title="Copier le lien"
-        >
-          {copied ? (
-            <Check className="h-4 w-4 text-emerald-600" />
-          ) : (
-            <Copy className="h-4 w-4" />
-          )}
+      <div className="rounded-xl border border-border bg-canvas/60 p-1.5">
+        <div className="flex items-center gap-2">
+          <Link2 className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+          <input
+            readOnly
+            value={url.replace(/^https?:\/\//, "")}
+            aria-label="Lien du portail client"
+            onFocus={(e) => e.currentTarget.select()}
+            className="min-w-0 flex-1 truncate bg-transparent py-1.5 text-sm text-foreground outline-none"
+          />
+          <Button type="button" size="sm" onClick={copy} className="shrink-0">
+            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            {copied ? "Copié" : "Copier"}
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Button variant="outline" asChild>
+          <a href={mailto}>
+            <Mail className="h-4 w-4" />
+            Envoyer par e-mail
+          </a>
+        </Button>
+        <Button variant="outline" asChild>
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            <ExternalLink className="h-4 w-4" />
+            Voir comme le client
+          </a>
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Partagez ce lien avec votre client : il accède aux documents visibles
-        sans créer de compte.
-      </p>
-
-      {homeUrl && (
-        <div className="rounded-lg border border-dashed border-border bg-muted/30 p-3">
-          <p className="text-xs font-medium">Page d&apos;accueil de marque</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Une page d&apos;accueil personnalisée où le client saisit son lien.
-          </p>
-          <div className="mt-2 flex gap-2">
-            <Input
-              readOnly
-              value={homeUrl}
-              className="font-mono text-xs"
-              onFocus={(e) => e.currentTarget.select()}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={copyHome}
-              aria-label="Copier l'adresse de la page d'accueil"
-              title="Copier l'adresse de la page d'accueil"
-            >
-              {homeCopied ? (
-                <Check className="h-4 w-4 text-emerald-600" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-wrap gap-2">
-        <form action={regenerateShareLinkAction}>
-          <input type="hidden" name="workspace_id" value={workspaceId} />
-          <Button type="submit" variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4" />
-            Régénérer
-          </Button>
-        </form>
-        <form action={deactivateShareLinkAction}>
-          <input type="hidden" name="workspace_id" value={workspaceId} />
-          <Button
-            type="submit"
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground hover:text-destructive"
-          >
-            <Power className="h-4 w-4" />
-            Désactiver
-          </Button>
-        </form>
-      </div>
+      <details className="group rounded-xl border border-border">
+        <summary className="flex cursor-pointer list-none items-center justify-between px-3.5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
+          Options avancées
+          <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+        </summary>
+        {advanced}
+      </details>
     </div>
   );
 }
@@ -186,11 +215,11 @@ function CreateLinkForm({ workspaceId }: { workspaceId: string }) {
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="workspace_id" value={workspaceId} />
 
-      <div className="flex items-start gap-3 rounded-lg bg-muted/50 p-3">
-        <Link2 className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-        <p className="text-xs text-muted-foreground">
-          Générez un lien unique et sécurisé. Votre client consultera les
-          documents marqués « visibles » sans avoir à créer de compte.
+      <div className="flex items-start gap-3 rounded-xl bg-primary-subtle/60 p-3.5">
+        <Link2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+        <p className="text-sm text-foreground/80">
+          Activez le portail pour obtenir un lien unique et sécurisé. Votre
+          client y dépose ses pièces et consulte vos documents, sans compte.
         </p>
       </div>
 
@@ -211,10 +240,9 @@ function CreateLinkForm({ workspaceId }: { workspaceId: string }) {
       )}
 
       <SubmitButton
-        idle="Générer le lien du portail"
-        pendingLabel="Génération..."
+        idle="Activer le portail client"
+        pendingLabel="Activation…"
         isPending={pending}
-        size="sm"
       />
     </form>
   );

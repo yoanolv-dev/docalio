@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SITE } from "@/lib/site";
 import "./globals.css";
@@ -16,33 +16,42 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: "Docalio — Le portail documentaire client sécurisé",
+    default: "Docalio — Portail client : collecte de pièces et validation de documents",
     template: "%s | Docalio",
   },
   description: SITE.description,
   applicationName: "Docalio",
   keywords: [
     "portail client",
+    "collecte de pièces justificatives",
+    "portail client expert-comptable",
     "partage de documents sécurisé",
-    "espace client",
-    "suivi de documents",
-    "validation client",
-    "alternative Drive",
-    "data room légère",
+    "demande de documents client",
+    "validation de documents en ligne",
+    "alternative SharePoint",
+    "alternative J-Doc",
   ],
+  authors: [{ name: "Docalio" }],
+  creator: "Docalio",
+  formatDetection: { telephone: false, email: false, address: false },
   openGraph: {
     type: "website",
     locale: "fr_FR",
     siteName: "Docalio",
-    title: "Docalio — Le portail documentaire client sécurisé",
+    title: "Docalio — Vos clients déposent leurs pièces. Sans relance.",
     description: SITE.description,
     url: SITE.url,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Docalio — Le portail documentaire client sécurisé",
+    title: "Docalio — Vos clients déposent leurs pièces. Sans relance.",
     description: SITE.description,
   },
+  robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({

@@ -1,10 +1,12 @@
 import { ShieldCheck } from "lucide-react";
 import { BrowserFrame } from "@/components/shots/browser-frame";
 import { PortalDocuments } from "@/components/portal/portal-documents";
+import { PortalRequests } from "@/components/portal/portal-requests";
 import {
   MOCK_PORTAL_DOCUMENTS,
   MOCK_PORTAL_FOLDERS,
   MOCK_PORTAL_DECISIONS,
+  MOCK_PORTAL_REQUESTS,
 } from "@/lib/shots/mock";
 
 const accent = "#1c2a4e";
@@ -44,10 +46,12 @@ export default function PortalShot() {
               Boulangerie Margot
             </h1>
             <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
-              Studio Hélène Roy a préparé cet espace pour vous. Consultez vos
-              documents, téléchargez-les et indiquez votre décision.
+              Studio Hélène Roy a préparé cet espace pour vous. Déposez les
+              pièces demandées, consultez vos documents et indiquez votre décision.
             </p>
           </div>
+
+          <PortalRequests token="demo" requests={MOCK_PORTAL_REQUESTS} accent={accent} />
 
           <PortalDocuments
             token="demo"

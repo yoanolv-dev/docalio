@@ -1,7 +1,8 @@
+import { LogoMark } from "@/components/brand/logo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { FileText, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 
@@ -38,9 +39,7 @@ export default async function InvitePage({
     <div className="flex min-h-[100dvh] flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm text-center">
         <div className="mb-6 flex flex-col items-center gap-2">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary">
-            <FileText className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <LogoMark className="h-11 w-11" />
           <span className="text-sm font-semibold tracking-tight">Docalio</span>
         </div>
 

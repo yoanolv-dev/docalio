@@ -6,6 +6,7 @@ import {
   getUnreadNotificationCount,
 } from "@/lib/notifications";
 import { TopBar } from "@/components/layout/top-bar";
+import { vocabularyFor } from "@/lib/sectors";
 
 export default async function DashboardLayout({
   children,
@@ -27,25 +28,28 @@ export default async function DashboardLayout({
     redirect("/onboarding");
   }
 
-  const userName =
-    (user.user_metadata?.full_name as string | undefined) ?? null;
-
   const [unreadCount, recentNotifications] = await Promise.all([
     getUnreadNotificationCount(),
     getRecentNotifications(8),
   ]);
 
+  const org = membership.organization;
+  const vocab = vocabularyFor(org.usage_type);
+
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-canvas">
       <TopBar
-        orgName={membership.organization.name}
-        userName={userName}
+        orgName={org.name}
+        orgLogoUrl={org.logo_url}
+        orgColor={org.primary_color}
+        spacesLabel={vocab.plural.charAt(0).toUpperCase() + vocab.plural.slice(1)}
+        userName={(user.user_metadata?.full_name as string | undefined) ?? null}
         userEmail={user.email ?? ""}
         unreadCount={unreadCount}
         recentNotifications={recentNotifications}
       />
-      <main className="min-h-0 w-full flex-1 scroll-smooth overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
-        {children}
+      <main className="min-h-0 w-full flex-1 overflow-y-auto scroll-smooth">
+        <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">{children}</div>
       </main>
     </div>
   );
