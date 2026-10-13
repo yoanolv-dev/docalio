@@ -1,7 +1,11 @@
 // Types applicatifs reflétant le schéma Supabase (Sprint 2).
 // Volontairement légers : pas de génération automatique pour rester simple.
 
-export type OrganizationRole = "owner" | "admin" | "member";
+/** « guest » : personne extérieure, limitée aux espaces ouverts à son nom. */
+export type OrganizationRole = "owner" | "admin" | "member" | "guest";
+
+/** Niveau d'accès à un espace (invités et autorisations nominatives). */
+export type AccessLevel = "viewer" | "editor";
 
 /** Plans d'abonnement (les limites vivent dans src/lib/plans.ts). */
 export type OrganizationPlan = "starter" | "pro" | "business" | "enterprise";
@@ -33,6 +37,8 @@ export interface Organization {
   usage_type: UsageType;
   plan: OrganizationPlan;
   plan_status: PlanStatus;
+  /** Double authentification exigée pour les membres de l'équipe. */
+  require_mfa: boolean;
   trial_ends_at: string | null;
   created_at: string;
   updated_at: string;
@@ -78,6 +84,15 @@ export interface Document {
   /** Position sur le canvas spatial (null = auto-disposé). */
   pos_x: number | null;
   pos_y: number | null;
+  /** Corbeille : date de mise à la corbeille (null = fichier actif). */
+  deleted_at: string | null;
+  deleted_by: string | null;
+  trash_batch: string | null;
+  /** Numéro de la version courante (1 au premier dépôt). */
+  version: number;
+  /** Date et auteur du dépôt de la version courante. */
+  file_updated_at: string;
+  file_updated_by: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -93,9 +108,62 @@ export interface Folder {
   /** Position sur le canvas spatial (null = auto-disposé). */
   pos_x: number | null;
   pos_y: number | null;
+  deleted_at: string | null;
+  deleted_by: string | null;
+  trash_batch: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** Ancienne version d'un fichier (la courante est portée par documents). */
+export interface DocumentVersion {
+  id: string;
+  document_id: string;
+  workspace_id: string;
+  version: number;
+  file_path: string;
+  file_size: number | null;
+  file_type: string | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+/** Lien de partage sur un fichier, un dossier ou un espace entier. */
+export interface DriveLink {
+  id: string;
+  organization_id: string;
+  workspace_id: string;
+  folder_id: string | null;
+  document_id: string | null;
+  token: string;
+  can_view: boolean;
+  can_download: boolean;
+  can_upload: boolean;
+  has_password: boolean;
+  label: string | null;
+  expires_at: string | null;
+  is_active: boolean;
+  view_count: number;
+  download_count: number;
+  upload_count: number;
+  last_accessed_at: string | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+/** Élément racine de la corbeille (vue drive_trash_items). */
+export interface TrashItem {
+  kind: "file" | "folder";
+  id: string;
+  organization_id: string;
+  workspace_id: string;
+  folder_id: string | null;
+  name: string;
+  file_type: string | null;
+  size: number;
+  deleted_at: string;
+  deleted_by: string | null;
 }
 
 export interface Workspace {
@@ -180,7 +248,29 @@ export type ActivityEventType =
   | "portal_opened"
   | "document_downloaded"
   | "document_opened"
-  | "request_fulfilled";
+  | "request_fulfilled"
+  | "file_uploaded"
+  | "file_version_uploaded"
+  | "file_version_restored"
+  | "file_renamed"
+  | "file_moved"
+  | "file_trashed"
+  | "file_restored"
+  | "file_deleted"
+  | "file_downloaded"
+  | "folder_created"
+  | "folder_renamed"
+  | "folder_moved"
+  | "folder_trashed"
+  | "folder_restored"
+  | "folder_deleted"
+  | "share_created"
+  | "share_revoked"
+  | "share_opened"
+  | "share_downloaded"
+  | "share_uploaded"
+  | "access_granted"
+  | "access_revoked";
 
 export interface ActivityEvent {
   id: string;
@@ -198,7 +288,8 @@ export type NotificationType =
   | "document_downloaded"
   | "document_opened"
   | "decision_received"
-  | "request_received";
+  | "request_received"
+  | "share_uploaded";
 
 /** Charge utile minimale d'une notification (le wording vit côté code). */
 export interface NotificationMetadata {
@@ -209,6 +300,8 @@ export interface NotificationMetadata {
   request_id?: string;
   request_title?: string | null;
   file_name?: string | null;
+  /** Libellé du lien de partage (fichier déposé via un lien). */
+  label?: string | null;
 }
 
 /**

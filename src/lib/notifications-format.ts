@@ -56,6 +56,13 @@ export function describeNotification(n: AppNotification): NotificationDescriptor
         title: "Pièce reçue",
         message: `${ws}, « ${n.metadata.request_title ?? "une pièce"} » a été déposée${n.metadata.file_name ? ` (${n.metadata.file_name})` : ""}.`,
       };
+    case "share_uploaded":
+      return {
+        title: "Fichier déposé",
+        message: `${ws}, « ${doc} » a été déposé${n.metadata.label ? ` via le lien « ${n.metadata.label} »` : " via un lien de partage"}.`,
+      };
+    default:
+      return { title: "Activité", message: ws };
   }
 }
 

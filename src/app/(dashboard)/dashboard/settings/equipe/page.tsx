@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { FolderLock, Users } from "lucide-react";
+import { FolderLock, UserRoundPlus, Users } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,11 +12,12 @@ import { TeamManager } from "@/components/settings/team-manager";
 import { GroupsManager } from "@/components/settings/groups-manager";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/organizations";
-import { listOrgMembers, listPendingInvites } from "@/lib/team";
+import { listOrgGuests, listOrgMembers, listPendingInvites } from "@/lib/team";
+import { GuestsList } from "@/components/settings/guests-list";
 import { listGroupsWithMembers } from "@/lib/access";
 
 export const metadata: Metadata = {
-  title: "Équipe & accès",
+  title: "Équipe et invités",
 };
 
 export default async function TeamSettingsPage() {
@@ -27,15 +28,20 @@ export default async function TeamSettingsPage() {
 
   const membership = await getCurrentMembership();
   if (!membership) redirect("/onboarding");
+  if (membership.role === "guest") redirect("/dashboard/settings/securite");
 
   const canEdit = membership.role === "owner" || membership.role === "admin";
-  const [members, invites, groups] = await Promise.all([
+  const [allMembers, allInvites, groups, guests] = await Promise.all([
     listOrgMembers(membership.organization.id),
     canEdit
       ? listPendingInvites(membership.organization.id)
       : Promise.resolve([]),
     listGroupsWithMembers(membership.organization.id),
+    listOrgGuests(membership.organization.id),
   ]);
+  // Les invités extérieurs ont leur propre section (ils ne sont pas facturés).
+  const members = allMembers.filter((m) => m.role !== "guest");
+  const invites = allInvites.filter((i) => i.role !== "guest");
 
   return (
     <div className="space-y-4">
@@ -46,8 +52,8 @@ export default async function TeamSettingsPage() {
             <CardTitle>Équipe</CardTitle>
           </div>
           <CardDescription>
-            Invitez vos collègues à collaborer et gérez leurs rôles
-            (propriétaire, admin, membre).
+            Vos collègues : utilisateurs illimités dès le forfait Équipe. Gérez
+            leurs rôles (propriétaire, admin, membre).
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -63,12 +69,28 @@ export default async function TeamSettingsPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
+            <UserRoundPlus className="h-4 w-4 text-primary" />
+            <CardTitle>Invités extérieurs</CardTitle>
+          </div>
+          <CardDescription>
+            Clients, partenaires, prestataires : ils ne voient que les espaces
+            ouverts à leur nom. Gratuits et illimités.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <GuestsList guests={guests} canManage={canEdit} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
             <FolderLock className="h-4 w-4 text-primary" />
             <CardTitle>Groupes &amp; accès</CardTitle>
           </div>
           <CardDescription>
             Créez des groupes d&apos;utilisateurs et autorisez-les, espace par
-            espace, à accéder à vos espaces internes.
+            espace, à accéder à vos espaces privés.
           </CardDescription>
         </CardHeader>
         <CardContent>

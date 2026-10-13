@@ -14,7 +14,7 @@ export interface OrgMember {
 export interface PendingInvite {
   id: string;
   email: string | null;
-  role: "admin" | "member";
+  role: "admin" | "member" | "guest";
   token: string;
   expires_at: string;
   created_at: string;
@@ -72,4 +72,42 @@ export async function listPendingInvites(
     .is("accepted_at", null)
     .order("created_at", { ascending: false });
   return (data as PendingInvite[] | null) ?? [];
+}
+
+export interface OrgGuest {
+  memberId: string;
+  userId: string;
+  name: string;
+  email: string | null;
+  spaces: { id: string; name: string; level: "viewer" | "editor" }[];
+}
+
+/** Invités extérieurs de l'organisation, avec les espaces qui leur sont ouverts. */
+export async function listOrgGuests(organizationId: string): Promise<OrgGuest[]> {
+  const supabase = await createClient();
+  const members = (await listOrgMembers(organizationId)).filter((m) => m.role === "guest");
+  if (members.length === 0) return [];
+  const { data } = await supabase
+    .from("workspace_access")
+    .select("user_id, access_level, workspaces(id, name)")
+    .eq("organization_id", organizationId)
+    .in("user_id", members.map((m) => m.user_id));
+  const rows = (data ?? []) as {
+    user_id: string;
+    access_level: "viewer" | "editor";
+    workspaces: { id: string; name: string } | { id: string; name: string }[] | null;
+  }[];
+  return members.map((m) => ({
+    memberId: m.id,
+    userId: m.user_id,
+    name: m.full_name || m.email || "Invité",
+    email: m.email,
+    spaces: rows
+      .filter((r) => r.user_id === m.user_id)
+      .map((r) => {
+        const w = Array.isArray(r.workspaces) ? r.workspaces[0] : r.workspaces;
+        return { id: w?.id ?? "", name: w?.name ?? "Espace", level: r.access_level };
+      })
+      .filter((s) => s.id),
+  }));
 }

@@ -14,7 +14,7 @@ export interface BreadcrumbItem {
  * Renvoie [] pour la racine. Tolère les références cassées sans boucler.
  */
 export function buildBreadcrumb(
-  folders: Folder[],
+  folders: Pick<Folder, "id" | "name" | "parent_id">[],
   folderId: string | null
 ): BreadcrumbItem[] {
   if (!folderId) return [];
@@ -35,7 +35,7 @@ export function buildBreadcrumb(
  * liste plate. Sert au déplacement (anti-cycle) et à la suppression récursive.
  */
 export function collectDescendantIds(
-  folders: Folder[],
+  folders: Pick<Folder, "id" | "parent_id">[],
   rootId: string
 ): Set<string> {
   const childrenOf = new Map<string, string[]>();

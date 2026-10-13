@@ -63,6 +63,7 @@ export async function getWorkspaceActivity(
       .from("activity_events")
       .select("id, event_type, document_id, visitor_id, created_at, metadata, documents(title)")
       .eq("workspace_id", workspaceId)
+      .in("event_type", ["portal_opened", "document_downloaded", "document_opened", "request_fulfilled"])
       .order("created_at", { ascending: false })
       .limit(20),
   ]);

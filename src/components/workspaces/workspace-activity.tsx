@@ -57,10 +57,10 @@ export function WorkspaceEngagementStats({
   );
 }
 
-const EVENT_META: Record<
+const EVENT_META: Partial<Record<
   ActivityEvent["event_type"],
   { icon: typeof Eye; tone: string }
-> = {
+>> & { document_opened: { icon: typeof Eye; tone: string } } = {
   portal_opened: { icon: Eye, tone: "bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400" },
   document_downloaded: { icon: Download, tone: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400" },
   document_opened: { icon: FileText, tone: "bg-muted text-muted-foreground" },

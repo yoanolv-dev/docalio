@@ -77,6 +77,21 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  // Double authentification activée mais session non vérifiée (aal1) : le
+  // code est exigé avant tout accès (la base refuse de toute façon les données).
+  if (isProtected && user) {
+    try {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+        const url = new URL("/login/verification", request.url);
+        url.searchParams.set("next", pathname + request.nextUrl.search);
+        return NextResponse.redirect(url);
+      }
+    } catch {
+      // Niveau indéterminable : la RLS reste la garantie.
+    }
+  }
+
   // Rediriger les utilisateurs déjà connectés hors des pages d'authentification.
   // /reset-password est volontairement exclu : il s'utilise avec une session
   // de récupération active.

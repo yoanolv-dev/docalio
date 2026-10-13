@@ -46,6 +46,7 @@ export async function inviteMemberAction(
         .from("organization_invites")
         .select("id", { count: "exact", head: true })
         .eq("organization_id", membership.organization.id)
+        .neq("role", "guest")
         .is("accepted_at", null)
         .gt("expires_at", new Date().toISOString()),
     ]);

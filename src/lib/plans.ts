@@ -1,5 +1,5 @@
 // =============================================================================
-// Docalio : Définitions des plans (forfait par cabinet), quotas & limites
+// Docalio : Définitions des plans (forfait par entreprise), quotas & limites
 //
 // Source de vérité des plans côté code. La colonne `plan` de `organizations`
 // référence un de ces identifiants ; les limites/prix vivent ici.
@@ -31,9 +31,9 @@ export interface PlanLimits {
 export interface PlanDefinition {
   id: OrganizationPlan;
   /**
-   * Prix mensuel HT PAR ORGANISATION (forfait cabinet, pas au siège).
-   * `0` = gratuit, `null` = sur devis. Les clients invités sur le portail ne
-   * sont jamais facturés.
+   * Prix mensuel HT PAR ORGANISATION (forfait entreprise, pas au siège).
+   * `0` = gratuit, `null` = sur devis. Les invités et les clients du portail
+   * ne sont jamais facturés.
    */
   priceEur: number | null;
   /** Équivalent mensuel en facturation annuelle (2 mois offerts). */
@@ -49,90 +49,92 @@ export interface PlanDefinition {
 }
 
 /**
- * Plafond Storage du bucket `documents` (cf. migration). Il borne tous les
- * uploads en défense en profondeur, y compris pour l'offre Enterprise dont la
- * limite applicative est « sur mesure ».
+ * Plafond technique par fichier, fixé par l'hébergement (limite globale du
+ * Storage Supabase : 50 Mo sur l'offre gratuite, jusqu'à 500 Go sur les offres
+ * payantes). À relever via NEXT_PUBLIC_MAX_UPLOAD_MB quand l'infrastructure
+ * le permet. Il borne tous les forfaits, Entreprise compris.
  */
-export const BUCKET_MAX_FILE_BYTES = 1 * GB;
+export const INFRA_MAX_FILE_BYTES =
+  Math.max(1, Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB) || 50) * MB;
 
-// Forfaits par cabinet : un prix lisible, qui ne pénalise pas l'embauche d'un
-// collaborateur, et une montée en gamme naturelle (utilisateurs, marque, volume).
+// Forfaits par entreprise : un prix fixe, utilisateurs illimités dès l'offre
+// payante, et une montée en gamme par le stockage et les fonctions de
+// contrôle. Les quotas de stockage sont aussi vérifiés en base (fonction
+// plan_storage_quota) : garder les deux en phase.
 // Les identifiants restent ceux déjà stockés en base (aucune migration).
 export const PLANS: Record<OrganizationPlan, PlanDefinition> = {
   starter: {
     id: "starter",
-    name: "Découverte",
+    name: "Gratuit",
     priceEur: 0,
     priceYearlyEur: 0,
-    tagline: "Pour tester avec vos premiers clients.",
+    tagline: "Pour démarrer avec une petite équipe.",
     limits: {
       storageBytes: 2 * GB,
-      activeWorkspaces: 3,
-      users: 1,
-      maxFileBytes: 20 * MB,
+      activeWorkspaces: null,
+      users: 3,
+      maxFileBytes: 50 * MB,
       historyDays: 30,
     },
     branding: false,
     prioritySupport: false,
     highlights: [
-      "1 utilisateur",
-      "3 espaces clients actifs",
-      "Collecte de pièces & décisions client",
-      "Suivi des ouvertures en temps réel",
+      "Jusqu'à 3 utilisateurs",
       "2 Go de stockage",
+      "Liens de partage et dépôt de fichiers",
+      "Corbeille 30 jours",
     ],
   },
   pro: {
     id: "pro",
-    name: "Essentiel",
+    name: "Équipe",
     priceEur: 29,
     priceYearlyEur: 24,
-    tagline: "Pour l'indépendant ou le petit cabinet.",
+    tagline: "Le Drive de toute l'entreprise, sans compter les utilisateurs.",
     limits: {
-      storageBytes: 50 * GB,
+      storageBytes: 200 * GB,
       activeWorkspaces: null,
-      users: 3,
-      maxFileBytes: 200 * MB,
+      users: null,
+      maxFileBytes: 5 * GB,
       historyDays: 365,
     },
     branding: true,
     prioritySupport: false,
     highlights: [
-      "Jusqu'à 3 utilisateurs",
-      "Espaces clients illimités",
-      "Clients invités illimités, gratuits",
-      "Portail à vos couleurs & votre logo",
-      "Pièces types par métier en un clic",
-      "50 Go de stockage",
+      "Utilisateurs illimités",
+      "200 Go de stockage",
+      "Invités externes illimités et gratuits",
+      "Liens avec mot de passe et expiration",
+      "Historique des versions",
+      "Portail client à vos couleurs",
     ],
   },
   business: {
     id: "business",
-    name: "Cabinet",
+    name: "Business",
     priceEur: 79,
     priceYearlyEur: 66,
-    tagline: "Pour les équipes de 4 à 10 personnes.",
+    tagline: "Pour les entreprises qui veulent tout contrôler.",
     limits: {
-      storageBytes: 250 * GB,
+      storageBytes: 1024 * GB,
       activeWorkspaces: null,
-      users: 10,
-      maxFileBytes: 1 * GB,
+      users: null,
+      maxFileBytes: 20 * GB,
       historyDays: null,
     },
     branding: true,
     prioritySupport: true,
     highlights: [
-      "Tout Essentiel, jusqu'à 10 utilisateurs",
-      "Groupes & droits d'accès par espace",
-      "Espaces internes (Drive d'équipe)",
-      "Adresse de portail à votre nom",
-      "Historique d'activité illimité",
-      "250 Go · support prioritaire",
+      "Tout Équipe, avec 1 To de stockage",
+      "Espaces privés, groupes et droits par espace",
+      "Double authentification obligatoire",
+      "Journal d'activité exportable",
+      "Support prioritaire",
     ],
   },
   enterprise: {
     id: "enterprise",
-    name: "Entreprise",
+    name: "Sur mesure",
     priceEur: null,
     priceYearlyEur: null,
     tagline: "Volumes, conformité et accompagnement dédié.",
@@ -146,10 +148,10 @@ export const PLANS: Record<OrganizationPlan, PlanDefinition> = {
     branding: true,
     prioritySupport: true,
     highlights: [
-      "Utilisateurs & stockage sur mesure",
-      "SSO, DPA & exigences de conformité",
+      "Stockage sur mesure",
+      "SSO, DPA et exigences de conformité",
       "Import de votre existant",
-      "Interlocuteur dédié & SLA",
+      "Interlocuteur dédié et SLA",
     ],
   },
 };
@@ -177,11 +179,11 @@ export function resolvePlan(
 }
 
 /**
- * Taille de fichier réellement autorisée pour un plan. Pour Enterprise (limite
- * applicative « sur mesure »), on retombe sur le plafond du bucket.
+ * Taille de fichier réellement autorisée : celle du forfait, bornée par le
+ * plafond technique de l'hébergement.
  */
 export function effectiveMaxFileBytes(plan: PlanDefinition): number {
-  return plan.limits.maxFileBytes ?? BUCKET_MAX_FILE_BYTES;
+  return Math.min(plan.limits.maxFileBytes ?? INFRA_MAX_FILE_BYTES, INFRA_MAX_FILE_BYTES);
 }
 
 // --- Helpers de quota (purs, réutilisés côté actions et UI) ------------------

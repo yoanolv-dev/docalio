@@ -28,6 +28,8 @@ export function notificationVisual(n: AppNotification): NotificationVisual {
       return { Icon: Download, className: "bg-primary-subtle text-primary" };
     case "document_opened":
       return { Icon: FileText, className: SKY };
+    case "share_uploaded":
+      return { Icon: Inbox, className: "bg-emerald-50 text-emerald-600" };
     case "request_received":
       return {
         Icon: Inbox,

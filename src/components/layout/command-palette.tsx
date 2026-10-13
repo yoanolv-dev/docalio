@@ -1,83 +1,169 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  FolderClosed,
-  Plus,
-  Bell,
-  Settings,
-  Users,
-  CreditCard,
-  LogOut,
+  Activity,
+  Clock,
   CornerDownLeft,
+  CreditCard,
+  Home,
+  Link2,
+  LoaderCircle,
+  LogOut,
+  Plus,
   Search,
+  Settings,
+  ShieldCheck,
+  Trash2,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { searchDriveAction } from "@/lib/actions/drive";
+import type { SearchResults } from "@/lib/drive";
+import { ItemIcon } from "@/components/drive/item-icon";
 import { cn } from "@/lib/utils";
 
-interface Command {
+interface Entry {
   id: string;
   label: string;
   hint?: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
+  item?: { kind: "folder" | "file"; name: string; mime?: string | null };
   keywords?: string;
   run: () => void;
 }
 
 /**
- * Palette de commandes (Ctrl K / ⌘K), la navigation principale du dashboard.
- * Volontairement minimale : tout se fait au clavier, aucun menu permanent.
+ * Palette Ctrl K : recherche instantanée dans les espaces, dossiers et
+ * fichiers, et accès clavier à toutes les pages.
  */
 export function CommandPalette({
   open,
   onOpenChange,
+  guest = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  guest?: boolean;
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
+  const [results, setResults] = useState<SearchResults | null>(null);
+  const [loading, setLoading] = useState(false);
+  const listRef = useRef<HTMLUListElement>(null);
 
-  const commands = useMemo<Command[]>(() => {
-    const go = (href: string) => () => {
+  const go = useMemo(
+    () => (href: string) => () => {
       onOpenChange(false);
       router.push(href);
-    };
-    return [
-      { id: "spaces", label: "Espaces clients", icon: FolderClosed, keywords: "accueil dossiers clients liste à traiter", run: go("/dashboard") },
-      { id: "new", label: "Nouvel espace client", hint: "Créer", icon: Plus, keywords: "ajouter créer", run: go("/dashboard?nouveau=1") },
-      { id: "notifs", label: "Activité & notifications", icon: Bell, keywords: "activité alertes", run: go("/dashboard/notifications") },
-      { id: "team", label: "Équipe & accès", hint: "Inviter", icon: Users, keywords: "utilisateurs membres invitation rôles collaborateurs groupes", run: go("/dashboard/settings/equipe") },
-      { id: "billing", label: "Abonnement", icon: CreditCard, keywords: "plan facturation paiement usage offre", run: go("/dashboard/settings/abonnement") },
-      { id: "settings", label: "Paramètres", icon: Settings, keywords: "organisation compte identité logo", run: go("/dashboard/settings/organisation") },
+    },
+    [router, onOpenChange]
+  );
+
+  const commands = useMemo<Entry[]>(() => {
+    const all: (Entry & { member?: boolean })[] = [
+      { id: "home", label: "Accueil du Drive", icon: Home, keywords: "accueil espaces drive", run: go("/dashboard") },
+      { id: "recent", label: "Fichiers récents", icon: Clock, keywords: "récents derniers", run: go("/dashboard/recents") },
+      { id: "new", label: "Nouvel espace", hint: "Créer", icon: Plus, keywords: "ajouter créer espace", run: go("/dashboard?nouveau=1"), member: true },
+      { id: "links", label: "Liens de partage", icon: Link2, keywords: "partages liens", run: go("/dashboard/partages"), member: true },
+      { id: "activity", label: "Journal d'activité", icon: Activity, keywords: "activité historique audit journal", run: go("/dashboard/activite"), member: true },
+      { id: "trash", label: "Corbeille", icon: Trash2, keywords: "corbeille supprimés restaurer", run: go("/dashboard/corbeille") },
+      { id: "team", label: "Équipe et invités", icon: Users, keywords: "utilisateurs membres invitation rôles groupes", run: go("/dashboard/settings/equipe"), member: true },
+      { id: "security", label: "Sécurité et double authentification", icon: ShieldCheck, keywords: "2fa mot de passe sécurité", run: go("/dashboard/settings/securite") },
+      { id: "billing", label: "Abonnement", icon: CreditCard, keywords: "plan facturation stockage offre", run: go("/dashboard/settings/abonnement"), member: true },
+      { id: "settings", label: "Paramètres de l'organisation", icon: Settings, keywords: "organisation logo identité", run: go("/dashboard/settings/organisation"), member: true },
       {
         id: "signout",
         label: "Déconnexion",
         icon: LogOut,
-        keywords: "quitter logout sortir",
+        keywords: "quitter sortir",
         run: async () => {
           onOpenChange(false);
-          const supabase = createClient();
-          await supabase.auth.signOut();
+          await createClient().auth.signOut();
           router.push("/login");
           router.refresh();
         },
       },
     ];
-  }, [router, onOpenChange]);
+    return all.filter((c) => !guest || !c.member);
+  }, [go, guest, onOpenChange, router]);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return commands;
-    return commands.filter(
-      (c) => c.label.toLowerCase().includes(q) || (c.keywords ?? "").includes(q)
-    );
-  }, [commands, query]);
+  const trimmed = query.trim();
 
-  // Raccourci global ⌘K / Ctrl+K
+  // Recherche instantanée (après une courte pause de frappe).
+  useEffect(() => {
+    if (!open || trimmed.length < 2) return;
+    let cancelled = false;
+    const t = window.setTimeout(async () => {
+      setLoading(true);
+      const r = await searchDriveAction(trimmed);
+      if (!cancelled) {
+        setResults(r);
+        setLoading(false);
+      }
+    }, 160);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [open, trimmed]);
+
+  const entries = useMemo<Entry[]>(() => {
+    const q = trimmed.toLowerCase();
+    const cmds = q ? commands.filter((c) => c.label.toLowerCase().includes(q) || (c.keywords ?? "").includes(q)) : commands;
+    if (trimmed.length < 2 || !results || results.query !== trimmed) return cmds;
+    const found: Entry[] = [
+      ...results.spaces.map((s) => ({
+        id: `s:${s.id}`,
+        label: s.name,
+        hint: "Espace",
+        item: { kind: "folder" as const, name: s.name },
+        run: go(`/dashboard/workspaces/${s.id}`),
+      })),
+      ...results.folders.map((f) => ({
+        id: `d:${f.id}`,
+        label: f.name,
+        hint: [f.workspace_name, f.location].filter(Boolean).join(" › "),
+        item: { kind: "folder" as const, name: f.name },
+        run: go(`/dashboard/workspaces/${f.workspace_id}?dossier=${f.id}`),
+      })),
+      ...results.files.map((f) => ({
+        id: `f:${f.id}`,
+        label: f.name,
+        hint: [f.workspace_name, f.location].filter(Boolean).join(" › "),
+        item: { kind: "file" as const, name: f.name, mime: f.file_type },
+        run: go(`/dashboard/workspaces/${f.workspace_id}?${f.folder_id ? `dossier=${f.folder_id}&` : ""}apercu=${f.id}`),
+      })),
+      {
+        id: "all",
+        label: `Tous les résultats pour « ${trimmed} »`,
+        icon: Search,
+        run: go(`/dashboard/recherche?q=${encodeURIComponent(trimmed)}`),
+      },
+    ];
+    return [...found, ...cmds];
+  }, [commands, results, trimmed, go]);
+
+  // Réinitialisation à l'ouverture et quand la requête change (pendant le rendu).
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (prevOpen !== open) {
+    setPrevOpen(open);
+    if (open) {
+      setQuery("");
+      setActive(0);
+      setResults(null);
+    }
+  }
+  const [prevQuery, setPrevQuery] = useState(query);
+  if (prevQuery !== query) {
+    setPrevQuery(query);
+    setActive(0);
+  }
+
+  // Raccourci global Ctrl K / ⌘K
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -89,89 +175,92 @@ export function CommandPalette({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onOpenChange]);
 
-  // Réinitialise la saisie à l'ouverture, et la sélection quand la requête
-  // change, ajustement pendant le rendu (cf. « you might not need an effect »).
-  const [prevOpen, setPrevOpen] = useState(open);
-  if (prevOpen !== open) {
-    setPrevOpen(open);
-    if (open) {
-      setQuery("");
-      setActive(0);
-    }
-  }
-  const [prevQuery, setPrevQuery] = useState(query);
-  if (prevQuery !== query) {
-    setPrevQuery(query);
-    setActive(0);
-  }
+  useEffect(() => {
+    listRef.current?.querySelector(`[data-index="${active}"]`)?.scrollIntoView({ block: "nearest" });
+  }, [active]);
 
   if (!open) return null;
 
   function onListKey(e: React.KeyboardEvent) {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActive((a) => Math.min(a + 1, filtered.length - 1));
+      setActive((a) => Math.min(a + 1, entries.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActive((a) => Math.max(a - 1, 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      filtered[active]?.run();
+      if (entries[active]) entries[active].run();
+      else if (trimmed.length >= 2) go(`/dashboard/recherche?q=${encodeURIComponent(trimmed)}`)();
     } else if (e.key === "Escape") {
       onOpenChange(false);
     }
   }
 
+  const searching = trimmed.length >= 2 && (loading || !results || results.query !== trimmed);
+
   return (
     <div
-      className="animate-overlay-in fixed inset-0 z-[100] flex items-start justify-center bg-foreground/20 p-4 pt-[12vh] backdrop-blur-sm"
+      className="animate-overlay-in fixed inset-0 z-[100] flex items-start justify-center bg-slate-950/30 p-4 pt-[10vh] backdrop-blur-sm"
       onClick={() => onOpenChange(false)}
     >
       <div
-        className="animate-scale-in w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-popover shadow-2xl"
+        className="animate-scale-in w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-popover shadow-2xl"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label="Recherche"
       >
         <div className="flex items-center gap-2.5 border-b border-border px-4">
-          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+          {searching ? (
+            <LoaderCircle className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
+          ) : (
+            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+          )}
           <input
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onListKey}
-            placeholder="Rechercher une action, naviguer…"
-            className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            placeholder="Rechercher un fichier, un dossier, un espace…"
+            className="h-13 w-full bg-transparent py-4 text-[15px] outline-none placeholder:text-muted-foreground"
           />
           <kbd className="hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
-            ESC
+            ÉCHAP
           </kbd>
         </div>
-        <ul className="max-h-80 overflow-y-auto p-1.5">
-          {filtered.length === 0 && (
+        <ul ref={listRef} className="max-h-[60vh] overflow-y-auto p-1.5">
+          {entries.length === 0 && (
             <li className="px-3 py-8 text-center text-sm text-muted-foreground">
-              Aucune commande
+              {searching ? "Recherche…" : "Aucun résultat"}
             </li>
           )}
-          {filtered.map((c, i) => {
+          {entries.map((c, i) => {
             const Icon = c.icon;
             return (
               <li key={c.id}>
                 <button
                   type="button"
+                  data-index={i}
                   onMouseEnter={() => setActive(i)}
                   onClick={c.run}
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors",
+                    "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors",
                     i === active ? "bg-accent" : "hover:bg-accent/60"
                   )}
                 >
-                  <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <span className="flex-1 font-medium">{c.label}</span>
-                  {c.hint && (
-                    <span className="text-xs text-muted-foreground">{c.hint}</span>
-                  )}
-                  {i === active && (
-                    <CornerDownLeft className="h-3.5 w-3.5 text-muted-foreground" />
-                  )}
+                  {c.item ? (
+                    <ItemIcon kind={c.item.kind} name={c.item.name} mime={c.item.mime} size="sm" />
+                  ) : Icon ? (
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center">
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                    </span>
+                  ) : null}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium">{c.label}</span>
+                    {c.item && c.hint && <span className="block truncate text-xs text-muted-foreground">{c.hint}</span>}
+                  </span>
+                  {!c.item && c.hint && <span className="text-xs text-muted-foreground">{c.hint}</span>}
+                  {i === active && <CornerDownLeft className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
                 </button>
               </li>
             );

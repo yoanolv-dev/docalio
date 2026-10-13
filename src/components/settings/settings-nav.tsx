@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Building2,
   CreditCard,
+  ShieldCheck,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -14,19 +15,21 @@ interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
+  memberOnly?: boolean;
 }
 
 const ITEMS: NavItem[] = [
-  { href: "/dashboard/settings/abonnement", label: "Abonnement", icon: CreditCard },
-  { href: "/dashboard/settings/equipe", label: "Équipe & accès", icon: Users },
-  { href: "/dashboard/settings/organisation", label: "Identité", icon: Building2 },
+  { href: "/dashboard/settings/abonnement", label: "Abonnement", icon: CreditCard, memberOnly: true },
+  { href: "/dashboard/settings/equipe", label: "Équipe et invités", icon: Users, memberOnly: true },
+  { href: "/dashboard/settings/securite", label: "Sécurité", icon: ShieldCheck },
+  { href: "/dashboard/settings/organisation", label: "Identité", icon: Building2, memberOnly: true },
 ];
 
 /**
  * Navigation des Réglages. Volet vertical sur PC, barre déroulante sur mobile.
  * Chaque section est une page dédiée (plus rien n'est empilé).
  */
-export function SettingsNav() {
+export function SettingsNav({ guest = false }: { guest?: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -34,7 +37,7 @@ export function SettingsNav() {
       className="flex gap-1 overflow-x-auto lg:flex-col lg:gap-0.5 lg:overflow-visible"
       aria-label="Sections des réglages"
     >
-      {ITEMS.map((item) => {
+      {ITEMS.filter((item) => !guest || !item.memberOnly).map((item) => {
         const Icon = item.icon;
         const active = pathname === item.href;
         return (

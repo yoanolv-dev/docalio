@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slug";
+import { getCurrentMembership } from "@/lib/organizations";
 
 export type FormState = { ok: boolean; message?: string } | null;
 
@@ -127,4 +128,38 @@ export async function updateOrganizationAction(
   revalidatePath("/dashboard/settings/organisation");
   revalidatePath("/dashboard");
   return { ok: true, message: "Modifications enregistrées." };
+}
+
+/**
+ * Exige (ou non) la double authentification pour les membres de l'équipe.
+ * Réservé aux administrateurs ; l'administrateur doit l'avoir activée
+ * lui-même pour ne pas s'enfermer dehors.
+ */
+export async function setRequireMfaAction(
+  required: boolean
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, message: "Session expirée." };
+
+  const membership = await getCurrentMembership();
+  if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
+    return { ok: false, message: "Réservé aux administrateurs." };
+  }
+  if (required) {
+    const { data: factors } = await supabase.auth.mfa.listFactors();
+    if (!(factors?.totp ?? []).some((f) => f.status === "verified")) {
+      return { ok: false, message: "Activez d'abord la double authentification sur votre propre compte." };
+    }
+  }
+
+  const { error } = await supabase
+    .from("organizations")
+    .update({ require_mfa: required })
+    .eq("id", membership.organization.id);
+  if (error) return { ok: false, message: "Mise à jour impossible. Réessayez." };
+  revalidatePath("/dashboard/settings/securite");
+  return { ok: true };
 }

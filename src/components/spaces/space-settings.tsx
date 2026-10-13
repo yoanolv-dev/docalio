@@ -35,6 +35,32 @@ export function SpaceSettings({ title, children }: { title: string; children: Re
   );
 }
 
+/** Même fenêtre, avec un déclencheur et un titre libres (portail client…). */
+export function PanelDialog({
+  trigger,
+  title,
+  description,
+  children,
+}: {
+  trigger: ReactNode;
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="max-h-[88dvh] max-w-2xl gap-0 overflow-y-auto p-0">
+        <div className="sticky top-0 z-10 border-b border-border bg-card px-6 py-4">
+          <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription className="mt-0.5">{description}</DialogDescription>}
+        </div>
+        <div className="divide-y divide-border">{children}</div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function SettingsSection({
   title,
   description,

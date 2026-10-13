@@ -309,19 +309,22 @@ export async function deleteWorkspaceAction(formData: FormData): Promise<void> {
     .maybeSingle<{ id: string; organization_id: string }>();
   if (!workspace) return;
 
-  const prefix = `organizations/${workspace.organization_id}/workspaces/${workspace.id}`;
-  const { data: files } = await supabase.storage.from("documents").list(prefix);
-  if (files && files.length > 0) {
-    await supabase.storage
-      .from("documents")
-      .remove(files.map((f) => `${prefix}/${f.name}`));
+  // Tous les fichiers de l'espace (versions, pièces reçues et dépôts compris),
+  // lus en base avant la suppression des lignes.
+  const { data: paths } = await supabase.rpc("drive_workspace_file_paths", {
+    p_workspace_id: workspace.id,
+  });
+
+  const { error } = await supabase.from("workspaces").delete().eq("id", id);
+  if (error) return;
+
+  const list = (paths as string[] | null) ?? [];
+  for (let i = 0; i < list.length; i += 100) {
+    await supabase.storage.from("documents").remove(list.slice(i, i + 100));
   }
 
-  await supabase.from("workspaces").delete().eq("id", id);
-
-  revalidatePath("/dashboard/workspaces");
   revalidatePath("/dashboard");
-  redirect("/dashboard/workspaces");
+  redirect("/dashboard");
 }
 
 export type QuickCreateResult =
@@ -337,8 +340,10 @@ export type QuickCreateResult =
  */
 export async function quickCreateWorkspaceAction(input: {
   name: string;
-  clientEmail?: string;
-  pieces?: string[];
+  /** Espace privé : seulement le créateur, les admins et les personnes ajoutées. */
+  private?: boolean;
+  /** Espace client : portail (lien) et pièces à demander. */
+  client?: { email?: string; pieces?: string[] } | null;
 }): Promise<QuickCreateResult> {
   const supabase = await createClient();
   const {
@@ -348,12 +353,16 @@ export async function quickCreateWorkspaceAction(input: {
 
   const membership = await getCurrentMembership();
   if (!membership) redirect("/onboarding");
+  if (membership.role === "guest") {
+    return { ok: false, message: "Les invités ne peuvent pas créer d'espace." };
+  }
   const org = membership.organization;
 
   const name = String(input.name ?? "").trim().slice(0, 120);
-  if (!name) return { ok: false, message: "Indiquez le nom du client." };
+  if (!name) return { ok: false, message: "Indiquez le nom de l'espace." };
 
-  const email = String(input.clientEmail ?? "").trim().slice(0, 200);
+  const client = input.private ? null : input.client ?? null;
+  const email = String(client?.email ?? "").trim().slice(0, 200);
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false, message: "Adresse e-mail invalide." };
   }
@@ -361,18 +370,15 @@ export async function quickCreateWorkspaceAction(input: {
   const limitError = await activeWorkspaceLimitError(org, org.id);
   if (limitError) return { ok: false, message: limitError };
 
-  // Usage purement interne : un espace d'équipe, sans lien ni pièces.
-  const internal = org.usage_type === "internal";
-
   const { data, error } = await supabase
     .from("workspaces")
     .insert({
       organization_id: org.id,
       created_by: user.id,
       name,
-      space_type: internal ? "internal" : "external",
-      client_company: internal ? null : name,
-      client_email: internal ? null : email || null,
+      space_type: input.private ? "internal" : "external",
+      client_company: client ? name : null,
+      client_email: client ? email || null : null,
       status: "active",
     })
     .select("id")
@@ -382,7 +388,7 @@ export async function quickCreateWorkspaceAction(input: {
     return { ok: false, message: "Création impossible. Veuillez réessayer." };
   }
 
-  if (!internal) {
+  if (client) {
     const { randomBytes } = await import("node:crypto");
     await supabase.from("share_links").insert({
       organization_id: org.id,
@@ -392,7 +398,7 @@ export async function quickCreateWorkspaceAction(input: {
       created_by: user.id,
     });
 
-    const pieces = (input.pieces ?? [])
+    const pieces = (client.pieces ?? [])
       .map((p) => String(p).trim().slice(0, 160))
       .filter(Boolean)
       .slice(0, 30);

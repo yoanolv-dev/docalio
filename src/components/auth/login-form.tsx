@@ -51,6 +51,13 @@ export function LoginForm() {
       return;
     }
 
+    // Double authentification activée : le code est demandé avant tout accès.
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+      router.push(`/login/verification?next=${encodeURIComponent(safeNextPath())}`);
+      return;
+    }
+
     // `next` permet de revenir sur un lien d'invitation après connexion.
     // Le layout du dashboard redirige vers /onboarding si aucune organisation.
     router.push(safeNextPath());
