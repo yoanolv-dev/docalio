@@ -142,7 +142,7 @@ export function SharedLinkView({ token, data }: { token: string; data: Ok }) {
             {link.can_view ? "Partagé avec vous" : "Dépôt de fichiers"}
           </p>
           <h1 className="mt-1 truncate text-2xl font-semibold tracking-tight">{link.label || root.name}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p suppressHydrationWarning className="mt-1 text-sm text-muted-foreground">
             {organization.name}
             {link.expires_at ? ` · disponible jusqu'au ${formatDate(link.expires_at)}` : ""}
           </p>
@@ -172,7 +172,7 @@ export function SharedLinkView({ token, data }: { token: string; data: Ok }) {
         <div className="flex flex-col items-center rounded-2xl border border-border bg-white px-6 py-10 text-center">
           <ItemIcon kind="file" name={single.name} mime={single.file_type} size="lg" />
           <p className="mt-4 max-w-full break-words font-semibold">{single.name}</p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p suppressHydrationWarning className="mt-1 text-sm text-muted-foreground">
             {formatBytes(single.file_size)} · mis à jour {formatRelativeTime(single.updated_at).replace(/^I/, "i")}
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -240,7 +240,7 @@ export function SharedLinkView({ token, data }: { token: string; data: Ok }) {
                     <ItemIcon kind="file" name={f.name} mime={f.file_type} />
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-medium">{f.name}</span>
-                      <span className="block text-xs text-muted-foreground">
+                      <span suppressHydrationWarning className="block text-xs text-muted-foreground">
                         {formatBytes(f.file_size)} · {formatRelativeTime(f.updated_at)}
                       </span>
                     </span>

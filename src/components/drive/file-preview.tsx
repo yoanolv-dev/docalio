@@ -90,7 +90,7 @@ export function FilePreview({
   const ready = state?.id === file.id ? state : null;
 
   return (
-    <div className="animate-overlay-in fixed inset-0 z-[90] flex flex-col bg-slate-950/95 text-white" role="dialog" aria-modal="true" aria-label={`Aperçu de ${file.name}`}>
+    <div className="animate-overlay-in fixed inset-0 z-[90] flex flex-col bg-slate-950 text-white" role="dialog" aria-modal="true" aria-label={`Aperçu de ${file.name}`}>
       <header className="flex h-14 shrink-0 items-center gap-3 px-3 sm:px-5">
         <button
           type="button"

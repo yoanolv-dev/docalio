@@ -112,12 +112,12 @@ export function TrashView({ items }: { items: TrashEntry[] }) {
                 <ItemIcon kind={i.kind} name={i.name} mime={i.file_type} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{i.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">
+                  <p suppressHydrationWarning className="truncate text-xs text-muted-foreground">
                     {i.workspace_name} · supprimé {formatRelativeTime(i.deleted_at).replace(/^I/, "i")}
                     {i.deleted_by_name ? ` par ${i.deleted_by_name}` : ""}
                   </p>
                 </div>
-                <span className="hidden w-32 shrink-0 text-xs text-muted-foreground md:block">
+                <span suppressHydrationWarning className="hidden w-32 shrink-0 text-xs text-muted-foreground md:block">
                   Jusqu&apos;au {formatDate(i.purge_at)}
                 </span>
                 <span className="hidden w-16 shrink-0 text-right text-xs tabular-nums text-muted-foreground sm:block">{formatBytes(i.size)}</span>

@@ -806,7 +806,7 @@ export function Explorer({
                       >
                         {row.name}
                       </button>
-                      <p className="flex items-center gap-1.5 truncate text-xs text-muted-foreground md:hidden">
+                      <p suppressHydrationWarning className="flex items-center gap-1.5 truncate text-xs text-muted-foreground md:hidden">
                         {row.kind === "folder"
                           ? `${row.folder.files + row.folder.folders} élément${row.folder.files + row.folder.folders > 1 ? "s" : ""}`
                           : `${formatBytes(row.size)} · ${formatRelativeTime(row.modified)}`}
@@ -828,7 +828,7 @@ export function Explorer({
                       </span>
                     )}
                   </div>
-                  <span className="hidden truncate text-xs text-muted-foreground md:block">
+                  <span suppressHydrationWarning className="hidden truncate text-xs text-muted-foreground md:block">
                     {formatRelativeTime(row.modified)}
                     {by ? ` · ${by}` : ""}
                   </span>

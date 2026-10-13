@@ -24,6 +24,13 @@ import type {
   Workspace,
 } from "@/lib/types/database";
 
+/** « Espace client · contact », sans répéter le nom de l'espace. */
+function clientSubtitle(spaceName: string, contact: string | null) {
+  return contact && contact.trim().toLowerCase() !== spaceName.trim().toLowerCase()
+    ? `Espace client · ${contact}`
+    : "Espace client";
+}
+
 function InfoRow({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="flex items-center justify-between gap-4 py-2 text-sm">
@@ -65,7 +72,7 @@ export function SpaceHeader({
     : isPrivate
       ? "Espace privé"
       : workspace.client_email || workspace.client_company
-        ? `Espace client · ${workspace.client_email ?? workspace.client_company}`
+        ? clientSubtitle(workspace.name, workspace.client_email ?? workspace.client_company)
         : "Visible par toute l'équipe";
 
   const toVerify = portal?.requests.filter((r) => r.status === "received").length ?? 0;

@@ -62,7 +62,7 @@ export function LinksView({ links }: { links: OrgLink[] }) {
                     Mot de passe
                   </span>
                 )}
-                <span>{l.expires_at ? (l.live ? `Expire le ${formatDate(l.expires_at)}` : "Expiré") : "Sans expiration"}</span>
+                <span suppressHydrationWarning>{l.expires_at ? (l.live ? `Expire le ${formatDate(l.expires_at)}` : "Expiré") : "Sans expiration"}</span>
                 <span>{l.workspace_name}</span>
               </p>
             </div>
@@ -72,7 +72,7 @@ export function LinksView({ links }: { links: OrgLink[] }) {
                 {l.can_download ? ` · ${l.download_count} téléch.` : ""}
                 {l.can_upload ? ` · ${l.upload_count} dépôt${l.upload_count > 1 ? "s" : ""}` : ""}
               </p>
-              <p className="truncate">
+              <p suppressHydrationWarning className="truncate">
                 Créé {formatRelativeTime(l.created_at).replace(/^I/, "i")}
                 {l.created_by_name ? ` par ${l.created_by_name}` : ""}
               </p>

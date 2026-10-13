@@ -261,7 +261,8 @@ begin
     case when tg_op = 'INSERT' then 'access_granted' else 'access_revoked' end,
     jsonb_build_object('title', v_who, 'access_level', v_row.access_level,
                        'guest', v_row.user_id is not null
-                                and public.is_org_guest(v_row.organization_id, v_row.user_id))
+                                and public.is_org_guest(v_row.organization_id, v_row.user_id),
+                       'self', coalesce(v_row.user_id = auth.uid(), false))
   );
   return coalesce(new, old);
 end;

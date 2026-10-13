@@ -59,8 +59,10 @@ export function activityAction(type: ActivityEventType, meta: Meta): string {
     case "share_uploaded":
       return `a déposé ${title} via un lien`;
     case "access_granted":
+      if (meta.self) return `a rejoint l'espace en invité${meta.access_level === "viewer" ? " (lecture seule)" : ""}`;
       return `a ouvert l'accès à ${meta.title ?? "une personne"}${meta.access_level === "viewer" ? " (lecture seule)" : ""}`;
     case "access_revoked":
+      if (meta.self) return "a quitté l'espace";
       return `a retiré l'accès de ${meta.title ?? "une personne"}`;
     case "portal_opened":
       return "a ouvert le portail";

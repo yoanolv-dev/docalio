@@ -60,7 +60,7 @@ export function NotificationRow({
           >
             {message}
           </span>
-          <span className="mt-1 block text-xs text-muted-foreground/70">
+          <span suppressHydrationWarning className="mt-1 block text-xs text-muted-foreground/70">
             {formatRelativeTime(notification.created_at)}
           </span>
         </span>

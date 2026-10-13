@@ -30,6 +30,7 @@ export function GuestsList({ guests, canManage }: { guests: OrgGuest[]; canManag
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{g.name}</p>
+            {g.email && g.email !== g.name && <p className="truncate text-xs text-muted-foreground">{g.email}</p>}
             <p className="truncate text-xs text-muted-foreground">
               {g.spaces.length === 0
                 ? "Aucun espace ouvert"
