@@ -8,11 +8,16 @@ import {
   Check,
   CreditCard,
   LogOut,
+  MonitorSmartphone,
+  Share,
+  SquarePlus,
   Settings,
   ShieldCheck,
   Users,
   type LucideIcon,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { promptInstall, useInstallMode } from "@/lib/pwa";
 import { createClient } from "@/lib/supabase/client";
 import { getInitials } from "@/lib/utils";
 
@@ -55,6 +60,8 @@ export function AccountMenu({
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [iosHelp, setIosHelp] = useState(false);
+  const installMode = useInstallMode();
 
   async function signOut() {
     const supabase = createClient();
@@ -138,6 +145,22 @@ export function AccountMenu({
             </>
           )}
 
+          {installMode && (
+            <>
+              <DropdownMenu.Separator className="my-1.5 h-px bg-border" />
+              <DropdownMenu.Item
+                onSelect={() => (installMode === "ios" ? setIosHelp(true) : void promptInstall())}
+                className={itemClass}
+              >
+                <MonitorSmartphone className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <span className="flex-1">
+                  <span className="block font-medium leading-tight">Installer l&apos;application</span>
+                  <span className="block text-xs text-muted-foreground">Docalio sur votre écran d&apos;accueil</span>
+                </span>
+              </DropdownMenu.Item>
+            </>
+          )}
+
           <DropdownMenu.Separator className="my-1.5 h-px bg-border" />
 
           <DropdownMenu.Item
@@ -149,6 +172,27 @@ export function AccountMenu({
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
+
+      <Dialog open={iosHelp} onOpenChange={setIosHelp}>
+        <DialogContent>
+          <DialogTitle>Installer Docalio sur l&apos;iPhone</DialogTitle>
+          <DialogDescription>Deux gestes dans Safari, et Docalio s&apos;ouvre comme une application.</DialogDescription>
+          <ol className="space-y-3 text-sm">
+            <li className="flex items-center gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-canvas">
+                <Share className="h-4 w-4" />
+              </span>
+              Touchez le bouton Partager, en bas de l&apos;écran.
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-canvas">
+                <SquarePlus className="h-4 w-4" />
+              </span>
+              Choisissez « Sur l&apos;écran d&apos;accueil », puis « Ajouter ».
+            </li>
+          </ol>
+        </DialogContent>
+      </Dialog>
     </DropdownMenu.Root>
   );
 }

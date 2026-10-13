@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SITE } from "@/lib/site";
+import { ServiceWorker } from "@/components/pwa/service-worker";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
   },
   description: SITE.description,
   applicationName: "Docalio",
+  appleWebApp: { capable: true, title: "Docalio", statusBarStyle: "default" },
   keywords: [
     "portail client",
     "collecte de pièces justificatives",
@@ -64,7 +66,10 @@ export default function RootLayout({
       lang="fr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <ServiceWorker />
+      </body>
     </html>
   );
 }
