@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Scripts de tooling Node (génération des captures produit).
     "scripts/**",
+    // Application mobile (Expo) : configuration ESLint propre dans mobile/.
+    "mobile/**",
   ]),
 ]);
 
