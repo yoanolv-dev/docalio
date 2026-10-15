@@ -130,7 +130,7 @@ export default async function ComparisonPage({
           <p className="text-sm font-semibold text-blue-300">Notre verdict</p>
           <p className="text-balance mt-3 text-xl font-medium leading-relaxed sm:text-2xl">{c.verdict}</p>
           <Button size="lg" variant="secondary" className="mt-8 rounded-full" asChild>
-            <Link href="/register">Créer mon portail <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/register">Créer mon drive <ArrowRight className="h-4 w-4" /></Link>
           </Button>
         </div>
         <div className="mt-12 text-center">

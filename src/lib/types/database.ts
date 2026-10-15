@@ -78,6 +78,14 @@ export interface Document {
   /** Position sur le canvas spatial (null = auto-disposé). */
   pos_x: number | null;
   pos_y: number | null;
+  /** Corbeille : date de mise à la corbeille (null = vivant). */
+  deleted_at: string | null;
+  deleted_by: string | null;
+  trash_batch: string | null;
+  /** Numéro de version courant (incrémenté à chaque remplacement). */
+  version: number;
+  file_updated_at: string;
+  file_updated_by: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -93,6 +101,63 @@ export interface Folder {
   /** Position sur le canvas spatial (null = auto-disposé). */
   pos_x: number | null;
   pos_y: number | null;
+  /** Corbeille : date de mise à la corbeille (null = vivant). */
+  deleted_at: string | null;
+  deleted_by: string | null;
+  trash_batch: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Élément de premier niveau de la corbeille (vue drive_trash_items). */
+export interface DriveTrashItem {
+  kind: "folder" | "file";
+  id: string;
+  organization_id: string;
+  workspace_id: string;
+  folder_id: string | null;
+  name: string;
+  file_type: string | null;
+  size: number;
+  deleted_at: string;
+  deleted_by: string | null;
+}
+
+/** Version archivée d'un fichier (historique des remplacements). */
+export interface DocumentVersion {
+  id: string;
+  organization_id: string;
+  workspace_id: string;
+  document_id: string;
+  version: number;
+  file_path: string;
+  file_size: number | null;
+  file_type: string | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+/** Lien de partage par fichier / dossier / espace (drive_links). */
+export interface DriveLink {
+  id: string;
+  organization_id: string;
+  workspace_id: string;
+  folder_id: string | null;
+  document_id: string | null;
+  token: string;
+  can_view: boolean;
+  can_download: boolean;
+  can_upload: boolean;
+  has_password: boolean;
+  label: string | null;
+  expires_at: string | null;
+  is_active: boolean;
+  revoked_at: string | null;
+  view_count: number;
+  download_count: number;
+  upload_count: number;
+  last_accessed_at: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

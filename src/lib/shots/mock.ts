@@ -49,6 +49,12 @@ function doc(
     is_visible_to_client: true,
     pos_x: null,
     pos_y: null,
+    deleted_at: null,
+    deleted_by: null,
+    trash_batch: null,
+    version: 1,
+    file_updated_at: daysAgo(6),
+    file_updated_by: null,
     created_by: null,
     created_at: daysAgo(6),
     updated_at: daysAgo(6),
@@ -57,9 +63,9 @@ function doc(
 }
 
 export const MOCK_FOLDERS: Folder[] = [
-  { id: "f-contrats", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Contrats", pos_x: 40, pos_y: 40, created_by: null, created_at: daysAgo(20), updated_at: daysAgo(20) },
-  { id: "f-factures", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Factures", pos_x: 268, pos_y: 40, created_by: null, created_at: daysAgo(20), updated_at: daysAgo(20) },
-  { id: "f-creation", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Création", pos_x: 496, pos_y: 40, created_by: null, created_at: daysAgo(18), updated_at: daysAgo(18) },
+  { id: "f-contrats", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Contrats", pos_x: 40, pos_y: 40, deleted_at: null, deleted_by: null, trash_batch: null, created_by: null, created_at: daysAgo(20), updated_at: daysAgo(20) },
+  { id: "f-factures", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Factures", pos_x: 268, pos_y: 40, deleted_at: null, deleted_by: null, trash_batch: null, created_by: null, created_at: daysAgo(20), updated_at: daysAgo(20) },
+  { id: "f-creation", organization_id: ORG, workspace_id: WS, parent_id: null, name: "Création", pos_x: 496, pos_y: 40, deleted_at: null, deleted_by: null, trash_batch: null, created_by: null, created_at: daysAgo(18), updated_at: daysAgo(18) },
 ];
 
 export const MOCK_DOCUMENTS: Document[] = [

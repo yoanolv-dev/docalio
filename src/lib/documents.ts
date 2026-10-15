@@ -13,6 +13,7 @@ export async function listWorkspaceDocuments(
     .from("documents")
     .select("*")
     .eq("workspace_id", workspaceId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
   return (data as Document[] | null) ?? [];
 }
@@ -28,7 +29,7 @@ export interface DocumentStats {
 export async function getDocumentStats(): Promise<DocumentStats> {
   const supabase = await createClient();
   const [docs, decisions] = await Promise.all([
-    supabase.from("documents").select("id, is_visible_to_client"),
+    supabase.from("documents").select("id, is_visible_to_client").is("deleted_at", null),
     supabase.from("document_decisions").select("document_id"),
   ]);
 

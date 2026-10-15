@@ -280,9 +280,9 @@ export async function duplicateDocumentAction(
   // Quota : la copie consomme l'équivalent de la taille du fichier.
   const { data: org } = await supabase
     .from("organizations")
-    .select("plan")
+    .select("plan, plan_status, trial_ends_at")
     .eq("id", doc.organization_id)
-    .maybeSingle<Pick<Organization, "plan">>();
+    .maybeSingle<Pick<Organization, "plan" | "plan_status" | "trial_ends_at">>();
   const plan = resolvePlan(org);
   const storageLimit = plan.limits.storageBytes;
   if (storageLimit !== null && doc.file_size) {

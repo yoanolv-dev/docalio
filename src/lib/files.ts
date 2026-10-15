@@ -1,72 +1,135 @@
-// Règles fichiers du module Documents.
+// Règles fichiers du Drive.
 // Partagé entre la validation client (feedback immédiat) et serveur (autorité).
-// La taille maximale par fichier dépend du plan (cf. src/lib/plans.ts) et est
-// transmise explicitement à `validateFile`.
+// Un vrai drive accepte tous les types de fichiers : seule la taille est
+// limitée (par le plan de l'organisation, cf. src/lib/plans.ts).
 
-export type AcceptedExtension =
-  | "pdf"
-  | "docx"
-  | "xlsx"
-  | "pptx"
-  | "png"
-  | "jpg"
-  | "jpeg"
-  | "zip";
-
-const EXTENSION_LABELS: Record<AcceptedExtension, string> = {
+const EXTENSION_LABELS: Record<string, string> = {
   pdf: "PDF",
+  doc: "Word",
   docx: "Word",
+  odt: "Writer",
+  xls: "Excel",
   xlsx: "Excel",
+  ods: "Calc",
+  csv: "CSV",
+  ppt: "PowerPoint",
   pptx: "PowerPoint",
+  odp: "Impress",
+  txt: "Texte",
+  md: "Markdown",
+  rtf: "RTF",
   png: "Image PNG",
   jpg: "Image JPG",
   jpeg: "Image JPEG",
+  webp: "Image WebP",
+  gif: "Image GIF",
+  svg: "Image SVG",
+  heic: "Image HEIC",
+  tif: "Image TIFF",
+  tiff: "Image TIFF",
+  bmp: "Image BMP",
+  psd: "Photoshop",
+  ai: "Illustrator",
+  indd: "InDesign",
+  fig: "Figma",
+  sketch: "Sketch",
+  dwg: "AutoCAD",
+  dxf: "DXF",
   zip: "Archive ZIP",
+  rar: "Archive RAR",
+  "7z": "Archive 7z",
+  tar: "Archive TAR",
+  gz: "Archive GZ",
+  mp4: "Vidéo MP4",
+  mov: "Vidéo MOV",
+  avi: "Vidéo AVI",
+  webm: "Vidéo WebM",
+  mkv: "Vidéo MKV",
+  mp3: "Audio MP3",
+  wav: "Audio WAV",
+  m4a: "Audio M4A",
+  ogg: "Audio OGG",
+  eml: "E-mail",
+  msg: "E-mail",
+  json: "JSON",
+  xml: "XML",
+  html: "HTML",
+  key: "Keynote",
+  pages: "Pages",
+  numbers: "Numbers",
 };
 
-export const ACCEPTED_EXTENSIONS = Object.keys(
-  EXTENSION_LABELS
-) as AcceptedExtension[];
-
-/** Valeur de l'attribut `accept` des inputs fichier. */
-export const FILE_ACCEPT_ATTRIBUTE = ACCEPTED_EXTENSIONS.map(
-  (ext) => `.${ext}`
-).join(",");
+/**
+ * Tous les types de fichiers sont acceptés (`accept` absent des inputs).
+ * Conservé pour compatibilité avec les inputs existants.
+ */
+export const FILE_ACCEPT_ATTRIBUTE: string | undefined = undefined;
 
 export function getFileExtension(fileName: string): string {
   const idx = fileName.lastIndexOf(".");
   return idx === -1 ? "" : fileName.slice(idx + 1).toLowerCase();
 }
 
-export function isAcceptedExtension(ext: string): ext is AcceptedExtension {
-  return (ACCEPTED_EXTENSIONS as string[]).includes(ext);
-}
-
-/** Libellé lisible du type de fichier ("PDF", "Word"...). */
+/** Libellé lisible du type de fichier ("PDF", "Word", "Vidéo MP4"…). */
 export function fileTypeLabel(ext: string): string {
-  return isAcceptedExtension(ext) ? EXTENSION_LABELS[ext] : ext.toUpperCase();
+  if (!ext) return "Fichier";
+  return EXTENSION_LABELS[ext] ?? ext.toUpperCase();
 }
 
-const MIME_TO_EXTENSION: Record<string, AcceptedExtension> = {
+const MIME_TO_EXTENSION: Record<string, string> = {
   "application/pdf": "pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
     "docx",
-  "application/msword": "docx",
+  "application/msword": "doc",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
-  "application/vnd.ms-excel": "xlsx",
+  "application/vnd.ms-excel": "xls",
   "application/vnd.openxmlformats-officedocument.presentationml.presentation":
     "pptx",
-  "application/vnd.ms-powerpoint": "pptx",
+  "application/vnd.ms-powerpoint": "ppt",
+  "text/csv": "csv",
+  "text/plain": "txt",
+  "text/markdown": "md",
   "image/png": "png",
   "image/jpeg": "jpg",
+  "image/webp": "webp",
+  "image/gif": "gif",
+  "image/svg+xml": "svg",
+  "image/heic": "heic",
+  "image/tiff": "tiff",
   "application/zip": "zip",
   "application/x-zip-compressed": "zip",
+  "application/x-rar-compressed": "rar",
+  "application/x-7z-compressed": "7z",
+  "video/mp4": "mp4",
+  "video/quicktime": "mov",
+  "video/webm": "webm",
+  "audio/mpeg": "mp3",
+  "audio/wav": "wav",
+  "audio/mp4": "m4a",
 };
 
 /** Déduit une extension connue à partir d'un type MIME (pour l'affichage). */
 export function extensionFromMime(mime: string | null | undefined): string {
   if (!mime) return "";
   return MIME_TO_EXTENSION[mime] ?? "";
+}
+
+/** Catégorie d'aperçu : pilote la visionneuse intégrée. */
+export type PreviewKind = "image" | "pdf" | "video" | "audio" | "text" | "none";
+
+export function previewKind(
+  fileName: string,
+  mime?: string | null
+): PreviewKind {
+  const ext = getFileExtension(fileName) || extensionFromMime(mime);
+  if (["png", "jpg", "jpeg", "webp", "gif", "svg", "bmp"].includes(ext)) {
+    return "image";
+  }
+  if (ext === "pdf") return "pdf";
+  if (["mp4", "webm", "mov"].includes(ext)) return "video";
+  if (["mp3", "wav", "m4a", "ogg"].includes(ext)) return "audio";
+  if (["txt", "md", "csv", "json", "xml"].includes(ext)) return "text";
+  return "none";
 }
 
 /** Taille lisible : 1.4 Go, 1.2 Mo, 540 Ko... (sans « .0 » superflu). */
@@ -102,13 +165,13 @@ export function sanitizeFileName(fileName: string): string {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
       .slice(0, 64) || "document";
-  return ext ? `${safeBase}.${ext}` : safeBase;
+  const safeExt = ext.replace(/[^a-z0-9]/g, "").slice(0, 10);
+  return safeExt ? `${safeBase}.${safeExt}` : safeBase;
 }
 
 /**
  * Chemin Storage canonique d'un document dans le bucket privé.
  * Forme : organizations/{org}/workspaces/{ws}/{documentId}-{safeName}
- * Construit exclusivement côté serveur (empêche tout path traversal).
  */
 export function formatStoragePath(
   organizationId: string,
@@ -127,10 +190,6 @@ export function validateFile(
   file: { name: string; size: number },
   maxBytes: number
 ): string | null {
-  const ext = getFileExtension(file.name);
-  if (!isAcceptedExtension(ext)) {
-    return `Format non supporté. Formats acceptés : ${ACCEPTED_EXTENSIONS.map((e) => e.toUpperCase()).join(", ")}.`;
-  }
   if (file.size === 0) {
     return "Le fichier est vide.";
   }

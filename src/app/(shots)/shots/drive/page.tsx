@@ -44,6 +44,7 @@ export default function DriveShot() {
               documents={MOCK_DOCUMENTS}
               folders={MOCK_FOLDERS}
               workspaceId="ws-demo"
+              organizationId="org-demo"
               decisions={MOCK_DECISIONS}
               viewedDocumentIds={MOCK_VIEWED}
               downloadedDocumentIds={MOCK_DOWNLOADED}

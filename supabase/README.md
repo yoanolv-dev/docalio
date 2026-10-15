@@ -48,3 +48,17 @@ Dans le dashboard Supabase → **SQL Editor**, exécutez les deux fichiers
 3. **Le trigger `on_auth_user_created`** crée le profil automatiquement. Les
    utilisateurs créés *avant* l'application de la migration n'ont pas de profil :
    l'action d'onboarding le recrée à la volée (upsert) en filet de sécurité.
+
+## Drive Pro (13-15/10/2026)
+
+- `migrations/20261013154133_drive_pro.sql` : fichier **consolidé et idempotent** qui
+  reconstitue les migrations `20261013074545` → `20261013154133` appliquées
+  directement sur le projet (rôles & invités, corbeille + restauration,
+  versions de fichiers, quotas en base, audit d'activité, MFA, liens de
+  partage par fichier/dossier avec mot de passe, portail ignorant la
+  corbeille). Sur le projet de production ces versions sont déjà enregistrées
+  dans `supabase_migrations.schema_migrations` ; sur un environnement neuf, ce
+  fichier restaure l'état complet.
+- `migrations/20261015083005_offer_30d_trial_5gb_search.sql` : essai Pro
+  30 jours à l'inscription, plan gratuit 5 Go, index trigram pour la
+  recherche instantanée.

@@ -5,6 +5,7 @@ import { WorkspaceView } from "@/components/workspaces/workspace-view";
 import { getWorkspace } from "@/lib/workspaces";
 import { listWorkspaceDocuments } from "@/lib/documents";
 import { listWorkspaceFolders } from "@/lib/folders";
+import { listTrashItems } from "@/lib/drive";
 import { getActiveShareLink } from "@/lib/share-links";
 import { getWorkspaceActivity } from "@/lib/activity";
 import { getWorkspaceDecisions } from "@/lib/decisions";
@@ -27,13 +28,16 @@ export default async function WorkspaceDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ nouveau?: string }>;
+  searchParams: Promise<{ nouveau?: string; dossier?: string; fichier?: string }>;
 }) {
-  const [{ id }, { nouveau }] = await Promise.all([params, searchParams]);
+  const [{ id }, { nouveau, dossier, fichier }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
   const workspace = await getWorkspace(id);
   if (!workspace) notFound();
 
-  const [documents, folders, shareLink, activity, decisions, headerList, membership, requests] =
+  const [documents, folders, shareLink, activity, decisions, headerList, membership, requests, trashItems] =
     await Promise.all([
       listWorkspaceDocuments(workspace.id),
       listWorkspaceFolders(workspace.id),
@@ -43,6 +47,7 @@ export default async function WorkspaceDetailPage({
       headers(),
       getCurrentMembership(),
       listWorkspaceRequests(workspace.id),
+      listTrashItems(workspace.id),
     ]);
 
   const host = headerList.get("host") ?? "localhost:3000";
@@ -72,6 +77,9 @@ export default async function WorkspaceDetailPage({
       org={membership?.organization}
       baseUrl={`${proto}://${host}`}
       justCreated={nouveau === "1"}
+      trashItems={trashItems}
+      initialFolderId={dossier ?? null}
+      initialDocumentId={fichier ?? null}
       spaceAccess={spaceAccess}
       accessGroups={accessGroups}
       accessMembers={accessMembers}
