@@ -1,14 +1,14 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Docalio — le portail client qui récupère vos pièces et fait valider vos documents";
+export const alt = "Docalio — le drive professionnel français : fichiers, clients, marque";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default function OpengraphImage() {
   const rows = [
-    { t: "Relevés bancaires du mois", s: "Reçue", c: "#7c3aed", b: "#f5f3ff" },
-    { t: "Bilan 2025", s: "Approuvé", c: "#047857", b: "#ecfdf5" },
-    { t: "Pièce d'identité", s: "En attente", c: "#64748b", b: "#f1f5f9" },
+    { t: "Dossier « Création »", s: "Lien ouvert", c: "#1d4ed8", b: "#eff6ff" },
+    { t: "Contrat de prestation", s: "Approuvé", c: "#047857", b: "#ecfdf5" },
+    { t: "Relevés bancaires.pdf", s: "Déposé", c: "#7c3aed", b: "#f5f3ff" },
   ];
   return new ImageResponse(
     (
@@ -45,13 +45,13 @@ export default function OpengraphImage() {
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontSize: 62, fontWeight: 700, lineHeight: 1.05, letterSpacing: -1.5 }}>
-              Vos clients déposent leurs pièces.
+              Le drive professionnel
             </div>
             <div style={{ fontSize: 62, fontWeight: 700, lineHeight: 1.05, letterSpacing: -1.5, color: "#93c5fd" }}>
-              Sans relance.
+              français.
             </div>
             <div style={{ fontSize: 26, marginTop: 24, color: "#cbd5e1" }}>
-              Portail client sécurisé · collecte de pièces · validation · suivi en temps réel
+              Drive sécurisé · liens protégés · espaces clients à votre marque · 5 Go offerts
             </div>
           </div>
           <div style={{ fontSize: 22, color: "#93c5fd" }}>docalio.app · Hébergé dans l&apos;UE</div>
@@ -69,7 +69,7 @@ export default function OpengraphImage() {
               boxShadow: "0 40px 80px rgba(0,0,0,0.35)",
             }}
           >
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#64748b", letterSpacing: 1 }}>PIÈCES DEMANDÉES</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#64748b", letterSpacing: 1 }}>ACTIVITÉ DU DRIVE</div>
             {rows.map((r) => (
               <div
                 key={r.t}

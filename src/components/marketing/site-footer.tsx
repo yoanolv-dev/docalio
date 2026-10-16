@@ -45,10 +45,10 @@ export function SiteFooter() {
         <div className="flex flex-col items-start justify-between gap-6 border-b border-white/10 py-12 md:flex-row md:items-center">
           <div>
             <p className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Votre prochain dossier client, sans une seule relance.
+              Vos fichiers, vos clients, votre marque. Au même endroit.
             </p>
             <p className="mt-2 text-sm text-slate-400">
-              Gratuit pour démarrer · Sans carte bancaire · Prêt en 5 minutes
+              5 Go offerts · 30 jours d'essai Pro · Sans carte bancaire
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
@@ -56,7 +56,7 @@ export function SiteFooter() {
               href="/register"
               className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-slate-900 transition-transform hover:-translate-y-0.5"
             >
-              Créer mon portail
+              Créer mon drive
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
@@ -74,8 +74,9 @@ export function SiteFooter() {
               <Logo inverted />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">
-              Le portail client des cabinets et agences : vos clients déposent
-              leurs pièces, valident vos documents, et vous suivez tout.
+              Le drive professionnel français : vos fichiers, vos liens
+              sécurisés, vos espaces clients — à votre marque, hébergés en
+              Europe.
             </p>
             <a
               href={`mailto:${SITE.email}`}

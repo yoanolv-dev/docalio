@@ -70,9 +70,9 @@ export async function uploadDocumentAction(
   // Plan de l'organisation : pilote la taille max par fichier et le quota global.
   const { data: org } = await supabase
     .from("organizations")
-    .select("plan")
+    .select("plan, plan_status, trial_ends_at")
     .eq("id", workspace.organization_id)
-    .maybeSingle<Pick<Organization, "plan">>();
+    .maybeSingle<Pick<Organization, "plan" | "plan_status" | "trial_ends_at">>();
   const plan = resolvePlan(org);
 
   // Limite 1 : taille du fichier (selon le plan).

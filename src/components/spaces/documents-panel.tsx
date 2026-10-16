@@ -9,28 +9,41 @@ import {
   Eye,
   EyeOff,
   FolderTree,
+  Link2,
   List,
   LoaderCircle,
   Lock,
   MoreHorizontal,
   Pencil,
   Trash2,
+  Undo2,
   Unlock,
 } from "lucide-react";
 import { FileIcon } from "@/components/documents/file-icon";
 import { DocumentEditDialog } from "@/components/documents/document-edit-dialog";
 import { ExplorerDrive } from "@/components/drive/explorer-drive";
+import { FileViewer, type ViewerFile } from "@/components/drive/file-viewer";
+import { ShareLinkDialog, type ShareTarget } from "@/components/drive/share-link-dialog";
 import {
-  deleteDocumentAction,
   getDocumentDownloadUrl,
   setDocumentDownloadAction,
   setDocumentVisibilityAction,
-  uploadDocumentAction,
 } from "@/lib/actions/documents";
+import {
+  getDocumentPreviewUrl,
+  restoreItemsAction,
+  trashItemsAction,
+} from "@/lib/actions/drive";
+import { uploadFileDirect } from "@/lib/drive-upload";
 import { DOCUMENT_STATE_CONFIG, deriveDocumentState } from "@/lib/document-state";
 import { FILE_ACCEPT_ATTRIBUTE, formatBytes, validateFile } from "@/lib/files";
 import { cn, formatDate } from "@/lib/utils";
-import type { Document, DocumentDecision, Folder } from "@/lib/types/database";
+import type {
+  Document,
+  DocumentDecision,
+  DriveTrashItem,
+  Folder,
+} from "@/lib/types/database";
 
 const VIEW_KEY = "docalio:documents-view";
 const VIEW_EVENT = "docalio:documents-view";
@@ -74,19 +87,27 @@ export function DocumentsPanel({
   documents,
   folders,
   workspaceId,
+  organizationId,
   decisions,
   viewedDocumentIds,
   downloadedDocumentIds,
   maxFileBytes,
+  trashItems = [],
+  initialFolderId = null,
+  initialDocumentId = null,
   internal = false,
 }: {
   documents: Document[];
   folders: Folder[];
   workspaceId: string;
+  organizationId: string;
   decisions: Record<string, DocumentDecision>;
   viewedDocumentIds: string[];
   downloadedDocumentIds: string[];
   maxFileBytes: number;
+  trashItems?: DriveTrashItem[];
+  initialFolderId?: string | null;
+  initialDocumentId?: string | null;
   internal?: boolean;
 }) {
   const router = useRouter();
@@ -95,7 +116,9 @@ export function DocumentsPanel({
   const [drag, setDrag] = useState(false);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [editDoc, setEditDoc] = useState<Document | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<Document | null>(null);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null);
+  const [lastTrash, setLastTrash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -125,12 +148,9 @@ export function DocumentsPanel({
       while (i < queue.length) {
         const { id, file } = queue[i++];
         if (validateFile(file, maxFileBytes)) continue;
-        const fd = new FormData();
-        fd.set("workspace_id", workspaceId);
-        fd.set("file", file);
         let r: { ok: boolean; message?: string } | null;
         try {
-          r = await uploadDocumentAction(null, fd);
+          r = await uploadFileDirect({ organizationId, workspaceId, folderId: null, file });
         } catch {
           r = { ok: false, message: "L'envoi a échoué." };
         }
@@ -159,6 +179,40 @@ export function DocumentsPanel({
     const r = await getDocumentDownloadUrl(id);
     if (r.ok) window.location.assign(r.url);
     else setError(r.message);
+  }
+
+  // Visionneuse intégrée : un clic sur un fichier l'ouvre dans l'app.
+  const viewerFiles: ViewerFile[] = sorted.map((d) => ({
+    id: d.id,
+    name: d.title,
+    filePath: d.file_path,
+    fileType: d.file_type,
+    size: d.file_size,
+  }));
+  function openViewer(id: string) {
+    const i = sorted.findIndex((d) => d.id === id);
+    if (i >= 0) setViewerIndex(i);
+  }
+
+  // Corbeille (récupérable 30 jours) avec annulation immédiate.
+  function trashDoc(doc: Document) {
+    setError(null);
+    start(async () => {
+      const r = await trashItemsAction(workspaceId, [], [doc.id]);
+      if (!r.ok) setError(r.message ?? "Suppression impossible.");
+      else setLastTrash(doc.id);
+      router.refresh();
+    });
+  }
+  function undoTrash() {
+    const id = lastTrash;
+    if (!id) return;
+    setLastTrash(null);
+    start(async () => {
+      const r = await restoreItemsAction(workspaceId, [], [id]);
+      if (!r.ok) setError(r.message ?? "Restauration impossible.");
+      router.refresh();
+    });
   }
 
   const toggle = (
@@ -196,10 +250,14 @@ export function DocumentsPanel({
             documents={documents}
             folders={folders}
             workspaceId={workspaceId}
+            organizationId={organizationId}
             decisions={decisions}
             viewedDocumentIds={viewedDocumentIds}
             downloadedDocumentIds={downloadedDocumentIds}
             maxFileBytes={maxFileBytes}
+            trashItems={trashItems}
+            initialFolderId={initialFolderId}
+            initialDocumentId={initialDocumentId}
           />
         </div>
       </div>
@@ -288,7 +346,7 @@ export function DocumentsPanel({
             return (
               <li key={doc.id} className="group flex items-center gap-3 bg-white px-3.5 py-2.5 transition-colors hover:bg-canvas/40">
                 <FileIcon filePath={doc.file_path} />
-                <button type="button" onClick={() => download(doc.id)} className="min-w-0 flex-1 text-left" title="Télécharger">
+                <button type="button" onClick={() => openViewer(doc.id)} className="min-w-0 flex-1 text-left" title="Aperçu">
                   <span className="block truncate text-sm font-medium">{doc.title}</span>
                   <span className="block truncate text-xs text-muted-foreground">
                     {doc.folder_id && folderName.get(doc.folder_id) ? `${folderName.get(doc.folder_id)} · ` : ""}
@@ -318,7 +376,11 @@ export function DocumentsPanel({
                       sideOffset={4}
                       className="animate-menu-in z-[60] w-60 rounded-xl border border-border bg-popover p-1 shadow-lg"
                     >
+                      <MenuItem icon={Eye} onSelect={() => openViewer(doc.id)}>Aperçu</MenuItem>
                       <MenuItem icon={Download} onSelect={() => download(doc.id)}>Télécharger</MenuItem>
+                      <MenuItem icon={Link2} onSelect={() => setShareTarget({ kind: "document", id: doc.id, name: doc.title })}>
+                        Obtenir le lien
+                      </MenuItem>
                       <MenuItem icon={Pencil} onSelect={() => setEditDoc(doc)}>Renommer</MenuItem>
                       {!internal && (
                         <>
@@ -340,7 +402,7 @@ export function DocumentsPanel({
                         </>
                       )}
                       <DropdownMenu.Separator className="my-1 h-px bg-border" />
-                      <MenuItem icon={Trash2} destructive onSelect={() => setConfirmDelete(doc)}>Supprimer</MenuItem>
+                      <MenuItem icon={Trash2} destructive onSelect={() => trashDoc(doc)}>Mettre à la corbeille</MenuItem>
                     </DropdownMenu.Content>
                   </DropdownMenu.Portal>
                 </DropdownMenu.Root>
@@ -359,35 +421,40 @@ export function DocumentsPanel({
         />
       )}
 
-      {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]" role="dialog" aria-modal="true">
-          <div className="animate-dialog-in w-full max-w-sm rounded-2xl border bg-card p-6 shadow-xl">
-            <p className="font-semibold">Supprimer « {confirmDelete.title} » ?</p>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              Le fichier sera définitivement supprimé, y compris de l&apos;espace de votre client.
-            </p>
-            <div className="mt-5 flex justify-end gap-2">
-              <button type="button" onClick={() => setConfirmDelete(null)} className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
-                Annuler
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const id = confirmDelete.id;
-                  setConfirmDelete(null);
-                  act(async () => {
-                    const fd = new FormData();
-                    fd.set("document_id", id);
-                    await deleteDocumentAction(fd);
-                  });
-                }}
-                className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
-              >
-                Supprimer
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Annulation après mise à la corbeille */}
+      {lastTrash && (
+        <p className="flex items-center justify-between gap-3 rounded-lg bg-muted/70 px-3 py-2 text-xs text-muted-foreground">
+          <span>Fichier mis à la corbeille (récupérable 30 jours).</span>
+          <button
+            type="button"
+            onClick={undoTrash}
+            className="inline-flex shrink-0 items-center gap-1 font-medium text-primary hover:underline"
+          >
+            <Undo2 className="h-3 w-3" />
+            Annuler
+          </button>
+        </p>
+      )}
+
+      {/* Visionneuse intégrée */}
+      {viewerIndex !== null && viewerFiles[viewerIndex] && (
+        <FileViewer
+          files={viewerFiles}
+          index={viewerIndex}
+          onIndexChange={setViewerIndex}
+          onClose={() => setViewerIndex(null)}
+          getPreviewUrl={(f) => getDocumentPreviewUrl(f.id)}
+          getDownloadUrl={(f) => getDocumentDownloadUrl(f.id)}
+        />
+      )}
+
+      {/* Partage par lien */}
+      {shareTarget && (
+        <ShareLinkDialog
+          workspaceId={workspaceId}
+          target={shareTarget}
+          onOpenChange={(o) => !o && setShareTarget(null)}
+        />
       )}
     </div>
   );

@@ -21,29 +21,25 @@ import {
   Download,
   Eye,
   EyeOff,
+  FileUp,
   Folder,
   FolderOpen,
   FolderPlus,
+  History,
   House,
   LayoutGrid,
+  Link2,
   List as ListIcon,
   LoaderCircle,
   Lock,
   MoreHorizontal,
   Pencil,
   Trash2,
+  Undo2,
   Upload,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import { FileIcon } from "@/components/documents/file-icon";
 import { DocumentEditDialog } from "@/components/documents/document-edit-dialog";
 import {
@@ -52,16 +48,23 @@ import {
   type ContextMenuState,
 } from "@/components/drive/context-menu";
 import { NameDialog } from "@/components/drive/name-dialog";
+import { FileViewer, type ViewerFile } from "@/components/drive/file-viewer";
+import { ShareLinkDialog, type ShareTarget } from "@/components/drive/share-link-dialog";
+import { TrashPanel } from "@/components/drive/trash-panel";
+import { VersionHistoryDialog } from "@/components/drive/version-history-dialog";
 import {
-  deleteDocumentAction,
   getDocumentDownloadUrl,
   setDocumentDownloadAction,
   setDocumentVisibilityAction,
-  uploadDocumentAction,
 } from "@/lib/actions/documents";
 import {
+  getDocumentPreviewUrl,
+  restoreItemsAction,
+  trashItemsAction,
+} from "@/lib/actions/drive";
+import { uploadFileDirect } from "@/lib/drive-upload";
+import {
   createFolderAction,
-  deleteFolderAction,
   duplicateDocumentAction,
   moveDocumentAction,
   moveFolderAction,
@@ -75,7 +78,12 @@ import {
 import { buildBreadcrumb } from "@/lib/folder-tree";
 import { FILE_ACCEPT_ATTRIBUTE, formatBytes, validateFile } from "@/lib/files";
 import { cn, formatDate } from "@/lib/utils";
-import type { Document, DocumentDecision, Folder as FolderType } from "@/lib/types/database";
+import type {
+  Document,
+  DocumentDecision,
+  DriveTrashItem,
+  Folder as FolderType,
+} from "@/lib/types/database";
 
 // ---------------------------------------------------------------------------
 // Drive « Explorateur de fichiers » — paradigme familier (Windows) : volet
@@ -117,27 +125,46 @@ interface ExplorerDriveProps {
   documents: Document[];
   folders: FolderType[];
   workspaceId: string;
+  organizationId: string;
   decisions: Record<string, DocumentDecision>;
   viewedDocumentIds: string[];
   downloadedDocumentIds: string[];
   maxFileBytes: number;
+  trashItems?: DriveTrashItem[];
+  /** Dossier ouvert au montage (résultat de recherche). */
+  initialFolderId?: string | null;
+  /** Fichier à ouvrir dans la visionneuse au montage (résultat de recherche). */
+  initialDocumentId?: string | null;
 }
 
 export function ExplorerDrive({
   documents,
   folders,
   workspaceId,
+  organizationId,
   decisions,
   viewedDocumentIds,
   downloadedDocumentIds,
   maxFileBytes,
+  trashItems = [],
+  initialFolderId = null,
+  initialDocumentId = null,
 }: ExplorerDriveProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
   const dragData = useRef<{ keys: string[] } | null>(null);
   const extDepth = useRef(0);
 
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(() => {
+    if (initialFolderId && folders.some((f) => f.id === initialFolderId)) {
+      return initialFolderId;
+    }
+    const target = initialDocumentId
+      ? documents.find((d) => d.id === initialDocumentId)
+      : null;
+    return target?.folder_id ?? null;
+  });
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [anchor, setAnchor] = useState<string | null>(null);
@@ -154,13 +181,22 @@ export function ExplorerDrive({
   const [newFolderParent, setNewFolderParent] = useState<{ parentId: string | null } | null>(null);
   const [renameTarget, setRenameTarget] = useState<FolderType | null>(null);
   const [editDoc, setEditDoc] = useState<Document | null>(null);
-  const [confirm, setConfirm] = useState<{
-    title: string;
-    description: string;
-    onConfirm: () => void;
-  } | null>(null);
   const [opError, setOpError] = useState<string | null>(null);
   const [, startOp] = useTransition();
+
+  // Drive Pro : corbeille, visionneuse, partage par lien, versions.
+  const [showTrash, setShowTrash] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null);
+  const [historyDoc, setHistoryDoc] = useState<Document | null>(null);
+  const [replaceDoc, setReplaceDoc] = useState<Document | null>(null);
+  const [lastTrash, setLastTrash] = useState<{
+    folderIds: string[];
+    documentIds: string[];
+    count: number;
+  } | null>(null);
+  // Ouvre la visionneuse sur le fichier demandé par la recherche globale.
+  const [consumedInitialDoc, setConsumedInitialDoc] = useState(false);
 
   const viewedSet = useMemo(() => new Set(viewedDocumentIds), [viewedDocumentIds]);
   const downloadedSet = useMemo(() => new Set(downloadedDocumentIds), [downloadedDocumentIds]);
@@ -412,13 +448,16 @@ export function ExplorerDrive({
     let anyOk = false;
     let cursor = 0;
     const uploadOne = async ({ id, file }: { id: string; file: File }) => {
-      const fd = new FormData();
-      fd.set("workspace_id", workspaceId);
-      if (folderId) fd.set("folder_id", folderId);
-      fd.set("file", file);
       let r: { ok: boolean; message?: string } | null = null;
       try {
-        r = await uploadDocumentAction(null, fd);
+        // Upload direct navigateur → Storage (aucune limite serveur, gros
+        // fichiers autorisés jusqu'à la limite du plan).
+        r = await uploadFileDirect({
+          organizationId,
+          workspaceId,
+          folderId,
+          file,
+        });
       } catch {
         r = { ok: false, message: "L'envoi a échoué." };
       }
@@ -476,30 +515,41 @@ export function ExplorerDrive({
       else setOpError(r.message ?? "Renommage impossible.");
     });
   }
-  function deleteFolder(folder: FolderType) {
-    setConfirm({
-      title: "Supprimer ce dossier ?",
-      description: `« ${folder.name} » et tout son contenu seront définitivement supprimés.`,
-      onConfirm: () =>
-        startOp(async () => {
-          await deleteFolderAction(folder.id);
-          if (currentFolderId === folder.id) navigate(folder.parent_id ?? null);
-          setConfirm(null);
-        }),
+  // Mise à la corbeille immédiate (récupérable 30 jours) + annulation en un clic.
+  function trashKeys(keys: string[]) {
+    const folderIds = keys.filter((k) => k.startsWith("f:")).map(idOf);
+    const documentIds = keys.filter((k) => k.startsWith("d:")).map(idOf);
+    if (folderIds.length === 0 && documentIds.length === 0) return;
+    setOpError(null);
+    startOp(async () => {
+      const r = await trashItemsAction(workspaceId, folderIds, documentIds);
+      if (!r.ok) {
+        setOpError(r.message ?? "Suppression impossible.");
+        return;
+      }
+      setLastTrash({
+        folderIds,
+        documentIds,
+        count: folderIds.length + documentIds.length,
+      });
+      setSelected(new Set());
+      if (currentFolderId && folderIds.includes(currentFolderId)) {
+        navigate(null);
+      }
     });
   }
-  function deleteDoc(doc: Document) {
-    setConfirm({
-      title: "Supprimer ce document ?",
-      description: `« ${doc.title} » et son fichier seront définitivement supprimés.`,
-      onConfirm: () =>
-        startOp(async () => {
-          const fd = new FormData();
-          fd.set("document_id", doc.id);
-          await deleteDocumentAction(fd);
-          setConfirm(null);
-        }),
+  function undoTrash() {
+    const t = lastTrash;
+    if (!t) return;
+    setLastTrash(null);
+    startOp(async () => {
+      const r = await restoreItemsAction(workspaceId, t.folderIds, t.documentIds);
+      if (!r.ok) setOpError(r.message ?? "Restauration impossible.");
     });
+  }
+  /** Corbeille : l'élément visé, ou toute la sélection s'il en fait partie. */
+  function trashItem(key: string) {
+    trashKeys(selected.has(key) && selected.size > 1 ? [...selected] : [key]);
   }
   function duplicateDoc(doc: Document) {
     setOpError(null);
@@ -528,21 +578,73 @@ export function ExplorerDrive({
     else setOpError(r.message);
   }
 
+  // Visionneuse : « ouvrir » un fichier l'affiche dans l'app, comme un drive.
+  const viewerFiles: ViewerFile[] = currentDocs.map((d) => ({
+    id: d.id,
+    name: d.title,
+    filePath: d.file_path,
+    fileType: d.file_type,
+    size: d.file_size,
+  }));
+  function openDoc(doc: Document) {
+    const i = currentDocs.findIndex((d) => d.id === doc.id);
+    if (i >= 0) setViewerIndex(i);
+  }
+  if (!consumedInitialDoc && initialDocumentId) {
+    const i = currentDocs.findIndex((d) => d.id === initialDocumentId);
+    setConsumedInitialDoc(true);
+    if (i >= 0) setViewerIndex(i);
+  }
+
+  // Remplacement versionné : nouveau fichier, ancienne version archivée.
+  async function handleReplaceFile(file: File) {
+    const target = replaceDoc;
+    setReplaceDoc(null);
+    if (!target) return;
+    const invalid = validateFile(file, maxFileBytes);
+    if (invalid) {
+      setOpError(invalid);
+      return;
+    }
+    setUploads((u) => [
+      ...u,
+      { id: target.id, name: file.name, status: "uploading", folderId: target.folder_id },
+    ]);
+    const r = await uploadFileDirect({
+      organizationId,
+      workspaceId,
+      folderId: target.folder_id,
+      file,
+      replaceDocumentId: target.id,
+    });
+    setUploads((u) => u.filter((it) => it.id !== target.id));
+    if (!r.ok) setOpError(r.message);
+    else router.refresh();
+  }
+
   // ---------------------------------------------------------------------------
   // Menus contextuels
   // ---------------------------------------------------------------------------
   function openFolderMenu(folder: FolderType, e: ReactMouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    const multi = selected.has(fKey(folder.id)) && selected.size > 1;
     setMenu({
       x: e.clientX,
       y: e.clientY,
       items: [
         { label: "Ouvrir", icon: FolderOpen, onSelect: () => navigate(folder.id) },
+        { label: "Obtenir le lien", icon: Link2, onSelect: () => setShareTarget({ kind: "folder", id: folder.id, name: folder.name }) },
+        { type: "separator" },
         { label: "Nouveau sous-dossier", icon: FolderPlus, onSelect: () => setNewFolderParent({ parentId: folder.id }) },
         { label: "Renommer", icon: Pencil, onSelect: () => setRenameTarget(folder) },
         { type: "separator" },
-        { label: "Supprimer", icon: Trash2, destructive: true, onSelect: () => deleteFolder(folder) },
+        {
+          label: multi ? `Mettre à la corbeille (${selected.size})` : "Mettre à la corbeille",
+          icon: Trash2,
+          destructive: true,
+          onSelect: () => trashItem(fKey(folder.id)),
+        },
       ],
     });
   }
@@ -550,8 +652,12 @@ export function ExplorerDrive({
     e.preventDefault();
     e.stopPropagation();
     const visible = visOverride.get(doc.id) ?? doc.is_visible_to_client;
+    const multi = selected.has(dKey(doc.id)) && selected.size > 1;
     const items: ContextMenuEntry[] = [
+      { label: "Aperçu", icon: Eye, onSelect: () => openDoc(doc) },
       { label: "Télécharger", icon: Download, onSelect: () => downloadDoc(doc) },
+      { label: "Obtenir le lien", icon: Link2, onSelect: () => setShareTarget({ kind: "document", id: doc.id, name: doc.title }) },
+      { type: "separator" },
       {
         label: visible ? "Rendre privé" : "Rendre visible au client",
         icon: visible ? EyeOff : Eye,
@@ -568,7 +674,26 @@ export function ExplorerDrive({
       { type: "separator" },
       { label: "Renommer", icon: Pencil, onSelect: () => setEditDoc(doc) },
       { label: "Dupliquer", icon: Copy, onSelect: () => duplicateDoc(doc) },
-      { label: "Supprimer", icon: Trash2, destructive: true, onSelect: () => deleteDoc(doc) },
+      {
+        label: "Remplacer (nouvelle version)",
+        icon: FileUp,
+        onSelect: () => {
+          setReplaceDoc(doc);
+          replaceInputRef.current?.click();
+        },
+      },
+      {
+        label: doc.version > 1 ? `Versions (${doc.version})` : "Historique des versions",
+        icon: History,
+        onSelect: () => setHistoryDoc(doc),
+      },
+      { type: "separator" },
+      {
+        label: multi ? `Mettre à la corbeille (${selected.size})` : "Mettre à la corbeille",
+        icon: Trash2,
+        destructive: true,
+        onSelect: () => trashItem(dKey(doc.id)),
+      },
     ];
     setMenu({ x: e.clientX, y: e.clientY, items });
   }
@@ -580,6 +705,9 @@ export function ExplorerDrive({
       items: [
         { label: "Nouveau dossier", icon: FolderPlus, onSelect: () => setNewFolderParent({ parentId: currentFolderId }) },
         { label: "Importer des fichiers", icon: Upload, onSelect: () => inputRef.current?.click() },
+        { type: "separator" },
+        { label: "Partager l'espace par lien", icon: Link2, onSelect: () => setShareTarget({ kind: "space", name: "Tout l'espace" }) },
+        { label: `Corbeille (${trashItems.length})`, icon: Trash2, onSelect: () => setShowTrash(true) },
       ],
     });
   }
@@ -650,10 +778,35 @@ export function ExplorerDrive({
             <FolderPlus className="h-4 w-4" />
             <span className="hidden sm:inline">Dossier</span>
           </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8"
+            title="Partager l'espace par lien"
+            onClick={() => setShareTarget({ kind: "space", name: "Tout l'espace" })}
+          >
+            <Link2 className="h-4 w-4" />
+            <span className="hidden lg:inline">Partager</span>
+          </Button>
           <Button size="sm" className="ml-1 h-8" onClick={() => inputRef.current?.click()}>
             <Upload className="h-4 w-4" />
             <span className="hidden sm:inline">Importer</span>
           </Button>
+          <span className="mx-0.5 h-5 w-px bg-border" />
+          <button
+            type="button"
+            onClick={() => setShowTrash(true)}
+            title={`Corbeille (${trashItems.length})`}
+            aria-label={`Corbeille (${trashItems.length} éléments)`}
+            className="relative flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <Trash2 className="h-4 w-4" />
+            {trashItems.length > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+                {trashItems.length > 9 ? "9+" : trashItems.length}
+              </span>
+            )}
+          </button>
           <span className="mx-0.5 h-5 w-px bg-border" />
           <div className="flex items-center rounded-md border border-border bg-background p-0.5">
             <button
@@ -690,7 +843,16 @@ export function ExplorerDrive({
         }}
       />
 
-      {/* Corps : arborescence + contenu */}
+      {/* Corbeille : remplace le corps (restauration / suppression définitive) */}
+      {showTrash ? (
+        <div className="min-h-0 flex-1">
+          <TrashPanel
+            workspaceId={workspaceId}
+            items={trashItems}
+            onBack={() => setShowTrash(false)}
+          />
+        </div>
+      ) : (
       <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[220px_1fr]">
         {/* Volet d'arborescence */}
         <aside className="hidden overflow-y-auto border-r border-border bg-muted/20 py-2 md:block">
@@ -732,9 +894,22 @@ export function ExplorerDrive({
 
         {/* Contenu */}
         <div
-          className="relative overflow-y-auto"
+          className="relative overflow-y-auto outline-none"
+          tabIndex={-1}
           onClick={() => setSelected(new Set())}
           onContextMenu={openPaneMenu}
+          onKeyDown={(e) => {
+            // Comme un vrai explorateur : Suppr envoie la sélection à la corbeille.
+            if (e.key === "Delete" && selected.size > 0) {
+              e.preventDefault();
+              trashKeys([...selected]);
+            } else if (e.key === "Escape") {
+              setSelected(new Set());
+            } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "a") {
+              e.preventDefault();
+              setSelected(new Set(orderedKeys));
+            }
+          }}
           onDragEnter={onPaneDragEnter}
           onDragOver={onPaneDragOver}
           onDragLeave={onPaneDragLeave}
@@ -768,7 +943,7 @@ export function ExplorerDrive({
                     visible={visible}
                     selected={selected.has(dKey(d.id))}
                     onClick={(e) => handleSelectClick(dKey(d.id), e)}
-                    onOpen={() => downloadDoc(d)}
+                    onOpen={() => openDoc(d)}
                     onMenu={(e) => openDocMenu(d, e)}
                     onToggleVisible={() => toggleVisible(d, !visible)}
                     onDragStart={(e) => onItemDragStart(dKey(d.id), e)}
@@ -819,7 +994,7 @@ export function ExplorerDrive({
                       visible={visible}
                       selected={selected.has(dKey(d.id))}
                       onClick={(e) => handleSelectClick(dKey(d.id), e)}
-                      onOpen={() => downloadDoc(d)}
+                      onOpen={() => openDoc(d)}
                       onMenu={(e) => openDocMenu(d, e)}
                       onToggleVisible={() => toggleVisible(d, !visible)}
                       onDragStart={(e) => onItemDragStart(dKey(d.id), e)}
@@ -856,14 +1031,36 @@ export function ExplorerDrive({
           )}
         </div>
       </div>
+      )}
 
       {/* Barre d'état */}
       <div className="flex shrink-0 items-center justify-between gap-3 border-t border-border bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground">
         <span>
-          {totalCount} élément{totalCount > 1 ? "s" : ""}
+          {showTrash
+            ? `${trashItems.length} élément${trashItems.length > 1 ? "s" : ""} dans la corbeille`
+            : `${totalCount} élément${totalCount > 1 ? "s" : ""}`}
         </span>
-        {selected.size > 0 && (
-          <span className="font-medium text-foreground">{selected.size} sélectionné{selected.size > 1 ? "s" : ""}</span>
+        {lastTrash ? (
+          <span className="flex items-center gap-2">
+            <span>
+              {lastTrash.count} élément{lastTrash.count > 1 ? "s" : ""} mis à la corbeille
+            </span>
+            <button
+              type="button"
+              onClick={undoTrash}
+              className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+            >
+              <Undo2 className="h-3 w-3" />
+              Annuler
+            </button>
+          </span>
+        ) : (
+          selected.size > 0 &&
+          !showTrash && (
+            <span className="font-medium text-foreground">
+              {selected.size} sélectionné{selected.size > 1 ? "s" : ""}
+            </span>
+          )
         )}
       </div>
 
@@ -954,28 +1151,50 @@ export function ExplorerDrive({
           }}
         />
       )}
-      {confirm && (
-        <Dialog
-          open
+      {/* Remplacement versionné : sélection du nouveau fichier */}
+      <input
+        ref={replaceInputRef}
+        type="file"
+        className="sr-only"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) void handleReplaceFile(file);
+          e.target.value = "";
+        }}
+      />
+
+      {/* Visionneuse intégrée */}
+      {viewerIndex !== null && viewerFiles[viewerIndex] && (
+        <FileViewer
+          files={viewerFiles}
+          index={viewerIndex}
+          onIndexChange={setViewerIndex}
+          onClose={() => setViewerIndex(null)}
+          getPreviewUrl={(f) => getDocumentPreviewUrl(f.id)}
+          getDownloadUrl={(f) => getDocumentDownloadUrl(f.id)}
+        />
+      )}
+
+      {/* Partage par lien */}
+      {shareTarget && (
+        <ShareLinkDialog
+          workspaceId={workspaceId}
+          target={shareTarget}
           onOpenChange={(o) => {
-            if (!o) setConfirm(null);
+            if (!o) setShareTarget(null);
           }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{confirm.title}</DialogTitle>
-              <DialogDescription>{confirm.description}</DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="ghost" onClick={() => setConfirm(null)}>
-                Annuler
-              </Button>
-              <Button variant="destructive" onClick={confirm.onConfirm}>
-                Supprimer
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        />
+      )}
+
+      {/* Historique des versions */}
+      {historyDoc && (
+        <VersionHistoryDialog
+          doc={historyDoc}
+          workspaceId={workspaceId}
+          onOpenChange={(o) => {
+            if (!o) setHistoryDoc(null);
+          }}
+        />
       )}
     </div>
   );

@@ -35,6 +35,11 @@ const CORE_ROWS: Record<string, Omit<ComparisonRow, "other">> = {
   setup: { criterion: "Opérationnel en 5 minutes, sans informaticien", docalio: "yes" },
   eu: { criterion: "Données hébergées dans l'UE", docalio: "yes" },
   freeClients: { criterion: "Clients invités gratuits et illimités", docalio: "yes" },
+  passwordLinks: { criterion: "Liens protégés par mot de passe, avec expiration", docalio: "yes" },
+  dropLinks: { criterion: "Lien de dépôt inversé (le client vous envoie des fichiers)", docalio: "yes" },
+  versionsTrash: { criterion: "Versions de fichiers et corbeille 30 jours", docalio: "yes" },
+  orgPricing: { criterion: "Prix par organisation (pas par utilisateur)", docalio: "yes" },
+  subdomain: { criterion: "Sous-domaine à votre nom inclus", docalio: "yes" },
 };
 
 function row(key: keyof typeof CORE_ROWS, other: Verdict, note?: string): ComparisonRow {
@@ -71,6 +76,9 @@ export const COMPARISONS: Comparison[] = [
       row("setup", "no", "Paramétrage de sites, bibliothèques et droits"),
       row("eu", "yes"),
       row("freeClients", "partial", "Selon la licence et la configuration des invités"),
+      row("passwordLinks", "partial", "Selon l'édition et la politique du locataire"),
+      row("dropLinks", "partial", "« Demander des fichiers » OneDrive, selon configuration"),
+      row("orgPricing", "no", "Licences Microsoft 365 par utilisateur"),
     ],
     verdict:
       "Gardez SharePoint pour vos équipes, et offrez à vos clients un portail pensé pour eux. Les deux cohabitent très bien.",
@@ -104,6 +112,9 @@ export const COMPARISONS: Comparison[] = [
       row("setup", "yes"),
       row("eu", "yes"),
       row("freeClients", "yes"),
+      row("passwordLinks", "yes"),
+      row("dropLinks", "partial"),
+      row("orgPricing", "yes", "Forfait annuel"),
     ],
     verdict:
       "Si votre besoin est uniquement d'envoyer des fichiers en sécurité, les deux conviennent. Si vous voulez que vos clients déposent, valident et avancent sans relance, Docalio est fait pour vous.",
@@ -133,6 +144,9 @@ export const COMPARISONS: Comparison[] = [
       row("setup", "yes"),
       row("eu", "partial", "Selon le fournisseur"),
       row("freeClients", "yes"),
+      row("passwordLinks", "partial", "WeTransfer payant ; impossible par e-mail"),
+      row("dropLinks", "no"),
+      row("orgPricing", "no", "WeTransfer facturé par siège"),
     ],
     verdict: "Gardez l'e-mail pour discuter. Pour les documents, donnez à chaque client son portail.",
   },
@@ -161,8 +175,45 @@ export const COMPARISONS: Comparison[] = [
       row("setup", "yes"),
       row("eu", "partial", "Selon l'offre et la configuration"),
       row("freeClients", "yes"),
+      row("passwordLinks", "no", "Pas de mot de passe natif sur les liens"),
+      row("dropLinks", "no", "Nécessite un formulaire ou un outil tiers"),
+      row("orgPricing", "no", "Google Workspace facturé par utilisateur"),
     ],
     verdict: "Drive pour produire en équipe, Docalio pour la relation documentaire avec vos clients.",
+  },
+  {
+    slug: "dropbox",
+    competitor: "Dropbox",
+    seoTitle: "Alternative française à Dropbox pour les professionnels",
+    seoDescription:
+      "Dropbox facture au siège et héberge hors d'Europe par défaut. Docalio est le drive professionnel français : prix par organisation, liens protégés, espaces clients à votre marque, 5 Go offerts.",
+    title: "Le drive professionnel français, pensé pour le travail client.",
+    intro:
+      "Dropbox a inventé la synchronisation de fichiers grand public. Mais pour une structure française qui travaille avec des clients, la facture grimpe à chaque siège, les données partent par défaut hors d'Europe, et le partage reste un simple lien de téléchargement.",
+    strengths: [
+      "Synchronisation de bureau éprouvée",
+      "Grand écosystème d'intégrations",
+      "Fonctions avancées de transfert (Dropbox Transfer)",
+    ],
+    whyDocalio: [
+      { title: "Un prix par organisation", text: "29 € HT/mois pour toute l'équipe (jusqu'à 10 utilisateurs) — pas 15 € par siège et par mois." },
+      { title: "Hébergé en Europe, point", text: "Base de données et fichiers à Francfort. Pas d'option à payer ni de configuration à vérifier." },
+      { title: "Des partages qui travaillent", text: "Liens à mot de passe avec suivi d'ouverture, dépôt inversé, espaces clients à votre marque sur votre sous-domaine, collecte et validation." },
+    ],
+    rows: [
+      row("orgPricing", "no", "Facturation par utilisateur sur les offres équipe"),
+      row("passwordLinks", "partial", "Réservé aux offres payantes supérieures"),
+      row("dropLinks", "partial", "« Demandes de fichiers », sans suivi de pièces ni échéances"),
+      row("versionsTrash", "yes"),
+      row("requests", "no"),
+      row("decisions", "no"),
+      row("branding", "partial", "Personnalisation limitée, pas de sous-domaine à votre nom"),
+      row("subdomain", "no"),
+      row("eu", "partial", "Hébergement américain par défaut, UE selon l'offre"),
+      row("freeClients", "yes"),
+    ],
+    verdict:
+      "Pour synchroniser votre poste, Dropbox reste très bon. Pour stocker, partager et faire avancer vos dossiers clients depuis une plateforme française, choisissez Docalio.",
   },
 ];
 

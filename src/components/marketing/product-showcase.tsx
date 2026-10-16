@@ -7,11 +7,31 @@ import { cn } from "@/lib/utils";
 
 const TABS = [
   {
+    id: "drive",
+    label: "Le Drive",
+    icon: FolderTree,
+    title: "Vos dossiers, rangés comme sur votre ordinateur.",
+    text: "Glisser-déposer, clic droit, sélection multiple, aperçu intégré, corbeille 30 jours et versions de fichiers. Tous les formats, jusqu'à 1 Go par fichier.",
+    src: "/product/drive.png",
+    w: 2480,
+    h: 1848,
+  },
+  {
+    id: "espaces",
+    label: "Tableau de bord",
+    icon: LayoutGrid,
+    title: "Tous vos espaces, et ce qui les bloque.",
+    text: "Décisions en attente, pièces manquantes, dernière activité : vous savez où en est chaque dossier d'un coup d'œil.",
+    src: "/product/dashboard.png",
+    w: 2480,
+    h: 1800,
+  },
+  {
     id: "portail",
-    label: "Portail client",
+    label: "Espace client",
     icon: MonitorSmartphone,
-    title: "Un portail à votre marque, sans compte à créer.",
-    text: "Votre client voit ce qu'il doit déposer, consulter et valider. Rien de plus, rien de moins.",
+    title: "Un espace à votre marque, sans compte à créer.",
+    text: "Votre client ouvre votre adresse, voit vos couleurs, dépose, consulte et valide. Rien de plus, rien de moins.",
     src: "/product/portal.png",
     w: 1720,
     h: 3408,
@@ -26,30 +46,10 @@ const TABS = [
     w: 2360,
     h: 1800,
   },
-  {
-    id: "espaces",
-    label: "Tableau de bord",
-    icon: LayoutGrid,
-    title: "Tous vos clients, et ce qui les bloque.",
-    text: "Décisions en attente, pièces manquantes, dernière activité : vous savez qui relancer d'un coup d'œil.",
-    src: "/product/dashboard.png",
-    w: 2480,
-    h: 1800,
-  },
-  {
-    id: "drive",
-    label: "Espace documentaire",
-    icon: FolderTree,
-    title: "Vos dossiers, rangés comme sur votre ordinateur.",
-    text: "Glisser-déposer, arborescence, visibilité client document par document.",
-    src: "/product/drive.png",
-    w: 2480,
-    h: 1848,
-  },
 ] as const;
 
 export function ProductShowcase() {
-  const [active, setActive] = useState<(typeof TABS)[number]["id"]>("portail");
+  const [active, setActive] = useState<(typeof TABS)[number]["id"]>("drive");
   const tab = TABS.find((t) => t.id === active)!;
 
   return (
@@ -110,7 +110,7 @@ export function ProductShowcase() {
                   "absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-500",
                   t.id === active ? "opacity-100" : "opacity-0"
                 )}
-                loading={t.id === "portail" ? "eager" : "lazy"}
+                loading={t.id === "drive" ? "eager" : "lazy"}
               />
             ))}
           </div>

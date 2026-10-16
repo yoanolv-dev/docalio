@@ -309,12 +309,14 @@ export async function deleteWorkspaceAction(formData: FormData): Promise<void> {
     .maybeSingle<{ id: string; organization_id: string }>();
   if (!workspace) return;
 
-  const prefix = `organizations/${workspace.organization_id}/workspaces/${workspace.id}`;
-  const { data: files } = await supabase.storage.from("documents").list(prefix);
-  if (files && files.length > 0) {
-    await supabase.storage
-      .from("documents")
-      .remove(files.map((f) => `${prefix}/${f.name}`));
+  // Tous les chemins Storage de l'espace (documents, versions archivées,
+  // pièces déposées via le portail et les liens de dépôt).
+  const { data: pathsData } = await supabase.rpc("drive_workspace_file_paths", {
+    p_workspace_id: workspace.id,
+  });
+  const paths = (pathsData as string[] | null) ?? [];
+  if (paths.length > 0) {
+    await supabase.storage.from("documents").remove(paths);
   }
 
   await supabase.from("workspaces").delete().eq("id", id);

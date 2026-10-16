@@ -1,13 +1,13 @@
 import Image from "next/image";
-import { CircleCheck, Eye, Inbox } from "lucide-react";
+import { CircleCheck, CloudUpload, Link2 } from "lucide-react";
 import { Tilt } from "@/components/marketing/scroll-fx";
 
 const LIVE = [
   {
-    icon: Inbox,
-    tone: "bg-violet-50 text-violet-600",
-    title: "Pièce reçue",
-    text: "Relevés bancaires · SARL Martin",
+    icon: Link2,
+    tone: "bg-blue-50 text-blue-600",
+    title: "Lien ouvert",
+    text: "Dossier « Création » · protégé par mot de passe",
     time: "à l'instant",
     pos: "left-[-4%] top-[18%] sm:left-[-7%]",
     delay: "300ms",
@@ -16,16 +16,16 @@ const LIVE = [
     icon: CircleCheck,
     tone: "bg-emerald-50 text-emerald-600",
     title: "Document approuvé",
-    text: "Bilan 2025 · Cabinet Lenoir",
+    text: "Contrat de prestation · Boulangerie Margot",
     time: "il y a 2 min",
     pos: "right-[-3%] top-[46%] sm:right-[-6%]",
     delay: "700ms",
   },
   {
-    icon: Eye,
-    tone: "bg-sky-50 text-sky-600",
-    title: "Portail ouvert",
-    text: "Boulangerie Margot",
+    icon: CloudUpload,
+    tone: "bg-violet-50 text-violet-600",
+    title: "Fichier déposé",
+    text: "Relevés bancaires.pdf · via lien de dépôt",
     time: "il y a 5 min",
     pos: "bottom-[8%] left-[6%]",
     delay: "1100ms",
@@ -43,10 +43,10 @@ export function HeroVisual() {
       <Tilt max={5}>
         <div className="overflow-hidden rounded-2xl border border-white/60 bg-card shadow-[0_50px_120px_-40px_rgba(15,23,42,0.55)] ring-1 ring-black/5">
           <Image
-            src="/product/collecte.png"
-            alt="Docalio : pièces demandées à un client et activité en temps réel"
-            width={2360}
-            height={1800}
+            src="/product/drive.png"
+            alt="Le Drive Docalio : dossiers, fichiers partagés et corbeille dans un espace client"
+            width={2480}
+            height={1848}
             priority
             sizes="(min-width: 1024px) 1024px, 100vw"
             className="h-auto w-full"

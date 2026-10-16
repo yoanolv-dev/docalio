@@ -22,6 +22,7 @@ import type {
   Document,
   DocumentDecision,
   DocumentRequest,
+  DriveTrashItem,
   Folder,
   Organization,
   ShareLink,
@@ -79,6 +80,9 @@ export function WorkspaceView({
   org,
   baseUrl,
   justCreated = false,
+  trashItems = [],
+  initialFolderId = null,
+  initialDocumentId = null,
   spaceAccess = [],
   accessGroups = [],
   accessMembers = [],
@@ -94,6 +98,9 @@ export function WorkspaceView({
   org: Organization | undefined;
   baseUrl: string;
   justCreated?: boolean;
+  trashItems?: DriveTrashItem[];
+  initialFolderId?: string | null;
+  initialDocumentId?: string | null;
   spaceAccess?: WorkspaceAccessEntry[];
   accessGroups?: GroupWithMembers[];
   accessMembers?: OrgMember[];
@@ -126,10 +133,14 @@ export function WorkspaceView({
       documents={documents}
       folders={folders}
       workspaceId={workspace.id}
+      organizationId={workspace.organization_id}
       decisions={decisions}
       viewedDocumentIds={activity.viewedDocumentIds}
       downloadedDocumentIds={activity.downloadedDocumentIds}
       maxFileBytes={maxFileBytes}
+      trashItems={trashItems}
+      initialFolderId={initialFolderId}
+      initialDocumentId={initialDocumentId}
       internal={isInternal}
     />
   );

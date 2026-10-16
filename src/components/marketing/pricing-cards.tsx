@@ -122,8 +122,8 @@ export function PricingCards({
                   {isEnterprise
                     ? "Parler à l'équipe"
                     : plan.priceEur === 0
-                      ? "Créer mon compte"
-                      : "Essayer 14 jours"}
+                      ? "Commencer gratuitement"
+                      : "Essayer 30 jours gratuitement"}
                 </Link>
               </Button>
 

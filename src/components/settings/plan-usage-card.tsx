@@ -12,7 +12,9 @@ import {
   formatCount,
   formatPlanPrice,
   formatStorage,
+  isTrialExpired,
   resolvePlan,
+  trialDaysLeft,
 } from "@/lib/plans";
 import { formatBytes } from "@/lib/files";
 import { formatDate } from "@/lib/utils";
@@ -69,10 +71,21 @@ export function PlanUsageCard({
 
       <CardContent className="space-y-5">
         {status === "trial" && organization.trial_ends_at && (
-          <p className="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
-            Période d&apos;essai jusqu&apos;au{" "}
-            {formatDate(organization.trial_ends_at)}.
-          </p>
+          isTrialExpired(organization) ? (
+            <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+              Votre essai Pro est terminé : vous êtes sur le plan Gratuit
+              (5 Go). Vos fichiers restent accessibles — passez à un plan
+              supérieur pour retrouver toutes les capacités.
+            </p>
+          ) : (
+            <p className="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
+              Essai Pro : {trialDaysLeft(organization)} jour
+              {(trialDaysLeft(organization) ?? 0) > 1 ? "s" : ""} restant
+              {(trialDaysLeft(organization) ?? 0) > 1 ? "s" : ""} (jusqu&apos;au{" "}
+              {formatDate(organization.trial_ends_at)}). Ensuite, vous basculez
+              automatiquement sur le plan Gratuit — rien n&apos;est perdu.
+            </p>
+          )
         )}
 
         <UsageMeter

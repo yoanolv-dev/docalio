@@ -10,7 +10,7 @@ import { Faq } from "@/components/marketing/faq";
 export const metadata: Metadata = {
   title: "Tarifs",
   description:
-    "Un forfait par cabinet, pas au siège : Découverte gratuit, Essentiel 29 € HT/mois, Cabinet 79 € HT/mois, 2 mois offerts en annuel. Clients invités illimités et gratuits.",
+    "Le drive professionnel français : 5 Go offerts à vie, Pro 29 € HT/mois (200 Go, 10 utilisateurs), Business 79 € HT/mois (1 To, domaine personnalisé). 30 jours d'essai Pro, 2 mois offerts en annuel.",
   alternates: { canonical: "/tarifs" },
 };
 
@@ -18,22 +18,22 @@ const PRICING_FAQ = [
   {
     question: "Y a-t-il un engagement ?",
     answer:
-      "Non. Les forfaits mensuels sont sans engagement. Le forfait Découverte est gratuit sans limite de durée, et les forfaits payants s’essaient 14 jours.",
+      "Non. Les forfaits mensuels sont sans engagement. Le plan Gratuit (5 Go) est sans limite de durée, et chaque inscription inclut 30 jours d'essai du plan Pro complet, sans carte bancaire.",
   },
   {
     question: "Comment se passe le démarrage ?",
     answer:
-      "Vous créez votre compte et explorez Docalio gratuitement, sans carte bancaire. Pendant la phase bêta, l’activation d’une offre payante se fait avec notre équipe.",
+      "Vous créez votre compte, votre drive est prêt immédiatement avec 30 jours de plan Pro offerts. À la fin de l'essai, vous basculez automatiquement sur le plan Gratuit (5 Go) — rien n'est perdu. Pendant la phase bêta, l'activation d'une offre payante se fait avec notre équipe.",
   },
   {
     question: "Que se passe-t-il si j’atteins une limite ?",
     answer:
-      "Docalio vous prévient clairement (utilisateurs, espaces actifs, stockage) et vous passez au forfait supérieur en un instant. Vos données ne sont jamais bloquées.",
+      "Docalio vous prévient clairement (stockage, utilisateurs) et vous passez au forfait supérieur en un instant. Vos données ne sont jamais bloquées ni supprimées.",
   },
   {
     question: "Pourquoi un forfait et pas un prix par utilisateur ?",
     answer:
-      "Parce qu’un cabinet ne devrait pas payer plus cher à chaque embauche. Le forfait couvre votre équipe jusqu’à sa limite, et vos clients ne sont jamais facturés.",
+      "Parce qu'une entreprise ne devrait pas payer plus cher à chaque embauche. Le forfait couvre votre équipe jusqu'à sa limite, et vos clients comme les destinataires de vos liens ne sont jamais facturés.",
   },
   {
     question: "Puis-je changer d’offre plus tard ?",
@@ -47,8 +47,8 @@ export default function PricingPage() {
     <>
       <PageHero
         eyebrow="Tarifs"
-        title="Un forfait par cabinet. Vos clients ne paient jamais."
-        description="Pas de facturation au siège. Gratuit pour démarrer, sans carte bancaire, sans engagement — et deux mois offerts en annuel."
+        title="5 Go offerts. Un forfait par organisation."
+        description="Pas de facturation au siège. 30 jours d'essai Pro à l'inscription, sans carte bancaire, sans engagement — et deux mois offerts en annuel."
       />
 
       <Section className="pt-12 sm:pt-14">
@@ -63,7 +63,7 @@ export default function PricingPage() {
               <span className="font-semibold">
                 -50 % pendant 3 mois
               </span>{" "}
-              sur Essentiel et Cabinet, et import de vos premiers dossiers offert.
+              sur Pro et Business, et import de votre Drive ou Dropbox offert.
             </p>
           </div>
           <Button size="sm" asChild>

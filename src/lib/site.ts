@@ -3,9 +3,9 @@
 export const SITE = {
   name: "Docalio",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://docalio.app",
-  tagline: "Le portail client qui récupère vos pièces et fait valider vos documents",
+  tagline: "Le drive professionnel français — vos fichiers, vos clients, votre marque",
   description:
-    "Docalio est le portail client sécurisé des cabinets et agences : demandez les pièces, votre client les dépose sans compte, fait valider vos documents et vous suivez tout en temps réel. Hébergé en Europe, sans engagement.",
+    "Docalio est le drive professionnel français : stockez, organisez et partagez vos fichiers par liens sécurisés, ouvrez des espaces clients à votre marque sur votre sous-domaine, collectez les pièces et faites valider vos documents. 5 Go offerts, 30 jours d'essai Pro, hébergé en Europe.",
   email: "contact@docalio.app",
 } as const;
 
@@ -39,10 +39,11 @@ export const SOLUTIONS_NAV: NavLink[] = [
 ];
 
 export const COMPARE_NAV: NavLink[] = [
+  { label: "Docalio vs Google Drive", href: "/comparatif/google-drive" },
+  { label: "Docalio vs Dropbox", href: "/comparatif/dropbox" },
   { label: "Docalio vs SharePoint", href: "/comparatif/sharepoint" },
   { label: "Docalio vs J-Doc", href: "/comparatif/j-doc" },
   { label: "Docalio vs e-mail & WeTransfer", href: "/comparatif/email-wetransfer" },
-  { label: "Docalio vs Google Drive", href: "/comparatif/google-drive" },
 ];
 
 export const MARKETING_NAV: NavLink[] = [
